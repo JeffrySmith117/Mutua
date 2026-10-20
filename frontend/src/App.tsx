@@ -2,6 +2,11 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import LoginPage from './pages/auth/LoginPage'
 import CadastroPage from './pages/auth/CadastroPage'
+import PainelLayout from './components/layout/PainelLayout'
+import DashboardPage from './pages/dashboard/DashboardPage'
+import AmbientesPage from './pages/ambientes/AmbientesPage'
+import EquipamentosPage from './pages/equipamentos/EquipamentosPage'
+import MinhasReservasPage from './pages/reservas/MinhasReservasPage'
 import RotaProtegida from './components/layout/RotaProtegida'
 import './App.css'
 
@@ -14,42 +19,32 @@ const queryClient = new QueryClient({
   },
 })
 
-function PaginaInicial() {
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      fontSize: '1.25rem',
-      color: 'var(--cor-texto-secundario)',
-    }}>
-      <p>Dashboard em construção 🚧</p>
-    </div>
-  )
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          {/* Rotas públicas */}
+          {/* Rotas públicas de autenticação */}
           <Route path="/entrar" element={<LoginPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
 
-          {/* Rotas protegidas */}
+          {/* Rotas protegidas com PainelLayout */}
           <Route
             path="/"
             element={
               <RotaProtegida>
-                <PaginaInicial />
+                <PainelLayout />
               </RotaProtegida>
             }
-          />
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="ambientes" element={<AmbientesPage />} />
+            <Route path="equipamentos" element={<EquipamentosPage />} />
+            <Route path="minhas-reservas" element={<MinhasReservasPage />} />
+          </Route>
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/entrar" replace />} />
+          {/* Fallback inteligente */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

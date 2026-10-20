@@ -13,10 +13,22 @@ interface AuthState {
   definirCarregando: (carregando: boolean) => void
 }
 
+const obterUsuarioSalvo = (): Usuario | null => {
+  try {
+    const usuarioSalvo = localStorage.getItem('@mutua:usuario')
+    return usuarioSalvo ? JSON.parse(usuarioSalvo) : null
+  } catch {
+    return null
+  }
+}
+
+const tokenSalvo = localStorage.getItem('@mutua:token')
+const usuarioInicial = obterUsuarioSalvo()
+
 export const useAuthStore = create<AuthState>((set) => ({
-  usuario: null,
-  token: localStorage.getItem('@mutua:token'),
-  estaAutenticado: !!localStorage.getItem('@mutua:token'),
+  usuario: usuarioInicial,
+  token: tokenSalvo,
+  estaAutenticado: !!tokenSalvo,
   carregando: false,
 
   definirUsuario: (usuario, token) => {

@@ -1,0 +1,812 @@
+/* ============================================================
+   ESTILOS DA DASHBOARD / HOME (Dashboard.css)
+   ============================================================ */
+
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+/* ============================================================
+   HERO BANNER
+   ============================================================ */
+.dashboard-hero {
+  background: linear-gradient(135deg, #0f3049 0%, #1b4d6e 55%, #2a6f9a 100%);
+  border-radius: var(--raio-xl);
+  padding: 2.5rem;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(15, 48, 73, 0.18);
+}
+
+.dashboard-hero::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(46, 175, 125, 0.25) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-conteudo {
+  flex: 1;
+  max-width: 650px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d1fae5;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hero-tag-ponto {
+  width: 7px;
+  height: 7px;
+  background: #34d399;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #34d399;
+}
+
+.hero-titulo {
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.destaque-nome {
+  background: linear-gradient(135deg, #ffffff 0%, #a7f3d0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-descricao {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.55;
+  margin-bottom: 1.75rem;
+}
+
+.hero-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.btn-hero {
+  background: #ffffff !important;
+  color: var(--cor-primaria-escura) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-hero svg {
+  color: var(--cor-primaria);
+}
+
+.btn-hero:hover {
+  background: #f0fdf4 !important;
+  color: #065f46 !important;
+  transform: translateY(-2px);
+}
+
+.btn-outline-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--raio-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transicao-rapida);
+  backdrop-filter: blur(6px);
+}
+
+.btn-outline-hero:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Card Destaque Hero */
+.hero-card-destaque {
+  width: 320px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--raio-lg);
+  padding: 1.5rem;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.hero-card-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.badge-beneficio {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(46, 175, 125, 0.25);
+  color: #6ee7b7;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.badge-crea {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.hero-card-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.hero-card-texto {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.45;
+  margin-bottom: 1.2rem;
+}
+
+.hero-card-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 0.75rem 1rem;
+  border-radius: var(--raio-md);
+}
+
+.stat-miniatura {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.stat-rotulo {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-divisor {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   MÉTRICAS / KPIS GRID
+   ============================================================ */
+.metricas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+.metrica-card {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: all var(--transicao-rapida);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.metrica-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+  border-color: rgba(27, 77, 110, 0.2);
+}
+
+.metrica-icone {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--raio-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icone-azul {
+  background: rgba(27, 77, 110, 0.1);
+  color: var(--cor-primaria);
+}
+
+.icone-verde {
+  background: rgba(46, 175, 125, 0.12);
+  color: #1a7452;
+}
+
+.icone-ambar {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.icone-roxo {
+  background: rgba(139, 92, 246, 0.12);
+  color: #6d28d9;
+}
+
+.metrica-dados {
+  display: flex;
+  flex-direction: column;
+}
+
+.metrica-valor {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--cor-texto-principal);
+  line-height: 1.1;
+}
+
+.metrica-titulo {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  margin-top: 0.25rem;
+}
+
+.metrica-detalhe {
+  font-size: 0.7rem;
+  color: var(--cor-texto-mutado);
+  margin-top: 0.15rem;
+}
+
+/* ============================================================
+   SEÇÕES GERAIS
+   ============================================================ */
+.secao-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.secao-cabecalho {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.secao-titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  letter-spacing: -0.01em;
+}
+
+.secao-subtitulo {
+  font-size: 0.825rem;
+  color: var(--cor-texto-secundario);
+  margin-top: 0.2rem;
+}
+
+.tag-secao-hub {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cor-primaria);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.link-ver-todos {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-primaria);
+  text-decoration: none;
+  transition: color var(--transicao-rapida);
+}
+
+.link-ver-todos:hover {
+  color: var(--cor-primaria-clara);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   RESERVAS GRID HORIZONTAL
+   ============================================================ */
+.reservas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.reserva-card-horizontal {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  transition: all var(--transicao-rapida);
+}
+
+.reserva-card-horizontal:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+  border-color: rgba(27, 77, 110, 0.25);
+}
+
+.reserva-tipo-barra {
+  width: 6px;
+  background: var(--cor-primaria);
+}
+
+.reserva-tipo-barra[data-tipo="equipamento"] {
+  background: var(--cor-secundaria);
+}
+
+.reserva-card-corpo {
+  flex: 1;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.reserva-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.reserva-tag-categoria {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.status-confirmada {
+  background: rgba(46, 175, 125, 0.12);
+  color: #1a7452;
+}
+
+.status-pendente {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.status-em_andamento {
+  background: rgba(27, 77, 110, 0.12);
+  color: var(--cor-primaria);
+}
+
+.reserva-item-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+}
+
+.reserva-item-categoria {
+  font-size: 0.78rem;
+  color: var(--cor-texto-mutado);
+  margin-bottom: 0.85rem;
+}
+
+.reserva-dados-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  background: var(--cor-fundo-alt);
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--raio-md);
+  margin-bottom: 1rem;
+}
+
+.reserva-dado-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--cor-texto-secundario);
+}
+
+.reserva-dado-item svg {
+  color: var(--cor-primaria);
+  flex-shrink: 0;
+}
+
+.reserva-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--cor-fundo-alt);
+}
+
+.reserva-protocolo {
+  font-size: 0.72rem;
+  color: var(--cor-texto-mutado);
+}
+
+.reserva-botoes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-acao-secundaria {
+  background: none;
+  border: 1px solid var(--cor-borda);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--raio-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-acao-secundaria:hover {
+  background: var(--cor-fundo-alt);
+  color: var(--cor-texto-principal);
+}
+
+.btn-acao-primaria {
+  background: var(--cor-primaria-gradiente);
+  border: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--raio-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-acao-primaria:hover {
+  opacity: 0.92;
+}
+
+/* ============================================================
+   CATÁLOGO GRID (ESPAÇOS E EQUIPAMENTOS)
+   ============================================================ */
+.catalogo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.card-item-catalogo {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transicao-rapida);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.card-item-catalogo:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-lg);
+  border-color: rgba(27, 77, 110, 0.25);
+}
+
+.card-item-imagem-wrapper {
+  height: 140px;
+  position: relative;
+  overflow: hidden;
+}
+
+.tag-capacidade {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 48, 73, 0.85);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.tag-auditorio {
+  background: rgba(180, 83, 9, 0.88);
+}
+
+.banner-ambiente-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.banner-ambiente-placeholder[data-tipo="coworking"] {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+}
+
+.banner-ambiente-placeholder[data-tipo="auditorio"] {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.banner-hub-bg {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+}
+
+.ambiente-icone-simbolo {
+  font-size: 2.5rem;
+}
+
+.ambiente-tipo-rotulo {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  letter-spacing: 0.02em;
+}
+
+/* Badges de Equipamento */
+.badge-status-equip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  z-index: 2;
+}
+
+.status-equip-disponivel {
+  background: rgba(46, 175, 125, 0.9);
+  color: #ffffff;
+}
+
+.status-equip-em_uso {
+  background: rgba(245, 158, 11, 0.9);
+  color: #ffffff;
+}
+
+.card-item-conteudo {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.categoria-rotulo-equip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cor-secundaria);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.card-item-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.card-item-descricao {
+  font-size: 0.8rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.45;
+  margin-bottom: 0.85rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-tags-recursos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.15rem;
+}
+
+.tag-recurso {
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: var(--cor-fundo-alt);
+  color: var(--cor-texto-secundario);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--cor-borda);
+}
+
+.info-requisito-equip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--cor-texto-mutado);
+  margin-bottom: 1.15rem;
+  background: var(--cor-fundo-alt);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--raio-sm);
+}
+
+.info-requisito-equip svg {
+  color: var(--cor-primaria);
+  flex-shrink: 0;
+}
+
+.card-item-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--cor-fundo-alt);
+}
+
+.horario-info,
+.patrimonio-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cor-texto-mutado);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem !important;
+  font-size: 0.78rem !important;
+}
+
+.btn-desabilitado {
+  background: var(--cor-fundo-alt);
+  color: var(--cor-texto-mutado);
+  border: 1px solid var(--cor-borda);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--raio-md);
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   AVISO INSTITUCIONAL CARD
+   ============================================================ */
+.aviso-institucional-card {
+  background: #f8fafc;
+  border: 1px solid rgba(27, 77, 110, 0.15);
+  border-left: 4px solid var(--cor-primaria);
+  border-radius: var(--raio-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+
+.aviso-icone {
+  color: var(--cor-primaria);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.aviso-conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.aviso-titulo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+}
+
+.aviso-texto {
+  font-size: 0.825rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   RESPONSIVIDADE DA DASHBOARD
+   ============================================================ */
+@media (max-width: 1200px) {
+  .metricas-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .catalogo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-card-destaque {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .metricas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reservas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .hero-titulo {
+    font-size: 1.45rem;
+  }
+}
