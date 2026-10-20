@@ -87,7 +87,7 @@ npm run dev
 
 | Papel         | Responsável     |
 |---------------|-----------------|
-| Frontend      | Elias Pio Mendes|
+| Frontend      |Nicolas          |
 | Demandante    | Mútua-PI / CREA-PI |
 | Supervisão    | ICEV Software House |
 
