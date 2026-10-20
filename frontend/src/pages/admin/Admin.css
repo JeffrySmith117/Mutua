@@ -1,0 +1,750 @@
+/* ============================================================
+   ESTILOS DO PAINEL ADMINISTRATIVO (Admin.css)
+   ============================================================ */
+
+.admin-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: relative;
+}
+
+/* Toast Notificação */
+.toast-admin-feedback {
+  position: fixed;
+  top: 85px;
+  right: 2rem;
+  background: #065f46;
+  color: #ffffff;
+  padding: 0.85rem 1.4rem;
+  border-radius: var(--raio-lg);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 200;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-icone {
+  background: rgba(255, 255, 255, 0.2);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+/* ============================================================
+   CABEÇALHO
+   ============================================================ */
+.admin-cabecalho {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-xl);
+  padding: 2rem 2.25rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.badge-gestao-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cor-primaria);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(27, 77, 110, 0.08);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+.ponto-status-admin {
+  width: 7px;
+  height: 7px;
+  background: #f59e0b;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+.admin-titulo {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--cor-primaria-escura);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.admin-subtitulo {
+  font-size: 0.9rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.55;
+  max-width: 680px;
+}
+
+/* ============================================================
+   KPIS GRID
+   ============================================================ */
+.admin-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+.admin-kpi-card {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all var(--transicao-rapida);
+}
+
+.admin-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+}
+
+.kpi-icone-box {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--raio-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icone-laranja {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.icone-azul {
+  background: rgba(27, 77, 110, 0.1);
+  color: var(--cor-primaria);
+}
+
+.icone-verde {
+  background: rgba(46, 175, 125, 0.12);
+  color: #1a7452;
+}
+
+.icone-roxo {
+  background: rgba(139, 92, 246, 0.12);
+  color: #6d28d9;
+}
+
+.kpi-info-bloco {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-valor-grande {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--cor-primaria-escura);
+  line-height: 1.1;
+}
+
+.kpi-rotulo-texto {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+  margin-top: 0.25rem;
+}
+
+.kpi-descricao-texto {
+  font-size: 0.7rem;
+  color: var(--cor-texto-mutado);
+  margin-top: 0.1rem;
+}
+
+/* ============================================================
+   ABAS DE GESTÃO
+   ============================================================ */
+.admin-abas-secao {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-abas-navegacao {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--cor-borda);
+  padding-bottom: 0.2rem;
+  overflow-x: auto;
+}
+
+.admin-aba-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cor-texto-secundario);
+  border-radius: var(--raio-md) var(--raio-md) 0 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  transition: all var(--transicao-rapida);
+  white-space: nowrap;
+}
+
+.admin-aba-btn:hover {
+  color: var(--cor-primaria);
+  background: rgba(27, 77, 110, 0.04);
+}
+
+.admin-aba-btn.aba-ativa {
+  color: var(--cor-primaria) !important;
+  font-weight: 700 !important;
+}
+
+.admin-aba-btn.aba-ativa::after {
+  content: '';
+  position: absolute;
+  bottom: -0.2rem;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--cor-primaria);
+  border-radius: 3px 3px 0 0;
+}
+
+.badge-contagem-alerta {
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+/* ============================================================
+   CARDS DE PENDÊNCIAS
+   ============================================================ */
+.grid-pendencias-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.card-pendencia-admin {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-xl);
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transicao-rapida);
+}
+
+.card-pendencia-admin:hover {
+  box-shadow: var(--sombra-md);
+  border-color: rgba(27, 77, 110, 0.25);
+}
+
+.pendencia-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.pendencia-tag-tipo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cor-primaria);
+}
+
+.pendencia-protocolo {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: var(--cor-texto-mutado);
+  background: var(--cor-fundo-alt);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.pendencia-item-titulo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+}
+
+.pendencia-item-local {
+  font-size: 0.78rem;
+  color: var(--cor-texto-mutado);
+  margin-bottom: 0.85rem;
+}
+
+.box-dados-solicitante {
+  background: var(--cor-fundo-alt);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.dado-solicitante-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--cor-texto-principal);
+}
+
+.rotulo-sol {
+  color: var(--cor-texto-mutado);
+  font-weight: 600;
+}
+
+.tag-doc-vinculado {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cor-secundaria-escura);
+}
+
+.pendencia-finalidade {
+  background: #ffffff;
+  border-left: 3px solid rgba(27, 77, 110, 0.3);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.finalidade-rotulo-admin {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--cor-texto-mutado);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.finalidade-texto-admin {
+  font-size: 0.78rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.4;
+}
+
+.pendencia-acoes-rodape {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--cor-fundo-alt);
+}
+
+.btn-recusar-admin {
+  background: #ffffff;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  padding: 0.55rem 1rem;
+  border-radius: var(--raio-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex: 1;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-recusar-admin:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.btn-aprovar-admin {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--raio-md);
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex: 1.2;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-aprovar-admin:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   TABELA DO BALCÃO
+   ============================================================ */
+.balcao-tabela-wrapper {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-xl);
+  overflow-x: auto;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.balcao-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.825rem;
+}
+
+.balcao-tabela th {
+  background: var(--cor-fundo-alt);
+  color: var(--cor-texto-secundario);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.balcao-tabela td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cor-fundo-alt);
+  color: var(--cor-texto-principal);
+}
+
+.balcao-tabela tr:hover td {
+  background: #fdfdfd;
+}
+
+.celula-protocolo {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--cor-primaria);
+}
+
+.celula-nome {
+  font-weight: 600;
+  color: var(--cor-primaria-escura);
+}
+
+.tag-patrimonio-tabela {
+  background: var(--cor-fundo-alt);
+  border: 1px solid var(--cor-borda);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.celula-profissional {
+  display: flex;
+  flex-direction: column;
+}
+
+.celula-profissional strong {
+  font-weight: 600;
+}
+
+.celula-profissional span {
+  font-size: 0.7rem;
+  color: var(--cor-texto-mutado);
+}
+
+.badge-balcao-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.status-em_campo {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+.status-devolvido {
+  background: rgba(16, 185, 129, 0.12);
+  color: #065f46;
+}
+
+.status-aguardando_retirada {
+  background: rgba(27, 77, 110, 0.12);
+  color: var(--cor-primaria);
+}
+
+.btn-devolver-tabela {
+  background: var(--cor-secundaria-gradiente);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  border-radius: var(--raio-md);
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+}
+
+.btn-devolver-tabela:hover {
+  opacity: 0.92;
+}
+
+.texto-concluido-tabela {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cor-texto-mutado);
+}
+
+/* ============================================================
+   INVENTÁRIO GRID
+   ============================================================ */
+.inventario-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.inventario-card {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.inventario-card-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inventario-tipo-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--cor-texto-secundario);
+  text-transform: uppercase;
+}
+
+.badge-inventario-livre {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(46, 175, 125, 0.12);
+  color: #1a7452;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.badge-inventario-campo {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.inventario-nome {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+}
+
+.inventario-detalhes {
+  font-size: 0.75rem;
+  color: var(--cor-texto-secundario);
+}
+
+.inventario-recursos-mini {
+  font-size: 0.7rem;
+  color: var(--cor-texto-mutado);
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--cor-fundo-alt);
+}
+
+/* ============================================================
+   MODAIS ADMINISTRATIVOS
+   ============================================================ */
+.modal-admin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 48, 73, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-admin-container {
+  background: #ffffff;
+  border-radius: var(--raio-xl);
+  max-width: 540px;
+  width: 100%;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-admin-cabecalho {
+  padding: 1.4rem 1.75rem;
+  border-bottom: 1px solid var(--cor-borda);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.subtitulo-admin-modal {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--cor-secundaria);
+  text-transform: uppercase;
+}
+
+.btn-fechar-admin {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--cor-texto-mutado);
+  cursor: pointer;
+}
+
+.modal-admin-corpo {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.textarea-recusa-admin {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  font-size: 0.85rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.textarea-recusa-admin:focus {
+  outline: none;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.box-resumo-devolucao {
+  display: flex;
+  justify-content: space-between;
+  background: var(--cor-fundo-alt);
+  padding: 0.75rem 1rem;
+  border-radius: var(--raio-md);
+  font-size: 0.8rem;
+}
+
+.rotulo-dev {
+  color: var(--cor-texto-mutado);
+  font-size: 0.7rem;
+  display: block;
+}
+
+.campo-grupo-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label-admin {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+}
+
+.select-condicao-admin,
+.input-admin-padrao {
+  width: 100%;
+  height: 42px;
+  padding: 0 0.85rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  font-size: 0.85rem;
+  background: #ffffff;
+}
+
+.checklist-balcao-caixa {
+  background: #f8fafc;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.checklist-titulo {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--cor-texto-mutado);
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.checkbox-item-checklist {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--cor-texto-principal);
+}
+
+.modal-admin-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-confirmar-recusa {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 1200px) {
+  .admin-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-pendencias-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .inventario-grid-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-kpis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventario-grid-cards {
+    grid-template-columns: 1fr;
+  }
+}

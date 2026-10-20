@@ -7,6 +7,7 @@ import DashboardPage from './pages/dashboard/DashboardPage'
 import AmbientesPage from './pages/ambientes/AmbientesPage'
 import EquipamentosPage from './pages/equipamentos/EquipamentosPage'
 import MinhasReservasPage from './pages/reservas/MinhasReservasPage'
+import AdminPage from './pages/admin/AdminPage'
 import RotaProtegida from './components/layout/RotaProtegida'
 import './App.css'
 
@@ -41,6 +42,7 @@ function App() {
             <Route path="ambientes" element={<AmbientesPage />} />
             <Route path="equipamentos" element={<EquipamentosPage />} />
             <Route path="minhas-reservas" element={<MinhasReservasPage />} />
+            <Route path="admin" element={<AdminPage />} />
           </Route>
 
           {/* Fallback inteligente */}
