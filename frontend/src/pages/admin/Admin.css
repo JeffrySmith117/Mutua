@@ -748,3 +748,715 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   HISTÓRICO & AUDITORIA — FILTROS E TABELA
+   ============================================================ */
+.historico-filtros-card {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.historico-filtros-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+@media (max-width: 1100px) {
+  .historico-filtros-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .historico-filtros-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grupo-filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label-filtro-admin {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cor-texto-secundario);
+  letter-spacing: 0.04em;
+}
+
+.input-busca-historico,
+.select-filtro-historico {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.825rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  background: var(--cor-fundo-alt);
+  color: var(--cor-texto-principal);
+  transition: border-color var(--transicao-rapida);
+  width: 100%;
+}
+
+.input-busca-historico:focus,
+.select-filtro-historico:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  background: #ffffff;
+}
+
+.btn-limpar-filtros {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-limpar-filtros:hover {
+  background: #f1f5f9;
+  color: var(--cor-texto-principal);
+}
+
+.historico-meta-barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--cor-texto-secundario);
+}
+
+.historico-tabela-wrapper {
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-xl);
+  overflow-x: auto;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  margin-bottom: 1rem;
+}
+
+.historico-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.825rem;
+}
+
+.historico-tabela th {
+  background: var(--cor-fundo-alt);
+  color: var(--cor-texto-secundario);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.historico-tabela td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--cor-fundo-alt);
+  color: var(--cor-texto-principal);
+  vertical-align: middle;
+}
+
+.historico-tabela tr:hover td {
+  background: #f8fafc;
+}
+
+.badge-tipo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--raio-sm);
+  background: #e2e8f0;
+  color: #334155;
+  margin-bottom: 0.25rem;
+}
+
+.celula-recurso strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--cor-texto-principal);
+}
+
+.celula-recurso span {
+  font-size: 0.75rem;
+  color: var(--cor-texto-mutado);
+}
+
+.celula-associado strong {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--cor-texto-principal);
+}
+
+.celula-associado .crea-tag {
+  font-size: 0.75rem;
+  color: var(--cor-texto-secundario);
+  margin-right: 0.5rem;
+}
+
+.tag-lgpd-cpf {
+  display: inline-block;
+  font-size: 0.7rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--raio-sm);
+  color: #64748b;
+  font-family: monospace;
+}
+
+.badge-status-tabela {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.badge-status-tabela.status-concluida {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-status-tabela.status-em_uso {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-status-tabela.status-cancelada {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge-status-tabela.status-recusada {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
+}
+
+.btn-inspecionar-auditoria {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--raio-md);
+  cursor: pointer;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-inspecionar-auditoria:hover {
+  background: var(--cor-primaria);
+  color: #ffffff;
+  border-color: var(--cor-primaria);
+}
+
+/* Paginação */
+.paginacao-historico-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--cor-texto-secundario);
+}
+
+.paginacao-botoes-grupo {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-paginacao {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-md);
+  cursor: pointer;
+  transition: all var(--transicao-rapida);
+}
+
+.btn-paginacao:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.btn-paginacao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   MODAL DE AUDITORIA COM LINHA DO TEMPO & TIMBRE OFICIAL
+   ============================================================ */
+.modal-auditoria-container {
+  max-width: 860px !important;
+  max-height: 92vh !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.auditoria-cabecalho-timbrado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+  border-top-left-radius: var(--raio-xl);
+  border-top-right-radius: var(--raio-xl);
+}
+
+.auditoria-timbre-esquerda {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.timbre-logo-area {
+  display: flex;
+  flex-direction: column;
+  padding-right: 1.25rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.timbre-sigla {
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+}
+
+.timbre-orgao {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #cbd5e1;
+}
+
+.timbre-doc-tipo {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.auditoria-doc-titulo {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0.15rem 0 0 0;
+}
+
+.auditoria-timbre-direita {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.badge-auditoria {
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.badge-auditoria.status-concluida {
+  background: #065f46;
+  color: #a7f3d0;
+  border: 1px solid #047857;
+}
+
+.badge-auditoria.status-em-uso {
+  background: #1e40af;
+  color: #bfdbfe;
+  border: 1px solid #3b82f6;
+}
+
+.badge-auditoria.status-cancelada {
+  background: #991b1b;
+  color: #fecaca;
+  border: 1px solid #dc2626;
+}
+
+.badge-auditoria.status-recusada {
+  background: #9a3412;
+  color: #fed7aa;
+  border: 1px solid #ea580c;
+}
+
+.modal-auditoria-corpo {
+  padding: 1.5rem 1.75rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.auditoria-secao-dados {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+}
+
+@media (max-width: 650px) {
+  .auditoria-secao-dados {
+    grid-template-columns: 1fr;
+  }
+}
+
+.auditoria-subtitulo-secao {
+  font-size: 0.825rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1e293b;
+  margin: 0 0 0.85rem 0;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.35rem;
+}
+
+.linha-dado-auditoria {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  font-size: 0.8rem;
+}
+
+.rotulo-aud {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.valor-aud {
+  color: #0f172a;
+  text-align: right;
+}
+
+.auditoria-box-finalidade {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--raio-md);
+  padding: 1rem;
+}
+
+.texto-finalidade-aud {
+  font-size: 0.825rem;
+  color: #334155;
+  margin: 0.35rem 0 0 0;
+  line-height: 1.5;
+}
+
+.auditoria-box-alerta-motivo {
+  display: flex;
+  gap: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--raio-md);
+  padding: 1rem;
+  font-size: 0.825rem;
+  color: #991b1b;
+}
+
+/* Vistoria Balcão */
+.auditoria-secao-balcao {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+}
+
+.grid-vistoria-balcao {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.card-vistoria-item {
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+  border-radius: var(--raio-md);
+  padding: 0.85rem;
+  font-size: 0.8rem;
+}
+
+.card-vistoria-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.linha-condicao-vistoria {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.badge-condicao-mini {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.badge-condicao-mini.cond-otimo {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-condicao-mini.cond-bom {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge-condicao-mini.cond-regular {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-condicao-mini.cond-danificado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.obs-balcao-auditoria {
+  margin: 0.35rem 0 0 0;
+  font-style: italic;
+  color: #475569;
+  font-size: 0.78rem;
+}
+
+.checklist-itens-auditoria {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+}
+
+.lista-itens-conferidos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0 0;
+  padding-left: 0;
+  list-style: none;
+  color: #166534;
+  font-weight: 600;
+}
+
+/* Timeline Vertical */
+.auditoria-secao-timeline {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--raio-lg);
+  padding: 1.25rem;
+}
+
+.auditoria-timeline-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 0.5rem;
+}
+
+.timeline-passo {
+  display: flex;
+  gap: 1.25rem;
+  position: relative;
+}
+
+.timeline-marcador {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 1.5rem;
+}
+
+.marcador-circulo {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px #3b82f6;
+  z-index: 2;
+}
+
+.passo-tipo-solicitacao .marcador-circulo {
+  background: #0284c7;
+  box-shadow: 0 0 0 2px #0284c7;
+}
+
+.passo-tipo-aprovacao .marcador-circulo {
+  background: #8b5cf6;
+  box-shadow: 0 0 0 2px #8b5cf6;
+}
+
+.passo-tipo-retirada .marcador-circulo {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px #f59e0b;
+}
+
+.passo-tipo-devolucao .marcador-circulo {
+  background: #10b981;
+  box-shadow: 0 0 0 2px #10b981;
+}
+
+.passo-tipo-cancelamento .marcador-circulo,
+.passo-tipo-recusa .marcador-circulo {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px #ef4444;
+}
+
+.marcador-linha {
+  width: 2px;
+  flex: 1;
+  background: #cbd5e1;
+  margin: 0.25rem 0;
+}
+
+.timeline-conteudo-evento {
+  padding-bottom: 1.5rem;
+  flex: 1;
+}
+
+.evento-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.evento-titulo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.evento-data {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.evento-responsavel {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 0.15rem;
+}
+
+.rotulo-resp {
+  font-weight: 600;
+}
+
+.evento-descricao {
+  font-size: 0.8rem;
+  color: #334155;
+  margin: 0.35rem 0 0 0;
+  line-height: 1.4;
+}
+
+/* Chancela oficial de rodapé */
+.auditoria-chancela-rodape {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  padding-top: 2rem;
+  margin-top: 1rem;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.chancela-bloco {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.linha-assinatura {
+  height: 1px;
+  background: #94a3b8;
+  margin-bottom: 0.5rem;
+}
+
+.btn-imprimir-auditoria {
+  background: #0f172a !important;
+  color: #ffffff !important;
+}
+
+.btn-imprimir-auditoria:hover {
+  background: #1e293b !important;
+}
+
+/* ============================================================
+   REGRAS DE IMPRESSÃO (FICHA OFICIAL TIMBRADA A4)
+   ============================================================ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .modal-admin-overlay,
+  .modal-auditoria-container,
+  .modal-auditoria-container * {
+    visibility: visible;
+  }
+
+  .modal-admin-overlay {
+    position: static;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .modal-auditoria-container {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .btn-nao-imprimir {
+    display: none !important;
+  }
+
+  .modal-auditoria-corpo {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+}
+
