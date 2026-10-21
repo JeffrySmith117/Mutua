@@ -1,19 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   adminService,
   type SolicitacaoPendente,
   type MovimentacaoBalcao,
   type MetricasAdmin,
+  type RegistroHistorico,
+  type StatusHistorico,
+  type TipoRecursoHistorico,
 } from '../../services/adminService'
 import type { CondicaoEquipamento } from '../../types'
+import HistoricoModalAuditoria from './HistoricoModalAuditoria'
 import './Admin.css'
 
 export default function AdminPage() {
-  const [abaAtiva, setAbaAtiva] = useState<'pendencias' | 'balcao' | 'inventario'>('pendencias')
+  const [abaAtiva, setAbaAtiva] = useState<'pendencias' | 'balcao' | 'inventario' | 'historico'>('pendencias')
   const [metricas, setMetricas] = useState<MetricasAdmin | null>(null)
   const [pendencias, setPendencias] = useState<SolicitacaoPendente[]>([])
   const [movimentacoes, setMovimentacoes] = useState<MovimentacaoBalcao[]>([])
+  const [historico, setHistorico] = useState<RegistroHistorico[]>([])
   const [carregando, setCarregando] = useState(true)
+
+  // Filtros do Histórico
+  const [buscaHistorico, setBuscaHistorico] = useState('')
+  const [tipoFiltro, setTipoFiltro] = useState<TipoRecursoHistorico>('todos')
+  const [statusFiltro, setStatusFiltro] = useState<'todos' | StatusHistorico>('todos')
+  const [dataInicioFiltro, setDataInicioFiltro] = useState('')
+  const [dataFimFiltro, setDataFimFiltro] = useState('')
+  const [paginaAtual, setPaginaAtual] = useState(1)
+  const itensPorPagina = 5
 
   // Modais
   const [solicitacaoParaRecusa, setSolicitacaoParaRecusa] =
@@ -23,26 +37,79 @@ export default function AdminPage() {
     useState<MovimentacaoBalcao | null>(null)
   const [condicaoDevolucao, setCondicaoDevolucao] = useState<CondicaoEquipamento>('otimo')
   const [obsDevolucao, setObsDevolucao] = useState('')
+  const [registroParaAuditoria, setRegistroParaAuditoria] = useState<RegistroHistorico | null>(null)
   const [feedbackMensagem, setFeedbackMensagem] = useState<string | null>(null)
 
   useEffect(() => {
     async function carregarDados() {
       setCarregando(true)
       try {
-        const [dadosMetricas, dadosPendencias, dadosMov] = await Promise.all([
+        const [dadosMetricas, dadosPendencias, dadosMov, dadosHist] = await Promise.all([
           adminService.obterMetricas(),
           adminService.listarPendencias(),
           adminService.listarMovimentacoes(),
+          adminService.listarHistorico(),
         ])
         setMetricas(dadosMetricas)
         setPendencias(dadosPendencias)
         setMovimentacoes(dadosMov)
+        setHistorico(dadosHist)
       } finally {
         setCarregando(false)
       }
     }
     carregarDados()
   }, [])
+
+  // Filtragem reativa do histórico
+  const historicoFiltrado = useMemo(() => {
+    let lista = [...historico]
+
+    if (buscaHistorico.trim()) {
+      const termo = buscaHistorico.toLowerCase().trim()
+      lista = lista.filter(
+        (item) =>
+          item.profissionalNome.toLowerCase().includes(termo) ||
+          item.registroCrea.toLowerCase().includes(termo) ||
+          item.recursoNome.toLowerCase().includes(termo) ||
+          item.patrimonioOuLocal.toLowerCase().includes(termo) ||
+          item.protocolo.toLowerCase().includes(termo)
+      )
+    }
+
+    if (tipoFiltro !== 'todos') {
+      lista = lista.filter((item) => item.tipo === tipoFiltro)
+    }
+
+    if (statusFiltro !== 'todos') {
+      lista = lista.filter((item) => item.status === statusFiltro)
+    }
+
+    if (dataInicioFiltro) {
+      lista = lista.filter((item) => item.dataInicio >= dataInicioFiltro)
+    }
+
+    if (dataFimFiltro) {
+      lista = lista.filter((item) => item.dataFim <= dataFimFiltro)
+    }
+
+    return lista
+  }, [historico, buscaHistorico, tipoFiltro, statusFiltro, dataInicioFiltro, dataFimFiltro])
+
+  const totalPaginas = Math.ceil(historicoFiltrado.length / itensPorPagina) || 1
+  const historicoPaginado = useMemo(() => {
+    const inicio = (paginaAtual - 1) * itensPorPagina
+    return historicoFiltrado.slice(inicio, inicio + itensPorPagina)
+  }, [historicoFiltrado, paginaAtual, itensPorPagina])
+
+  const limparFiltrosHistorico = () => {
+    setBuscaHistorico('')
+    setTipoFiltro('todos')
+    setStatusFiltro('todos')
+    setDataInicioFiltro('')
+    setDataFimFiltro('')
+    setPaginaAtual(1)
+  }
 
   const dispararFeedback = (msg: string) => {
     setFeedbackMensagem(msg)
@@ -239,6 +306,14 @@ export default function AdminPage() {
             onClick={() => setAbaAtiva('inventario')}
           >
             <span>🏢 Status dos Espaços da Sede</span>
+          </button>
+
+          <button
+            type="button"
+            className={`admin-aba-btn ${abaAtiva === 'historico' ? 'aba-ativa' : ''}`}
+            onClick={() => setAbaAtiva('historico')}
+          >
+            <span>📜 Histórico Geral & Auditoria</span>
           </button>
         </div>
 
@@ -466,6 +541,237 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* ============================================================
+            CONTEÚDO DA ABA 4: HISTÓRICO GERAL & AUDITORIA
+            ============================================================ */}
+        {abaAtiva === 'historico' && (
+          <div className="admin-conteudo-aba">
+            {/* Barra de Filtros do Histórico */}
+            <div className="historico-filtros-card">
+              <div className="historico-filtros-grid">
+                <div className="grupo-filtro-item">
+                  <label htmlFor="busca-hist" className="label-filtro-admin">
+                    Buscar Associado / Recurso
+                  </label>
+                  <input
+                    id="busca-hist"
+                    type="text"
+                    placeholder="Nome, CREA, patrimônio ou protocolo..."
+                    value={buscaHistorico}
+                    onChange={(e) => {
+                      setBuscaHistorico(e.target.value)
+                      setPaginaAtual(1)
+                    }}
+                    className="input-busca-historico"
+                  />
+                </div>
+
+                <div className="grupo-filtro-item">
+                  <label htmlFor="tipo-filtro-hist" className="label-filtro-admin">
+                    Categoria
+                  </label>
+                  <select
+                    id="tipo-filtro-hist"
+                    value={tipoFiltro}
+                    onChange={(e) => {
+                      setTipoFiltro(e.target.value as TipoRecursoHistorico)
+                      setPaginaAtual(1)
+                    }}
+                    className="select-filtro-historico"
+                  >
+                    <option value="todos">Todos os Recursos</option>
+                    <option value="ambiente">🏢 Espaços da Sede</option>
+                    <option value="equipamento">🛰️ Equipamentos HUB</option>
+                  </select>
+                </div>
+
+                <div className="grupo-filtro-item">
+                  <label htmlFor="status-filtro-hist" className="label-filtro-admin">
+                    Status da Reserva
+                  </label>
+                  <select
+                    id="status-filtro-hist"
+                    value={statusFiltro}
+                    onChange={(e) => {
+                      setStatusFiltro(e.target.value as 'todos' | StatusHistorico)
+                      setPaginaAtual(1)
+                    }}
+                    className="select-filtro-historico"
+                  >
+                    <option value="todos">Todos os Status</option>
+                    <option value="concluida">✓ Concluídas</option>
+                    <option value="em_uso">● Em Uso</option>
+                    <option value="cancelada">✕ Canceladas</option>
+                    <option value="recusada">✕ Recusadas</option>
+                  </select>
+                </div>
+
+                <div className="grupo-filtro-item">
+                  <label htmlFor="data-inicio-hist" className="label-filtro-admin">
+                    A Partir de
+                  </label>
+                  <input
+                    id="data-inicio-hist"
+                    type="date"
+                    value={dataInicioFiltro}
+                    onChange={(e) => {
+                      setDataInicioFiltro(e.target.value)
+                      setPaginaAtual(1)
+                    }}
+                    className="input-busca-historico"
+                  />
+                </div>
+
+                <div className="grupo-filtro-item">
+                  <label htmlFor="data-fim-hist" className="label-filtro-admin">
+                    Até a Data
+                  </label>
+                  <input
+                    id="data-fim-hist"
+                    type="date"
+                    value={dataFimFiltro}
+                    onChange={(e) => {
+                      setDataFimFiltro(e.target.value)
+                      setPaginaAtual(1)
+                    }}
+                    className="input-busca-historico"
+                  />
+                </div>
+
+                <div className="grupo-filtro-item">
+                  <button
+                    type="button"
+                    onClick={limparFiltrosHistorico}
+                    className="btn-limpar-filtros"
+                  >
+                    Limpar Filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Barra de Metadados / Contagem */}
+            <div className="historico-meta-barra">
+              <span>
+                Exibindo <strong>{historicoFiltrado.length}</strong> registro(s) histórico(s)
+                {buscaHistorico || tipoFiltro !== 'todos' || statusFiltro !== 'todos' || dataInicioFiltro || dataFimFiltro ? ' (filtrados)' : ''}
+              </span>
+              <span>Página {paginaAtual} de {totalPaginas}</span>
+            </div>
+
+            {/* Tabela do Histórico */}
+            {carregando ? (
+              <div className="admin-carregando">Carregando histórico...</div>
+            ) : historicoFiltrado.length === 0 ? (
+              <div className="admin-empty-bloco">
+                <span className="empty-icone-admin">🔍</span>
+                <h3>Nenhum registro encontrado</h3>
+                <p>Nenhuma reserva ou empréstimo corresponde aos critérios de pesquisa selecionados.</p>
+                <button
+                  type="button"
+                  className="btn btn-secundario"
+                  style={{ marginTop: '0.75rem' }}
+                  onClick={limparFiltrosHistorico}
+                >
+                  Restaurar Filtros Padrão
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="historico-tabela-wrapper">
+                  <table className="historico-tabela">
+                    <thead>
+                      <tr>
+                        <th>Protocolo</th>
+                        <th>Recurso & Patrimônio</th>
+                        <th>Associado (CREA / LGPD)</th>
+                        <th>Período Contratado</th>
+                        <th>Status do Processo</th>
+                        <th style={{ textAlign: 'right' }}>Auditoria</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historicoPaginado.map((item) => (
+                        <tr key={item.id}>
+                          <td className="celula-protocolo">{item.protocolo}</td>
+                          <td className="celula-recurso">
+                            <span className="badge-tipo-tag">
+                              {item.tipo === 'ambiente' ? '🏢 Espaço' : '🛰️ HUB'}
+                            </span>
+                            <strong>{item.recursoNome}</strong>
+                            <span>{item.patrimonioOuLocal}</span>
+                          </td>
+                          <td className="celula-associado">
+                            <strong>{item.profissionalNome}</strong>
+                            <div>
+                              <span className="crea-tag">{item.registroCrea}</span>
+                              <span className="tag-lgpd-cpf" title="CPF protegido pela LGPD">
+                                {item.cpfMascarado}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: '0.78rem' }}>
+                              <span>{formatarDataHora(item.dataInicio)}</span>
+                              <div style={{ color: 'var(--cor-texto-mutado)' }}>
+                                até {formatarDataHora(item.dataFim)}
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`badge-status-tabela status-${item.status}`}>
+                              {item.status === 'concluida' && '✓ Concluída'}
+                              {item.status === 'em_uso' && '● Em Uso'}
+                              {item.status === 'cancelada' && '✕ Cancelada'}
+                              {item.status === 'recusada' && '✕ Recusada'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              className="btn-inspecionar-auditoria"
+                              onClick={() => setRegistroParaAuditoria(item)}
+                            >
+                              Ver Auditoria
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Paginação */}
+                {totalPaginas > 1 && (
+                  <div className="paginacao-historico-container">
+                    <span>
+                      Mostrando {((paginaAtual - 1) * itensPorPagina) + 1} a {Math.min(paginaAtual * itensPorPagina, historicoFiltrado.length)} de {historicoFiltrado.length}
+                    </span>
+                    <div className="paginacao-botoes-grupo">
+                      <button
+                        type="button"
+                        className="btn-paginacao"
+                        disabled={paginaAtual === 1}
+                        onClick={() => setPaginaAtual((p) => Math.max(1, p - 1))}
+                      >
+                        ← Anterior
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-paginacao"
+                        disabled={paginaAtual === totalPaginas}
+                        onClick={() => setPaginaAtual((p) => Math.min(totalPaginas, p + 1))}
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       {/* ============================================================
@@ -628,6 +934,16 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ============================================================
+          MODAL DE AUDITORIA E LINHA DO TEMPO
+          ============================================================ */}
+      {registroParaAuditoria && (
+        <HistoricoModalAuditoria
+          registro={registroParaAuditoria}
+          aoFechar={() => setRegistroParaAuditoria(null)}
+        />
       )}
     </div>
   )
