@@ -93,16 +93,28 @@ npm run dev
 
 ---
 
-## 📌 Funcionalidades Planejadas
+## 📚 Documentação do Projeto
 
-- [ ] Autenticação e cadastro de usuários
-- [ ] Cadastro de ambientes e equipamentos
-- [ ] Consulta de disponibilidade por data/horário
-- [ ] Reserva de ambientes (coworking, salas, auditório)
-- [ ] Reserva de equipamentos (Crea Tec HUB)
-- [ ] Prevenção de conflitos de reserva
-- [ ] Registro de retirada/devolução de equipamentos
-- [ ] Histórico de utilização
-- [ ] Notificações e lembretes
-- [ ] Painel administrativo
-- [ ] Relatórios e indicadores
+A documentação detalhada para desenvolvedores e equipe de gestão está centralizada na pasta [`docs/`](docs/):
+
+- 📑 [**Contrato de API do Back-end**](docs/contrato-api-backend.md) — Guia completo para quem for desenvolver o Back-end (endpoints, DTOs, códigos HTTP, JWT e CORS).
+- 🔄 [**Ciclo de Vida das Reservas**](docs/ciclo-de-vida-reservas.md) — Máquina de estados (`PENDENTE`, `CONFIRMADA`, `EM_USO`, etc.) e regras de cancelamento.
+- 🗄️ [**Modelo de Banco de Dados**](docs/modelo-banco-dados.md) — Script DDL PostgreSQL e Exclusion Constraint temporal para prevenção física de conflitos.
+- 💻 [**Arquitetura do Front-end**](docs/arquitetura-frontend.md) — Visão técnica dos componentes, rotas, telas e modo de demonstração autônomo.
+
+---
+
+## 📌 Funcionalidades e Status do MVP
+
+- [x] Autenticação e cadastro de usuários (com perfil PROFISSIONAL e ADMIN)
+- [x] Consulta de disponibilidade por data/horário
+- [x] Catálogo e reserva de ambientes (coworking, salas, auditório)
+- [x] Catálogo e empréstimo de equipamentos (Crea Tec HUB) com Termo de Guarda
+- [x] Prevenção de conflitos de reserva (dupla camada: interface e validação)
+- [x] Central "Minhas Reservas" com cancelamento e emissão de comprovante timbrado
+- [x] Painel administrativo com fila de despacho de solicitações da diretoria
+- [x] Balcão de fiscalização com registro de retirada, devolução e vistoria de conservação
+- [x] Histórico de utilização e auditoria com linha do tempo e filtros LGPD
+- [ ] Integração com Back-end Spring Boot (API em desenvolvimento)
+- [ ] Notificações e lembretes por e-mail/WhatsApp (Fase 2)
+- [ ] Relatórios analíticos e indicadores gráficos de ocupação (Fase 2)
