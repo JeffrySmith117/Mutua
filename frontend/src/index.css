@@ -100,6 +100,65 @@
   --espaco-16: 64px;
 }
 
+/* ============================================================
+   Tema Escuro Minimalista (Obsidian Tech)
+   ============================================================ */
+[data-theme="escuro"] {
+  --cor-primaria: #38BDF8;
+  --cor-primaria-escura: #0284C7;
+  --cor-primaria-clara: #7DD3FC;
+  --cor-primaria-suave: rgba(56, 189, 248, 0.12);
+  --cor-primaria-gradiente: #38BDF8;
+
+  --cor-cta: #10B981;
+  --cor-cta-hover: #34D399;
+  --cor-cta-suave: rgba(16, 185, 129, 0.16);
+  --cor-secundaria: #10B981;
+  --cor-secundaria-escura: #059669;
+  --cor-secundaria-clara: #34D399;
+  --cor-secundaria-suave: rgba(16, 185, 129, 0.16);
+  --cor-secundaria-gradiente: #10B981;
+
+  --cor-acento: #FBBF24;
+  --cor-acento-escura: #F59E0B;
+  --cor-acento-suave: rgba(251, 191, 36, 0.15);
+
+  /* Neutros e Superfícies Escuras */
+  --cor-fundo: #090D14;
+  --cor-fundo-alt: #101726;
+  --cor-fundo-card: #131B2E;
+  --cor-fundo-elevado: #182238;
+  --cor-superficie: #131B2E;
+  --cor-borda: rgba(255, 255, 255, 0.08);
+  --cor-borda-hover: rgba(255, 255, 255, 0.18);
+  --cor-borda-foco: #38BDF8;
+  --cor-texto: #F8FAFC;
+  --cor-texto-principal: #F8FAFC;
+  --cor-texto-secundario: #94A3B8;
+  --cor-texto-terciario: #64748B;
+  --cor-texto-mutado: #64748B;
+  --cor-texto-invertido: #090D14;
+
+  /* Feedback */
+  --cor-sucesso: #10B981;
+  --cor-sucesso-suave: rgba(16, 185, 129, 0.16);
+  --cor-erro: #F87171;
+  --cor-erro-suave: rgba(248, 113, 113, 0.15);
+  --cor-aviso: #FBBF24;
+  --cor-aviso-suave: rgba(251, 191, 36, 0.15);
+  --cor-info: #38BDF8;
+  --cor-info-suave: rgba(56, 189, 248, 0.15);
+
+  /* Sombras Sutis Dark */
+  --sombra-card: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --sombra-card-hover: 0 6px 16px -2px rgba(0, 0, 0, 0.7);
+  --sombra-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --sombra-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --sombra-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+  --sombra-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+  --sombra-vidro: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
 html {
   font-size: 16px;
   scroll-behavior: smooth;
@@ -114,6 +173,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 #root {
@@ -293,5 +353,47 @@ select {
   background: var(--cor-fundo-alt);
   border-color: var(--cor-borda-hover);
 }
+
+/* --- Botões em Pílula (Estilo Editorial Minimalista) --- */
+.btn-pilula {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transicao-normal);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.btn-pilula-outline {
+  background: transparent;
+  color: var(--cor-texto-principal);
+  border: 1.5px solid var(--cor-borda-hover);
+}
+
+.btn-pilula-outline:hover {
+  background: var(--cor-fundo-alt);
+  border-color: var(--cor-texto-principal);
+  transform: translateY(-1px);
+}
+
+.btn-pilula-dark {
+  background: var(--cor-texto-principal);
+  color: var(--cor-fundo) !important;
+  border: 1.5px solid var(--cor-texto-principal);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.btn-pilula-dark:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
 
 

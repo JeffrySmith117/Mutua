@@ -1,476 +1,522 @@
 /* ============================================================
    ESTILOS DA DASHBOARD / HOME (Dashboard.css)
-   Design Minimalista Corporativo — Mútua-PI (Executive Minimalist)
+   Estilo Editorial Minimalista de Alto Padrão (Fiel à foto de referência)
    ============================================================ */
 
-.dashboard-wrapper {
+.editorial-page-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 3.25rem;
   width: 100%;
-  animation: fadeIn 0.25s ease-out;
+  max-width: 1360px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* ============================================================
-   1. HERO HEADER MINIMALISTA
+   1. HERO COM CORTE DIAGONAL ANGULAR
    ============================================================ */
-.dashboard-hero-clean {
+.editorial-hero {
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-card);
-  padding: 1.75rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+  overflow: hidden;
   box-shadow: var(--sombra-card);
+  transition: background-color var(--transicao-normal), border-color var(--transicao-normal);
 }
 
-.hero-clean-info {
-  flex: 1;
-  min-width: 280px;
+.editorial-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  min-height: 500px;
+  align-items: stretch;
+  position: relative;
 }
 
-.hero-clean-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.775rem;
-  font-weight: 600;
-  color: var(--cor-primaria);
-  background: var(--cor-primaria-suave);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--raio-total);
-  margin-bottom: 0.75rem;
-  border: 1px solid rgba(22, 62, 89, 0.08);
-}
-
-.ponto-status-online {
-  width: 6px;
-  height: 6px;
-  background: var(--cor-cta);
-  border-radius: 50%;
-  box-shadow: 0 0 6px var(--cor-cta);
-}
-
-.hero-clean-titulo {
-  font-size: 1.625rem;
-  font-weight: 600;
-  color: var(--cor-texto-principal);
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  margin-bottom: 0.35rem;
-}
-
-.hero-clean-titulo strong {
-  color: var(--cor-primaria);
-  font-weight: 700;
-}
-
-.hero-clean-subtitulo {
-  font-size: 0.9375rem;
-  color: var(--cor-texto-mutado);
-  line-height: 1.5;
-}
-
-.hero-clean-subtitulo strong {
-  color: var(--cor-texto-secundario);
-}
-
-.hero-clean-acoes {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-/* ============================================================
-   2. CARD CONTEXTUAL DE PRÓXIMO AGENDAMENTO
-   ============================================================ */
-.bloco-proxima-reserva {
-  width: 100%;
-}
-
-.card-proxima-reserva {
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-left: 4px solid var(--cor-cta);
-  border-radius: var(--raio-card);
-  padding: 1.25rem 1.75rem;
-  box-shadow: var(--sombra-card);
+.hero-esquerda-conteudo {
+  padding: 3.5rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  transition: border-color var(--transicao-rapida);
+  justify-content: center;
+  gap: 1.35rem;
+  z-index: 2;
 }
 
-.card-proxima-reserva:hover {
-  border-color: var(--cor-borda-hover);
-  border-left-color: var(--cor-cta);
-}
-
-.proxima-reserva-topo {
+.hero-top-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.badge-categoria-clean {
+.hero-tag-editorial {
   font-size: 0.725rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--cor-texto-mutado);
 }
 
-.badge-status-clean {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  padding: 0.2rem 0.65rem;
-  border-radius: var(--raio-total);
-}
-
-.badge-status-clean.status-confirmada {
-  background: var(--cor-cta-suave);
-  color: var(--cor-cta);
-}
-
-.badge-status-clean.status-pendente {
-  background: var(--cor-acento-suave);
-  color: var(--cor-acento);
-}
-
-.proxima-reserva-principal {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.proxima-reserva-titulo {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--cor-texto-principal);
-  margin-bottom: 0.35rem;
-}
-
-.proxima-reserva-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.875rem;
-  color: var(--cor-texto-secundario);
-  flex-wrap: wrap;
-}
-
-.divisor-ponto {
-  color: var(--cor-borda-hover);
-}
-
-.proxima-reserva-acoes {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.protocolo-tag {
-  font-size: 0.8125rem;
-  color: var(--cor-texto-mutado);
-}
-
-.protocolo-tag code {
-  font-family: var(--fonte-mono);
-  font-weight: 600;
-  color: var(--cor-primaria);
+.hero-theme-toggle-inline {
   background: var(--cor-fundo-alt);
-  padding: 0.2rem 0.45rem;
-  border-radius: 4px;
   border: 1px solid var(--cor-borda);
-}
-
-/* ============================================================
-   3. BARRA DE FILTRO POR ABAS / PÍLULAS
-   ============================================================ */
-.bloco-catalogo-filtro {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.catalogo-filtro-cabecalho {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-}
-
-.secao-titulo-clean {
-  font-size: 1.25rem;
+  border-radius: 9999px;
+  padding: 0.35rem 0.95rem;
+  font-size: 0.775rem;
   font-weight: 600;
-  color: var(--cor-texto-principal);
-  letter-spacing: -0.01em;
-  margin-bottom: 0.25rem;
-}
-
-.secao-subtitulo-clean {
-  font-size: 0.875rem;
-  color: var(--cor-texto-mutado);
-}
-
-.filtro-pilulas {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: var(--cor-fundo-alt);
-  padding: 0.3rem;
-  border-radius: 10px;
-  border: 1px solid var(--cor-borda);
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-.pilula-btn {
-  background: transparent;
-  border: none;
-  padding: 0.45rem 0.95rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
   color: var(--cor-texto-secundario);
-  border-radius: 7px;
   cursor: pointer;
   transition: all var(--transicao-rapida);
-  white-space: nowrap;
 }
 
-.pilula-btn:hover {
+.hero-theme-toggle-inline:hover {
+  background: var(--cor-superficie);
   color: var(--cor-texto-principal);
-  background: rgba(255, 255, 255, 0.6);
+  border-color: var(--cor-borda-hover);
+  transform: translateY(-1px);
 }
 
-.pilula-btn.ativa {
-  background: var(--cor-superficie);
-  color: var(--cor-primaria);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+.hero-titulo-editorial {
+  font-size: 2.65rem;
+  font-weight: 800;
+  line-height: 1.12;
+  color: var(--cor-texto-principal);
+  letter-spacing: -0.035em;
 }
 
-/* ============================================================
-   4. GRADE LIMPA DE CARDS (Espaços e Equipamentos)
-   ============================================================ */
-.grid-catalogo-minimalista {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.25rem;
+.hero-titulo-destaque {
+  font-weight: 700;
+  opacity: 0.92;
 }
 
-.card-minimalista {
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-card);
-  padding: 1.5rem;
-  box-shadow: var(--sombra-card);
+.hero-descricao-editorial {
+  font-size: 0.975rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.65;
+  max-width: 530px;
+}
+
+.hero-botoes-pilula-grupo {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: all var(--transicao-normal);
+  gap: 0.85rem;
+  margin-top: 0.75rem;
 }
 
-.card-minimalista:hover {
-  border-color: var(--cor-borda-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-card-hover);
-}
-
-.card-minimalista.card-hub {
-  border-top: 3px solid var(--cor-primaria-clara);
-}
-
-.card-minimalista-topo {
+.hero-linha-pilulas-secundarias {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-}
-
-.categoria-rotulo {
-  font-size: 0.725rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--cor-texto-mutado);
-}
-
-.categoria-rotulo.tag-hub-label {
-  color: var(--cor-primaria);
-}
-
-.badge-disponibilidade {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--raio-total);
-}
-
-.badge-disponibilidade.disponivel {
-  background: var(--cor-cta-suave);
-  color: var(--cor-cta);
-}
-
-.badge-disponibilidade.ocupado {
-  background: var(--cor-fundo-alt);
-  color: var(--cor-texto-mutado);
-}
-
-.card-minimalista-titulo {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--cor-texto-principal);
-  margin-bottom: 0.4rem;
-  line-height: 1.35;
-}
-
-.card-minimalista-desc {
-  font-size: 0.84rem;
-  color: var(--cor-texto-secundario);
-  line-height: 1.5;
-  margin-bottom: 1rem;
-}
-
-.card-minimalista-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 1.25rem;
-}
-
-.tag-neutra {
-  font-size: 0.75rem;
-  background: var(--cor-fundo-alt);
-  color: var(--cor-texto-secundario);
-  padding: 0.25rem 0.55rem;
-  border-radius: 6px;
-  font-weight: 500;
-  border: 1px solid var(--cor-borda);
-}
-
-.card-minimalista-rodape {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--cor-fundo-alt);
+  flex-wrap: wrap;
 }
 
-.info-secundaria {
-  font-size: 0.775rem;
-  color: var(--cor-texto-mutado);
+.hero-btn-primario {
+  max-width: 330px;
+  justify-content: space-between;
+  padding: 0.85rem 1.65rem;
 }
 
-.btn-sm {
-  padding: 0.45rem 0.95rem;
-  font-size: 0.8125rem;
+/* Coluna Direita: O Corte Diagonal */
+.hero-direita-diagonal-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: #090D14;
+  min-height: 500px;
+}
+
+.hero-diagonal-slice {
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(14% 0%, 100% 0%, 100% 100%, 0% 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-imagem-foco {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hero-diagonal-slice:hover .hero-imagem-foco {
+  transform: scale(1.04);
+}
+
+.hero-diagonal-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%);
+  pointer-events: none;
+}
+
+.hero-badge-diagonal {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: rgba(9, 13, 20, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  padding: 0.45rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  z-index: 3;
+}
+
+.ponto-pulso-verde {
+  width: 7px;
+  height: 7px;
+  background: #10B981;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #10B981;
 }
 
 /* ============================================================
-   5. RODAPÉ DE APOIO AO ASSOCIADO
+   BARRA COMPACTA: PRÓXIMO AGENDAMENTO ATIVO
    ============================================================ */
-.dashboard-rodape-apoio {
+.editorial-reserva-aviso {
   background: var(--cor-superficie);
   border: 1px solid var(--cor-borda);
+  border-left: 4px solid var(--cor-cta);
   border-radius: var(--raio-card);
-  padding: 1.25rem 1.75rem;
+  padding: 1.15rem 1.75rem;
+  box-shadow: var(--sombra-card);
+}
+
+.aviso-reserva-conteudo {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
   flex-wrap: wrap;
-  font-size: 0.8125rem;
-  color: var(--cor-texto-secundario);
-  box-shadow: var(--sombra-card);
-  margin-top: 0.5rem;
 }
 
-.apoio-item {
+.aviso-reserva-esq {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  flex: 1;
-  min-width: 220px;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
 }
 
-.apoio-item strong {
-  color: var(--cor-primaria);
+.aviso-tag-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--cor-cta);
+  background: var(--cor-cta-suave);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+}
+
+.aviso-titulo-item {
+  font-size: 0.95rem;
   font-weight: 600;
+  color: var(--cor-texto-principal);
 }
 
-.apoio-item span {
+.aviso-detalhes-item {
+  font-size: 0.85rem;
   color: var(--cor-texto-mutado);
 }
 
-.apoio-divisor {
+.aviso-reserva-dir {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.aviso-protocolo {
+  font-size: 0.8125rem;
+  color: var(--cor-texto-mutado);
+}
+
+.aviso-protocolo code {
+  font-family: var(--fonte-mono);
+  font-weight: 600;
+  color: var(--cor-primaria);
+  background: var(--cor-fundo-alt);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.btn-pilula-sm {
+  padding: 0.45rem 1.15rem;
+  font-size: 0.8125rem;
+}
+
+/* ============================================================
+   2. SEÇÃO CENTRAL: 3 CARDS DE FOTOGRAFIA MONOCROMÁTICA
+   ============================================================ */
+.editorial-secao-central {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.secao-label-central {
+  text-align: center;
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cor-texto-mutado);
+}
+
+.editorial-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+
+.editorial-card-foto {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all var(--transicao-normal);
+  box-shadow: var(--sombra-card);
+}
+
+.editorial-card-foto:hover {
+  transform: translateY(-4px);
+  border-color: var(--cor-borda-hover);
+  box-shadow: var(--sombra-card-hover);
+}
+
+.card-foto-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: #090D14;
+}
+
+.card-foto-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.editorial-card-foto:hover .card-foto-img {
+  transform: scale(1.05);
+}
+
+.card-foto-tag {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  background: rgba(9, 13, 20, 0.75);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 0.675rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.card-foto-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.card-foto-titulo {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cor-texto-principal);
+  letter-spacing: -0.01em;
+}
+
+.card-foto-desc {
+  font-size: 0.84rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.55;
+}
+
+.card-foto-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--transicao-rapida);
+}
+
+.editorial-card-foto:hover .card-foto-link {
+  color: var(--cor-primaria);
+}
+
+/* ============================================================
+   3. SEÇÃO INFERIOR: 3 COLUNAS COM DIVISORES & BOTÕES SÓLIDOS
+   ============================================================ */
+.editorial-secao-colunas {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: stretch;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-card);
+  padding: 2.75rem 2.5rem;
+  box-shadow: var(--sombra-card);
+  gap: 2.25rem;
+}
+
+.editorial-coluna-bloco {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.15rem;
+}
+
+.coluna-categoria-tag {
+  font-size: 0.675rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cor-texto-mutado);
+}
+
+.coluna-titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cor-texto-principal);
+  letter-spacing: -0.02em;
+}
+
+.coluna-texto {
+  font-size: 0.875rem;
+  color: var(--cor-texto-secundario);
+  line-height: 1.65;
+  flex: 1;
+}
+
+.coluna-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.coluna-divisor-vertical {
   width: 1px;
-  height: 32px;
   background: var(--cor-borda);
 }
 
 /* ============================================================
-   RESPONSIVIDADE (Mobile-First Polish)
+   4. BARRA DE RODAPÉ MINIMALISTA (Dock Monocromático)
    ============================================================ */
-@media (max-width: 768px) {
-  .dashboard-wrapper {
-    gap: 1.5rem;
-  }
+.editorial-dock-rodape {
+  background: #090D14;
+  color: #94A3B8;
+  border-radius: var(--raio-card);
+  padding: 1.35rem 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  font-size: 0.8125rem;
+  flex-wrap: wrap;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--sombra-card);
+}
 
-  .dashboard-hero-clean {
-    padding: 1.25rem 1.5rem;
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.dock-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #E2E8F0;
+  font-weight: 500;
+}
 
-  .hero-clean-acoes {
-    width: 100%;
-  }
+.dock-item svg {
+  color: #10B981;
+}
 
-  .hero-clean-acoes .btn {
-    flex: 1;
-  }
+.dock-divisor-ponto {
+  color: #334155;
+  font-weight: 700;
+}
 
-  .proxima-reserva-principal {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .proxima-reserva-acoes {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .catalogo-filtro-cabecalho {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .filtro-pilulas {
-    width: 100%;
-  }
-
-  .grid-catalogo-minimalista {
+/* ============================================================
+   RESPONSIVIDADE (Mobile & Tablet)
+   ============================================================ */
+@media (max-width: 1080px) {
+  .editorial-hero-grid {
     grid-template-columns: 1fr;
   }
 
-  .apoio-divisor {
-    display: none;
+  .hero-direita-diagonal-wrapper {
+    min-height: 340px;
   }
 
-  .dashboard-rodape-apoio {
+  .hero-diagonal-slice {
+    clip-path: polygon(0% 12%, 100% 0%, 100% 100%, 0% 100%);
+  }
+
+  .editorial-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .editorial-secao-colunas {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem 1.5rem;
+  }
+
+  .coluna-divisor-vertical {
+    width: 100%;
+    height: 1px;
+  }
+
+  .editorial-dock-rodape {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .dock-divisor-ponto {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-esquerda-conteudo {
+    padding: 2rem 1.5rem;
+  }
+
+  .hero-titulo-editorial {
+    font-size: 2rem;
+  }
+
+  .hero-btn-primario {
+    max-width: 100%;
+  }
+
+  .aviso-reserva-conteudo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .aviso-reserva-dir {
+    width: 100%;
+    justify-content: space-between;
   }
 }
