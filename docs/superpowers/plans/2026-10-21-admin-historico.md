@@ -31,7 +31,7 @@
   - `adminService.listarHistorico(filtros?: FiltrosHistorico): Promise<RegistroHistorico[]>`
   - `adminService.obterHistoricoPorId(id: string): Promise<RegistroHistorico | null>`
 
-- [ ] **Step 1: Adicionar as interfaces e tipos de histórico em `adminService.ts`**
+- [x] **Step 1: Adicionar as interfaces e tipos de histórico em `adminService.ts`**
 
 Adicionar ao topo do arquivo `frontend/src/services/adminService.ts`:
 ```typescript
@@ -81,7 +81,7 @@ export interface FiltrosHistorico {
 }
 ```
 
-- [ ] **Step 2: Adicionar base de dados mock representativa e métodos `listarHistorico` e `obterHistoricoPorId`**
+- [x] **Step 2: Adicionar base de dados mock representativa e métodos `listarHistorico` e `obterHistoricoPorId`**
 
 Incluir a constante `HISTORICO_MOCK: RegistroHistorico[]` com registros de auditório, coworking, drones RTK, câmeras termográficas e estações totais com diferentes status (`concluida`, `em_uso`, `cancelada`, `recusada`). Implementar os métodos no objeto `adminService`:
 ```typescript
@@ -135,12 +135,12 @@ async obterHistoricoPorId(id: string): Promise<RegistroHistorico | null> {
 }
 ```
 
-- [ ] **Step 3: Validar compilação e tipagem do TypeScript**
+- [x] **Step 3: Validar compilação e tipagem do TypeScript**
 
 Comando: `cd frontend && npm run build`  
 Esperado: Compilação concluída sem erros de tipagem.
 
-- [ ] **Step 4: Commitar as alterações**
+- [x] **Step 4: Commitar as alterações**
 
 ```bash
 git add frontend/src/services/adminService.ts
@@ -159,7 +159,7 @@ git commit -m "feat: adiciona modelos e servico de historico e auditoria no admi
 - Consumes: `RegistroHistorico` de `../../services/adminService`
 - Produces: `HistoricoModalAuditoria: React.FC<{ registro: RegistroHistorico; aoFechar: () => void }>`
 
-- [ ] **Step 1: Criar o componente `HistoricoModalAuditoria.tsx`**
+- [x] **Step 1: Criar o componente `HistoricoModalAuditoria.tsx`**
 
 Criar `frontend/src/pages/admin/HistoricoModalAuditoria.tsx` com:
 - Exibição timbrada do cabeçalho institucional (Mútua-PI / Crea Tec HUB).
@@ -168,16 +168,16 @@ Criar `frontend/src/pages/admin/HistoricoModalAuditoria.tsx` com:
 - Linha do tempo visual cronológica (solicitação -> aprovação -> retirada -> devolução / cancelamento).
 - Ação `window.print()` estilizada para emissão de ficha de auditoria oficial.
 
-- [ ] **Step 2: Adicionar estilos de auditoria e `@media print` no `Admin.css`**
+- [x] **Step 2: Adicionar estilos de auditoria e `@media print` no `Admin.css`**
 
 Adicionar as classes para a timeline vertical, ícones de etapa, caixas de checklist e regras de impressão para ocultar botões e formatar folha A4 limpa no `Admin.css`.
 
-- [ ] **Step 3: Validar build do frontend**
+- [x] **Step 3: Validar build do frontend**
 
 Comando: `cd frontend && npm run build`  
 Esperado: Compilado com sucesso.
 
-- [ ] **Step 4: Commitar as alterações**
+- [x] **Step 4: Commitar as alterações**
 
 ```bash
 git add frontend/src/pages/admin/HistoricoModalAuditoria.tsx frontend/src/pages/admin/Admin.css
@@ -195,14 +195,14 @@ git commit -m "feat: cria modal de auditoria com linha do tempo e impressao timb
 **Interfaces:**
 - Consumes: `adminService.listarHistorico`, `RegistroHistorico`, `FiltrosHistorico`, `HistoricoModalAuditoria`
 
-- [ ] **Step 1: Expandir o estado de abas para incluir `'historico'`**
+- [x] **Step 1: Expandir o estado de abas para incluir `'historico'`**
 
 Em `frontend/src/pages/admin/AdminPage.tsx`:
 ```typescript
 const [abaAtiva, setAbaAtiva] = useState<'pendencias' | 'balcao' | 'inventario' | 'historico'>('pendencias')
 ```
 
-- [ ] **Step 2: Adicionar botão da aba e conteúdo da aba com barra de filtros reativa**
+- [x] **Step 2: Adicionar botão da aba e conteúdo da aba com barra de filtros reativa**
 
 Inserir o 4º botão de aba:
 ```tsx
@@ -221,18 +221,18 @@ Inserir o container da aba com:
 - Paginação inteligente e contador de registros.
 - Empty state com botão "Limpar Filtros".
 
-- [ ] **Step 3: Conectar o modal de auditoria ao clique em "Inspecionar Auditoria"**
+- [x] **Step 3: Conectar o modal de auditoria ao clique em "Inspecionar Auditoria"**
 
 Armazenar `registroParaAuditoria: RegistroHistorico | null` no estado e renderizar `<HistoricoModalAuditoria />` quando selecionado.
 
-- [ ] **Step 4: Ajustar estilos de tabela, filtros e responsividade no `Admin.css`**
+- [x] **Step 4: Ajustar estilos de tabela, filtros e responsividade no `Admin.css`**
 
-- [ ] **Step 5: Validar compilação e lint**
+- [x] **Step 5: Validar compilação e lint**
 
 Comando: `cd frontend && npm run build && npm run lint`  
 Esperado: Zero erros de compilação e warnings sanados.
 
-- [ ] **Step 6: Commitar as alterações**
+- [x] **Step 6: Commitar as alterações**
 
 ```bash
 git add frontend/src/pages/admin/AdminPage.tsx frontend/src/pages/admin/Admin.css
@@ -246,23 +246,23 @@ git commit -m "feat: integra aba de historico e auditoria no painel administrati
 **Files:**
 - Inspect & Test: Navegador integrado / Servidor local Vite
 
-- [ ] **Step 1: Iniciar servidor dev se necessário e testar a navegação**
+- [x] **Step 1: Iniciar servidor dev se necessário e testar a navegação**
 
 Acessar a rota `/admin` e navegar para a aba "📜 Histórico Geral & Auditoria".
 
-- [ ] **Step 2: Testar filtros e buscas**
+- [x] **Step 2: Testar filtros e buscas**
 - Buscar por nome de associado (ex: "Elias", "Valéria").
 - Filtrar por status (`Concluídas`, `Em Uso`, `Canceladas`).
 - Filtrar por categoria (Espaços vs Equipamentos HUB).
 - Abrir o modal de auditoria de um registro de equipamento e verificar a linha do tempo e vistorias.
 - Abrir o modal de um ambiente e verificar a linha do tempo.
 
-- [ ] **Step 3: Executar build final de validação**
+- [x] **Step 3: Executar build final de validação**
 
 Comando: `cd frontend && npm run build`  
 Esperado: Sucesso absoluto.
 
-- [ ] **Step 4: Commitar e integrar branch**
+- [x] **Step 4: Commitar e integrar branch**
 
 ```bash
 git add .
