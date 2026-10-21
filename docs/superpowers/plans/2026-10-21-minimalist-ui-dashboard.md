@@ -25,7 +25,7 @@
 - Consumes: Estrutura existente de variáveis CSS em `:root`.
 - Produces: Variáveis padronizadas `--cor-fundo`, `--cor-superficie`, `--cor-primaria`, `--cor-cta`, `--cor-cta-hover`, `--cor-cta-suave`, `--sombra-card`, `--sombra-card-hover`.
 
-- [ ] **Step 1: Atualizar variáveis CSS em `:root` no `frontend/src/index.css`**
+- [x] **Step 1: Atualizar variáveis CSS em `:root` no `frontend/src/index.css`**
   Substituir a paleta carregada de gradientes pelos tokens minimalistas especificados:
   ```css
   --cor-primaria: #163E59;
@@ -52,10 +52,10 @@
   --raio-btn: 8px;
   ```
 
-- [ ] **Step 2: Verificar aplicação dos tokens e classes base no `index.css`**
+- [x] **Step 2: Verificar aplicação dos tokens e classes base no `index.css`**
   Ajustar classes utilitárias globais (como `.btn`, botões primários e resets) para utilizar `--cor-cta` e os novos raios/sombras.
 
-- [ ] **Step 3: Commit das alterações de tokens globais**
+- [x] **Step 3: Commit das alterações de tokens globais**
   ```bash
   git add frontend/src/index.css
   git commit -m "style: atualiza design tokens globais com paleta minimalista"
@@ -72,30 +72,30 @@
 - Consumes: `useAuthStore`, `useNavigate`, `Link` do React Router.
 - Produces: Interface limpa com filtro reativo de categorias (`categoriaAtiva`), banner inteligente de reserva e listagem unificada em grid.
 
-- [ ] **Step 1: Implementar estado de filtro por categoria**
+- [x] **Step 1: Implementar estado de filtro por categoria**
   Adicionar estado para alternar entre categorias:
   ```typescript
   type CategoriaFiltro = 'todos' | 'reuniao' | 'coworking' | 'auditorio' | 'hub'
   const [categoriaAtiva, setCategoriaAtiva] = useState<CategoriaFiltro>('todos')
   ```
 
-- [ ] **Step 2: Construir o Header Minimalista (Hero Limpo)**
+- [x] **Step 2: Construir o Header Minimalista (Hero Limpo)**
   - Saudação personalizada `Olá, {primeiroNome}`.
   - Frase de contexto e status ativo inline.
   - Ações rápidas de conversão: Botão primário `+ Nova Reserva` (link para `/ambientes`) e `Solicitar HUB` (link para `/equipamentos`).
 
-- [ ] **Step 3: Construir o Card de Próxima Reserva (Condicional)**
+- [x] **Step 3: Construir o Card de Próxima Reserva (Condicional)**
   - Exibir apenas quando houver reserva ativa (`confirmada` ou `pendente`).
   - Card horizontal com data/horário legível, badge de status discreto e botão `Ver Comprovante`.
 
-- [ ] **Step 4: Implementar Barra de Filtros e Grade Unificada de Destaques**
+- [x] **Step 4: Implementar Barra de Filtros e Grade Unificada de Destaques**
   - Barra de chips/pílulas horizontais com contagem.
   - Grade de cards com imagem/ícone sutil, especificações técnicas essenciais, disponibilidade e botão direto de reserva.
 
-- [ ] **Step 5: Adicionar Rodapé de Apoio ao Associado**
+- [x] **Step 5: Adicionar Rodapé de Apoio ao Associado**
   - Links discretos para Regulamento de Uso e Suporte Mútua-PI / CREA-PI.
 
-- [ ] **Step 6: Commit da reestruturação da DashboardPage**
+- [x] **Step 6: Commit da reestruturação da DashboardPage**
   ```bash
   git add frontend/src/pages/dashboard/DashboardPage.tsx
   git commit -m "feat: reestrutura dashboard com layout minimalista e filtro instantaneo"
@@ -112,22 +112,22 @@
 - Consumes: Classes e IDs gerados na `DashboardPage.tsx` e variáveis globais do `index.css`.
 - Produces: Estilos elegantes, responsivos e sem ruído visual para o layout da Dashboard.
 
-- [ ] **Step 1: Estilizar o Header/Hero Minimalista**
+- [x] **Step 1: Estilizar o Header/Hero Minimalista**
   Fundo branco com micro-borda (`#E2E8F0`), padding moderado (`1.75rem 2rem`), alinhamento flexível entre saudação e botões de ação rápida.
 
-- [ ] **Step 2: Estilizar o Card de Próximo Agendamento**
+- [x] **Step 2: Estilizar o Card de Próximo Agendamento**
   Design com borda sutil de destaque no lado esquerdo (`border-left: 4px solid var(--cor-cta)`), fundo suave e metadados alinhados.
 
-- [ ] **Step 3: Estilizar a Barra de Filtros (Chips)**
+- [x] **Step 3: Estilizar a Barra de Filtros (Chips)**
   Pílulas com transição suave, estado ativo com fundo azul institucional (`#163E59`) ou verde e texto branco; estados inativos com fundo neutro (`#F1F5F9`).
 
-- [ ] **Step 4: Estilizar a Grade de Destaques e Cards de Espaço/HUB**
+- [x] **Step 4: Estilizar a Grade de Destaques e Cards de Espaço/HUB**
   Cards com `border-radius: var(--raio-card)`, borda `1px solid var(--cor-borda)`, `box-shadow: var(--sombra-card)` e efeito hover sutil (`translateY(-2px)` e sombra leve).
 
-- [ ] **Step 5: Responsividade Mobile-First**
+- [x] **Step 5: Responsividade Mobile-First**
   Regras `@media (max-width: 768px)` garantindo que o hero empilhe harmoniosamente, os filtros tenham rolagem horizontal suave e os cards fiquem em coluna única legível.
 
-- [ ] **Step 6: Commit dos estilos minimalistas da Dashboard**
+- [x] **Step 6: Commit dos estilos minimalistas da Dashboard**
   ```bash
   git add frontend/src/pages/dashboard/Dashboard.css
   git commit -m "style: reformula dashboard.css com design minimalista executivo"
@@ -140,17 +140,17 @@
 **Files:**
 - Verify: `frontend/`
 
-- [ ] **Step 1: Executar build do TypeScript**
+- [x] **Step 1: Executar build do TypeScript**
   ```bash
   cd frontend
   npm run build
   ```
   Garantir zero erros de compilação ou inconsistência de tipos.
 
-- [ ] **Step 2: Verificar funcionamento e renderização no navegador**
+- [x] **Step 2: Verificar funcionamento e renderização no navegador**
   Confirmar que a página carrega sem avisos de console, os filtros por categoria funcionam e a estética atende aos critérios minimalistas.
 
-- [ ] **Step 3: Commit final e fechamento da tarefa**
+- [x] **Step 3: Commit final e fechamento da tarefa**
   ```bash
   git add .
   git commit -m "chore: valida build e entrega da dashboard minimalista"
