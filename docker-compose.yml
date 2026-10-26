@@ -1,0 +1,37 @@
+# Sobe o banco e a API do Sistema de Reservas Mútua-PI com um comando: docker compose up --build
+# O front roda à parte (cd frontend && npm run dev) e aponta para http://localhost:8080/api/v1.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mutua
+      POSTGRES_USER: mutua
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mutua}
+    ports:
+      - "5432:5432"
+    volumes:
+      - mutua-dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mutua -d mutua"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/mutua
+      DB_USER: mutua
+      DB_PASSWORD: ${DB_PASSWORD:-mutua}
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao-0123456789abcdef}
+      CORS_ORIGENS: ${CORS_ORIGENS:-http://localhost:5173,http://localhost:3000}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@mutua-pi.com.br}
+      ADMIN_SENHA: ${ADMIN_SENHA:-admin123}
+    ports:
+      - "8080:8080"
+
+volumes:
+  mutua-dados:
