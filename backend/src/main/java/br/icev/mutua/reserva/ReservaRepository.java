@@ -30,6 +30,10 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID>, JpaSpec
 
     List<Reserva> findByStatusAndDataFimBefore(StatusReserva status, LocalDateTime limite);
 
+    /** Há reserva do recurso que ainda ocupa ou vai ocupar horário depois de {@code limite}? */
+    boolean existsByRecursoIdAndStatusInAndDataFimAfter(UUID recursoId, Collection<StatusReserva> status,
+                                                        LocalDateTime limite);
+
     long countByStatus(StatusReserva status);
 
     long countByStatusAndRecursoTipo(StatusReserva status, TipoRecurso tipo);

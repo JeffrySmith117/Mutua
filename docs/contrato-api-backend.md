@@ -375,6 +375,43 @@ Lista paginada de objetos com a linha do tempo cronológica (`linhaDoTempo`), da
 
 ---
 
+### 4.6 Cadastro de Recursos (`/api/v1/admin/recursos`) — Apenas perfil `ADMIN`
+
+Cadastro de ambientes e equipamentos. Um novo espaço ou equipamento é só um registro, sem mudança de código.
+
+| Método | Rota | O que faz |
+| :--- | :--- | :--- |
+| `GET` | `/admin/recursos` | Lista todos os recursos, inclusive os inativos. |
+| `GET` | `/admin/recursos/{id}` | Detalha um recurso. |
+| `POST` | `/admin/recursos` | Cadastra (`201 Created`). |
+| `PUT` | `/admin/recursos/{id}` | Atualiza os dados. O `tipo` não pode ser alterado (`400`). |
+| `PATCH` | `/admin/recursos/{id}/ativo` | Ativa ou desativa (`{"ativo": false}`). |
+
+**Request Body (`POST` e `PUT`)** — só `nome` e `tipo` são obrigatórios; o restante tem padrão
+(capacidade 1, prazo de 1 dia, segunda a sexta das 08h às 18h, sem aprovação):
+```json
+{
+  "nome": "Sala de Estudo 1",
+  "tipo": "SALA",
+  "localizacao": "1º Andar • Sede Mútua-PI",
+  "descricao": "Sala silenciosa para estudo individual ou em dupla.",
+  "capacidade": 6,
+  "exigeAprovacao": false,
+  "horarioAbertura": "08:00",
+  "horarioFechamento": "18:00",
+  "diasSemana": [1, 2, 3, 4, 5],
+  "recursosDisponiveis": ["Wi-Fi 6", "Climatização"]
+}
+```
+`tipo` aceita `COWORKING`, `SALA`, `AUDITORIO` e `EQUIPAMENTO`. Equipamentos exigem `patrimonio` (único, `409`
+se repetido) e aceitam `categoria`, `prazoMaxDias`, `exigeArtSisant` e `especificacoes`; ambientes não têm
+patrimônio. `diasSemana` usa 1 (segunda) a 7 (domingo).
+
+**Regras:** um recurso com reservas `PENDENTE`, `CONFIRMADA` ou `EM_USO` ainda não encerradas não pode ser
+desativado (`409`). Recursos inativos somem das listagens públicas e não aceitam novas reservas (`404`).
+
+---
+
 ## 5. Dica de Ouro para o Back-end: Prevenção de Conflitos no PostgreSQL! 💡
 
 No PostgreSQL, para impedir 100% que duas reservas sobrepostas ocorram mesmo em caso de duas pessoas clicando exatamente no mesmo milissegundo, configure a extensão `btree_gist` e crie uma **Exclusion Constraint**:

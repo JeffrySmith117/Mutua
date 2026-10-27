@@ -11,13 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,45 +23,12 @@ import java.util.concurrent.Future;
 import br.icev.mutua.common.Relogio;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-/** Fluxo completo contra um PostgreSQL real (embutido), incluindo a exclusion constraint. */
-@SpringBootTest
-@AutoConfigureMockMvc
-class ReservaFluxoTest {
-
-    private static final EmbeddedPostgres POSTGRES;
-
-    static {
-        try {
-            POSTGRES = EmbeddedPostgres.builder().start();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    @DynamicPropertySource
-    static void banco(DynamicPropertyRegistry registro) {
-        registro.add("spring.datasource.url", () -> POSTGRES.getJdbcUrl("postgres", "postgres"));
-        registro.add("spring.datasource.username", () -> "postgres");
-        registro.add("spring.datasource.password", () -> "postgres");
-    }
-
-    @Autowired
-    MockMvc mvc;
-
-    @Autowired
-    ObjectMapper json;
+/** Fluxo completo de auth e reservas contra um PostgreSQL real, incluindo a exclusion constraint. */
+class ReservaFluxoTest extends IntegracaoBase {
 
     // ---------- auth ----------
 
@@ -319,40 +283,6 @@ class ReservaFluxoTest {
             }
         }
         throw new AssertionError("Recurso não encontrado: " + nome);
-    }
-
-    /** Cadastra um profissional novo e devolve o par e-mail/senha. */
-    private String[] novoProfissional() throws Exception {
-        String email = novoEmail();
-        mvc.perform(post("/auth/cadastro").contentType(MediaType.APPLICATION_JSON)
-                .content(corpoCadastro(email, "senhaSegura123"))).andExpect(status().isCreated());
-        return new String[] {email, "senhaSegura123"};
-    }
-
-    private String token(String[] credenciais) throws Exception {
-        return login(credenciais[0], credenciais[1]);
-    }
-
-    private String tokenAdmin() throws Exception {
-        return login("admin@mutua-pi.com.br", "admin123");
-    }
-
-    private String login(String email, String senha) throws Exception {
-        String corpo = mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\",\"senha\":\"" + senha + "\"}"))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-        return json.readTree(corpo).get("token").asText();
-    }
-
-    private String corpoCadastro(String email, String senha) {
-        long cpf = Math.abs(UUID.randomUUID().getMostSignificantBits() % 100_000_000_000L);
-        return "{\"nome\":\"Profissional Teste\",\"email\":\"" + email + "\",\"senha\":\"" + senha
-                + "\",\"confirmarSenha\":\"" + senha + "\",\"cpf\":\"" + String.format("%011d", cpf)
-                + "\",\"registroCrea\":\"CREA-PI 1234/D\"}";
-    }
-
-    private String novoEmail() {
-        return "teste-" + UUID.randomUUID() + "@exemplo.com";
     }
 
     /** Primeiro dia útil a partir de hoje + deslocamento. Cada teste usa um deslocamento próprio. */

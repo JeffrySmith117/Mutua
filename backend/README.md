@@ -50,6 +50,12 @@ br.icev.mutua
 O schema vive em `src/main/resources/db/migration` (Flyway). Mudanças de banco entram como novas
 migrations (`V3__...`), nunca editando as já aplicadas.
 
+## Cadastro de recursos
+
+O admin cadastra ambientes e equipamentos em `/admin/recursos` (contrato na seção 4.6). Os recursos que
+vêm da migration `V2` são só os iniciais da sede. Regras: o tipo não muda depois de criado (ele define se o
+recurso é exclusivo ou de lotação compartilhada) e recurso com reservas ativas não pode ser desativado.
+
 ## Decisões de regra de negócio
 
 - **Conflito de horário em duas camadas**: o service verifica antes (mensagem clara) e a exclusion

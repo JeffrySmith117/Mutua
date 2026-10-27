@@ -21,6 +21,10 @@ public interface RecursoRepository extends JpaRepository<Recurso, UUID> {
 
     Optional<Recurso> findByIdAndAtivoTrue(UUID id);
 
+    boolean existsByPatrimonio(String patrimonio);
+
+    boolean existsByPatrimonioAndIdNot(String patrimonio, UUID id);
+
     /** Trava a linha do recurso até o fim da transação, serializando as reservas concorrentes dele. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Recurso r where r.id = :id")

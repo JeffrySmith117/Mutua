@@ -93,6 +93,24 @@ public class Recurso {
     public boolean isAtivo() { return ativo; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 
+    public void setNome(String nome) { this.nome = nome; }
+    public void setTipo(TipoRecurso tipo) { this.tipo = tipo; }
+    public void setPatrimonio(String patrimonio) { this.patrimonio = patrimonio; }
+    public void setLocalizacao(String localizacao) { this.localizacao = localizacao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
+    public void setCapacidade(int capacidade) { this.capacidade = capacidade; }
+    public void setPrazoMaxDias(int prazoMaxDias) { this.prazoMaxDias = prazoMaxDias; }
+    public void setExigeAprovacao(boolean exigeAprovacao) { this.exigeAprovacao = exigeAprovacao; }
+    public void setExigeArtSisant(boolean exigeArtSisant) { this.exigeArtSisant = exigeArtSisant; }
+    public void setHorarioAbertura(LocalTime horarioAbertura) { this.horarioAbertura = horarioAbertura; }
+    public void setHorarioFechamento(LocalTime horarioFechamento) { this.horarioFechamento = horarioFechamento; }
+    public void setDiasSemana(List<Integer> diasSemana) { this.diasSemana = diasSemana; }
+    public void setRecursosDisponiveis(List<String> recursosDisponiveis) { this.recursosDisponiveis = recursosDisponiveis; }
+    public void setEspecificacoes(List<String> especificacoes) { this.especificacoes = especificacoes; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
+    public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
+
     public boolean isEquipamento() {
         return tipo == TipoRecurso.EQUIPAMENTO;
     }
