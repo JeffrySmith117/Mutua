@@ -15,6 +15,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,11 +25,17 @@ public class JwtService {
     private final SecretKey chave;
     private final Duration expiracao;
 
+    /** Prefixo do segredo de desenvolvimento do application.yml, proibido no perfil prod. */
+    static final String SEGREDO_DE_DESENVOLVIMENTO = "troque-este-segredo";
+
     public JwtService(@Value("${mutua.jwt.secret}") String segredo,
-                      @Value("${mutua.jwt.expiracao-horas}") long horas) {
+                      @Value("${mutua.jwt.expiracao-horas}") long horas, Environment ambiente) {
         byte[] bytes = segredo.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalStateException("mutua.jwt.secret precisa ter ao menos 32 caracteres.");
+        }
+        if (ambiente.acceptsProfiles(Profiles.of("prod")) && segredo.startsWith(SEGREDO_DE_DESENVOLVIMENTO)) {
+            throw new IllegalStateException("Em produção, defina JWT_SECRET com um valor próprio e secreto.");
         }
         this.chave = Keys.hmacShaKeyFor(bytes);
         this.expiracao = Duration.ofHours(horas);

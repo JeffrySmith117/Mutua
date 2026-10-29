@@ -23,6 +23,25 @@ Swagger: `http://localhost:8080/api/v1/swagger-ui.html`.
 Na primeira subida é criado o administrador `admin@mutua-pi.com.br` / `admin123`
 (`ADMIN_EMAIL` / `ADMIN_SENHA` mudam isso). **Troque a senha e o `JWT_SECRET` fora do desenvolvimento.**
 
+## Produção
+
+Suba com `SPRING_PROFILES_ACTIVE=prod`. Nesse perfil não há valores padrão: a API **não sobe** se faltar alguma
+variável, e recusa os valores de desenvolvimento.
+
+| Variável | Para que serve |
+|---|---|
+| `DB_URL`, `DB_USER`, `DB_PASSWORD` | Conexão com o PostgreSQL (ex.: `jdbc:postgresql://host:5432/mutua`). |
+| `JWT_SECRET` | Segredo de assinatura do token. Mínimo de 32 caracteres, e não pode ser o de desenvolvimento. |
+| `CORS_ORIGENS` | Endereços do front, separados por vírgula (ex.: `https://reservas.mutua-pi.com.br`). |
+| `ADMIN_EMAIL`, `ADMIN_SENHA` | Administrador inicial, criado só se ainda não existir nenhum. A senha precisa de 12+ caracteres. |
+
+Em produção o Swagger fica desligado. O `GET /api/v1/actuator/health` é público, para o deploy checar se a API
+está de pé. Rode atrás de um proxy reverso com HTTPS: o perfil `prod` confia no `X-Forwarded-For` dele para
+saber o IP do cliente.
+
+**Limite de tentativas de login:** depois de 5 senhas erradas para o mesmo e-mail a partir do mesmo IP (ou 30
+falhas de um IP) em 15 minutos, o login responde `429`. O controle fica em memória, por instância da API.
+
 ## Testes
 
 ```bash

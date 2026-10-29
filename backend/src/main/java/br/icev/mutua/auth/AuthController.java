@@ -9,6 +9,7 @@ import br.icev.mutua.auth.AuthDtos.UsuarioResponse;
 import br.icev.mutua.usuario.Usuario;
 import br.icev.mutua.usuario.UsuarioService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -35,8 +36,8 @@ public class AuthController {
     }
 
     @PostMapping({"/login", "/entrar"})
-    public LoginResponse login(@Valid @RequestBody LoginRequest req) {
-        return auth.login(req);
+    public LoginResponse login(@Valid @RequestBody LoginRequest req, HttpServletRequest http) {
+        return auth.login(req, http.getRemoteAddr());
     }
 
     @PostMapping({"/cadastro", "/cadastrar"})

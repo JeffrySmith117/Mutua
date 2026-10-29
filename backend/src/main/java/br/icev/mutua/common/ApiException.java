@@ -48,6 +48,10 @@ public class ApiException extends RuntimeException {
         return new ApiException(HttpStatus.NOT_FOUND, mensagem);
     }
 
+    public static ApiException muitasTentativas(String mensagem) {
+        return new ApiException(HttpStatus.TOO_MANY_REQUESTS, mensagem);
+    }
+
     public static ApiException conflito(String mensagem) {
         return new ApiException(HttpStatus.CONFLICT, mensagem);
     }

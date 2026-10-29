@@ -33,6 +33,11 @@ mutua:
     antecedencia-minima-cancelamento-horas: 2
     tolerancia-checkin-minutos: 30
     intervalo-vencimentos-ms: 60000
+  login:
+    # Falhas de login toleradas por janela de tempo, por e-mail+IP e por IP.
+    max-tentativas-conta: 5
+    max-tentativas-ip: 30
+    janela-minutos: 15
   admin:
     # Administrador inicial, criado só se ainda não existir nenhum ADMIN. Troque a senha em produção.
     email: ${ADMIN_EMAIL:admin@mutua-pi.com.br}
@@ -41,3 +46,12 @@ mutua:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
