@@ -56,6 +56,12 @@ O admin cadastra ambientes e equipamentos em `/admin/recursos` (contrato na seç
 vêm da migration `V2` são só os iniciais da sede. Regras: o tipo não muda depois de criado (ele define se o
 recurso é exclusivo ou de lotação compartilhada) e recurso com reservas ativas não pode ser desativado.
 
+## Contas e senhas
+
+O admin cria outros usuários, inclusive outro `ADMIN`, em `POST /admin/usuarios` (seção 4.7 do contrato). Qualquer
+usuário troca a própria senha em `PATCH /auth/senha`. Como o JWT é stateless, tokens já emitidos continuam
+válidos até expirar depois de uma troca de senha.
+
 ## Decisões de regra de negócio
 
 - **Conflito de horário em duas camadas**: o service verifica antes (mensagem clara) e a exclusion

@@ -31,6 +31,12 @@ public final class AuthDtos {
             @Size(max = 20) String telefone) {
     }
 
+    public record AlterarSenhaRequest(
+            @NotBlank(message = "Informe a senha atual.") String senhaAtual,
+            @NotBlank(message = "Informe a nova senha.")
+            @Size(min = 8, max = 72, message = "A senha deve ter de 8 a 72 caracteres.") String novaSenha) {
+    }
+
     public record UsuarioResponse(UUID id, String nome, String email, String registroCrea, String cpf,
                                   Perfil perfil, boolean ativo, LocalDateTime criadoEm) {
         public static UsuarioResponse de(Usuario u) {

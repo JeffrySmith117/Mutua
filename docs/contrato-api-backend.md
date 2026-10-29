@@ -145,6 +145,20 @@ Cadastro público de novos associados. **Importante**: Todo cadastro público na
 #### `GET /api/v1/auth/me` 🔒
 Retorna os dados do usuário dono do token JWT atual.
 
+#### `PATCH /api/v1/auth/senha` 🔒
+Troca a senha do próprio usuário. Responde `204 No Content`.
+
+**Request Body:**
+```json
+{
+  "senhaAtual": "senhaSegura123",
+  "novaSenha": "outraSenha456"
+}
+```
+Senha atual incorreta, nova senha igual à atual ou fora de 8 a 72 caracteres retornam `400` (com o campo em
+`validationErrors`). A senha atual errada **não** é `401`, para o front não tratá-la como sessão expirada. Tokens
+já emitidos continuam válidos até expirarem.
+
 ---
 
 ### 4.2 Módulo de Ambientes (`/api/v1/ambientes`)
@@ -409,6 +423,26 @@ patrimônio. `diasSemana` usa 1 (segunda) a 7 (domingo).
 
 **Regras:** um recurso com reservas `PENDENTE`, `CONFIRMADA` ou `EM_USO` ainda não encerradas não pode ser
 desativado (`409`). Recursos inativos somem das listagens públicas e não aceitam novas reservas (`404`).
+
+### 4.7 Criação de Usuários (`/api/v1/admin/usuarios`) — Apenas perfil `ADMIN`
+
+#### `POST /api/v1/admin/usuarios`
+Cria uma conta com o perfil escolhido, inclusive outro `ADMIN` (o cadastro público só cria `PROFISSIONAL`).
+Responde `201 Created` com o usuário.
+
+**Request Body:**
+```json
+{
+  "nome": "Maria da Silva",
+  "email": "maria@mutua-pi.com.br",
+  "senha": "senhaSegura123",
+  "cpf": "123.456.789-00",
+  "registroCrea": "CREA-PI 100/D",
+  "telefone": "(86) 99999-0000",
+  "perfil": "ADMIN"
+}
+```
+`registroCrea` e `telefone` são opcionais. E-mail ou CPF já cadastrado retorna `409`.
 
 ---
 
