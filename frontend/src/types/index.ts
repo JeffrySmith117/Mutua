@@ -106,6 +106,15 @@ export interface PaginacaoResponse<T> {
   totalPaginas: number
 }
 
+// Resposta de POST /reservas (reserva de ambiente ou empréstimo de equipamento)
+export interface ReservaCriada {
+  id: string
+  protocolo: string
+  /** PENDENTE aguarda despacho da gestão; CONFIRMADA já está garantida. */
+  status: string
+  mensagem?: string
+}
+
 // --- Filtros ---
 export interface FiltroDisponibilidade {
   dataInicio: string

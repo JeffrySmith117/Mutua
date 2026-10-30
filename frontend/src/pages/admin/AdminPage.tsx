@@ -8,6 +8,7 @@ import {
   type StatusHistorico,
   type TipoRecursoHistorico,
 } from '../../services/adminService'
+import { mensagemDeErro } from '../../services/api'
 import type { CondicaoEquipamento } from '../../types'
 import HistoricoModalAuditoria from './HistoricoModalAuditoria'
 import './Admin.css'
@@ -54,6 +55,8 @@ export default function AdminPage() {
         setPendencias(dadosPendencias)
         setMovimentacoes(dadosMov)
         setHistorico(dadosHist)
+      } catch (erro) {
+        alert(mensagemDeErro(erro))
       } finally {
         setCarregando(false)
       }
@@ -118,7 +121,12 @@ export default function AdminPage() {
 
   // Aprovação
   const handleAprovar = async (sol: SolicitacaoPendente) => {
-    await adminService.aprovarSolicitacao(sol.id)
+    try {
+      await adminService.aprovarSolicitacao(sol.id)
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    }
     setPendencias((prev) => prev.filter((p) => p.id !== sol.id))
     if (metricas) {
       setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
@@ -129,10 +137,15 @@ export default function AdminPage() {
   // Recusa
   const handleConfirmarRecusa = async () => {
     if (!solicitacaoParaRecusa) return
-    await adminService.recusarSolicitacao(
-      solicitacaoParaRecusa.id,
-      motivoRecusa || 'Incompatibilidade com o regulamento de uso'
-    )
+    try {
+      await adminService.recusarSolicitacao(
+        solicitacaoParaRecusa.id,
+        motivoRecusa || 'Incompatibilidade com o regulamento de uso'
+      )
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    }
     setPendencias((prev) => prev.filter((p) => p.id !== solicitacaoParaRecusa.id))
     if (metricas) {
       setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
@@ -145,11 +158,16 @@ export default function AdminPage() {
   // Devolução no Balcão
   const handleConfirmarDevolucao = async () => {
     if (!movimentacaoParaDevolucao) return
-    await adminService.registrarDevolucao(
-      movimentacaoParaDevolucao.id,
-      condicaoDevolucao,
-      obsDevolucao
-    )
+    try {
+      await adminService.registrarDevolucao(
+        movimentacaoParaDevolucao.id,
+        condicaoDevolucao,
+        obsDevolucao
+      )
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    }
 
     setMovimentacoes((prev) =>
       prev.map((m) =>

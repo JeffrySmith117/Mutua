@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { authService } from '../../services/authService'
+import { mensagemDeErro } from '../../services/api'
 import './Auth.css'
 
 export default function CadastroPage() {
@@ -44,8 +45,8 @@ export default function CadastroPage() {
   }
 
   function validarEtapa2(): boolean {
-    if (senha.length < 6) {
-      setErro('A senha deve ter no mínimo 6 caracteres.')
+    if (senha.length < 8) {
+      setErro('A senha deve ter no mínimo 8 caracteres.')
       return false
     }
     if (senha !== confirmarSenha) {
@@ -81,8 +82,8 @@ export default function CadastroPage() {
       })
       definirUsuario(resposta.usuario, resposta.token)
       navigate('/')
-    } catch {
-      setErro('Não foi possível criar a conta. Verifique os dados e tente novamente.')
+    } catch (erro) {
+      setErro(mensagemDeErro(erro))
       definirCarregando(false)
     }
   }

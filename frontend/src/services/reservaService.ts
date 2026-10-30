@@ -1,4 +1,4 @@
-import api from './api'
+import api, { falharSeNaoForMock } from './api'
 import type { Reserva, StatusReserva } from '../types'
 import { AMBIENTES_INICIAIS } from './ambienteService'
 import { EQUIPAMENTOS_INICIAIS } from './equipamentoService'
@@ -19,6 +19,25 @@ export interface ItemReservaCompleto {
   permitirCheckin: boolean
   detalhesTecnicos?: string[]
 }
+
+// GET /reservas já devolve os campos que a tela usa; só o status chega em maiúsculas (ex.: EM_USO).
+type ItemReservaApi = Omit<ItemReservaCompleto, 'status'> & { status: string }
+
+const STATUS_DA_API: Record<string, StatusReserva> = {
+  PENDENTE: 'pendente',
+  CONFIRMADA: 'confirmada',
+  EM_USO: 'em_andamento',
+  CONCLUIDA: 'concluida',
+  CANCELADA: 'cancelada',
+  // A tela ainda não tem abas próprias para estes dois; aparecem junto com as canceladas.
+  RECUSADA: 'cancelada',
+  NAO_COMPARECEU: 'cancelada',
+}
+
+const paraItemReserva = (reserva: ItemReservaApi): ItemReservaCompleto => ({
+  ...reserva,
+  status: STATUS_DA_API[reserva.status] ?? 'pendente',
+})
 
 // Reservas pré-existentes representativas para demonstração
 const RESERVAS_MOCK_INICIAIS: ItemReservaCompleto[] = [
@@ -105,9 +124,10 @@ const RESERVAS_MOCK_INICIAIS: ItemReservaCompleto[] = [
 export const reservaService = {
   async listar(): Promise<ItemReservaCompleto[]> {
     try {
-      const resposta = await api.get<ItemReservaCompleto[]>('/reservas')
-      return resposta.data
-    } catch {
+      const resposta = await api.get<ItemReservaApi[]>('/reservas')
+      return resposta.data.map(paraItemReserva)
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       // Mescla com reservas que o usuário criou nas outras telas durante a sessão
       let reservasCriadas: ItemReservaCompleto[] = []
       try {
@@ -163,7 +183,8 @@ export const reservaService = {
     try {
       await api.delete(`/reservas/${id}`)
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       // Simulação local de cancelamento
       return true
     }
@@ -173,7 +194,8 @@ export const reservaService = {
     try {
       await api.post(`/reservas/${id}/checkin`)
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },

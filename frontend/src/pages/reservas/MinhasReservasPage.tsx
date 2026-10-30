@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { reservaService, type ItemReservaCompleto } from '../../services/reservaService'
+import { mensagemDeErro } from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
 import './MinhasReservas.css'
 
@@ -30,6 +31,8 @@ export default function MinhasReservasPage() {
       try {
         const dados = await reservaService.listar()
         setReservas(dados)
+      } catch (erro) {
+        alert(mensagemDeErro(erro))
       } finally {
         setCarregando(false)
       }
@@ -67,7 +70,12 @@ export default function MinhasReservasPage() {
   const handleConfirmarCancelamento = async () => {
     if (!reservaParaCancelar) return
 
-    await reservaService.cancelar(reservaParaCancelar.id)
+    try {
+      await reservaService.cancelar(reservaParaCancelar.id)
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    }
 
     setReservas((prev) =>
       prev.map((r) =>
@@ -83,7 +91,12 @@ export default function MinhasReservasPage() {
   const handleExecutarCheckin = async () => {
     if (!reservaParaCheckin) return
 
-    await reservaService.realizarCheckin(reservaParaCheckin.id)
+    try {
+      await reservaService.realizarCheckin(reservaParaCheckin.id)
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    }
     setCheckinConcluido(true)
 
     setReservas((prev) =>

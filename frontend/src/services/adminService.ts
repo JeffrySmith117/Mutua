@@ -1,4 +1,4 @@
-import api from './api'
+import api, { falharSeNaoForMock } from './api'
 import type { CondicaoEquipamento } from '../types'
 
 export interface SolicitacaoPendente {
@@ -434,7 +434,8 @@ export const adminService = {
     try {
       const resposta = await api.get<SolicitacaoPendente[]>('/admin/pendencias')
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return SOLICITACOES_MOCK
     }
   },
@@ -443,7 +444,8 @@ export const adminService = {
     try {
       const resposta = await api.get<MovimentacaoBalcao[]>('/admin/movimentacoes')
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return MOVIMENTACOES_MOCK
     }
   },
@@ -452,7 +454,8 @@ export const adminService = {
     try {
       await api.post(`/admin/pendencias/${id}/aprovar`, { observacao })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -461,7 +464,8 @@ export const adminService = {
     try {
       await api.post(`/admin/pendencias/${id}/recusar`, { motivo })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -474,7 +478,8 @@ export const adminService = {
     try {
       await api.post(`/admin/movimentacoes/${id}/retirar`, { condicao, observacao })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -487,7 +492,8 @@ export const adminService = {
     try {
       await api.post(`/admin/movimentacoes/${id}/devolver`, { condicao, observacao })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -496,7 +502,8 @@ export const adminService = {
     try {
       const resposta = await api.get<MetricasAdmin>('/admin/metricas')
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return {
         solicitacoesPendentes: 3,
         equipamentosEmCampo: 1,
@@ -511,7 +518,8 @@ export const adminService = {
     try {
       const resposta = await api.get<RegistroHistorico[]>('/admin/historico', { params: filtros })
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       let resultado = [...HISTORICO_MOCK]
       if (!filtros) return resultado
 
@@ -551,7 +559,8 @@ export const adminService = {
     try {
       const resposta = await api.get<RegistroHistorico>(`/admin/historico/${id}`)
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return HISTORICO_MOCK.find((r) => r.id === id) || null
     }
   },

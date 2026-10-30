@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  EQUIPAMENTOS_INICIAIS,
-  equipamentoService,
-  type EquipamentoCompleto,
-} from '../../services/equipamentoService'
+import { useQuery } from '@tanstack/react-query'
+import { equipamentoService, type EquipamentoCompleto } from '../../services/equipamentoService'
+import { mensagemDeErro } from '../../services/api'
 import './Equipamentos.css'
+
+const SEM_EQUIPAMENTOS: EquipamentoCompleto[] = []
 
 export default function EquipamentosPage() {
   const navigate = useNavigate()
@@ -33,20 +33,30 @@ export default function EquipamentosPage() {
   const [enviando, setEnviando] = useState(false)
   const [solicitacaoConfirmada, setSolicitacaoConfirmada] = useState<{
     protocolo: string
+    /** Equipamentos que exigem aprovação ficam pendentes até o despacho da gestão. */
+    pendente: boolean
     equipamentoNome: string
     patrimonio: string
     periodo: string
   } | null>(null)
 
+  // Catálogo vindo da API
+  const {
+    data: equipamentos = SEM_EQUIPAMENTOS,
+    isLoading: carregando,
+    error: erroAoCarregar,
+    refetch: recarregar,
+  } = useQuery({ queryKey: ['equipamentos'], queryFn: () => equipamentoService.listar() })
+
   // Categorias únicas extraídas dos equipamentos
   const categorias = useMemo(() => {
-    const cats = new Set(EQUIPAMENTOS_INICIAIS.map((e) => e.categoria))
+    const cats = new Set(equipamentos.map((e) => e.categoria))
     return Array.from(cats)
-  }, [])
+  }, [equipamentos])
 
   // Filtragem dos equipamentos em tempo real
   const equipamentosFiltrados = useMemo(() => {
-    return EQUIPAMENTOS_INICIAIS.filter((item) => {
+    return equipamentos.filter((item) => {
       // Filtro de Categoria
       if (categoriaFiltro !== 'todas' && item.categoria !== categoriaFiltro) return false
 
@@ -67,7 +77,7 @@ export default function EquipamentosPage() {
 
       return true
     })
-  }, [categoriaFiltro, statusFiltro, termoBusca])
+  }, [equipamentos, categoriaFiltro, statusFiltro, termoBusca])
 
   // Submissão da solicitação de empréstimo
   const handleConfirmarSolicitacao = async (e: React.FormEvent) => {
@@ -77,7 +87,7 @@ export default function EquipamentosPage() {
     setEnviando(true)
 
     try {
-      await equipamentoService.solicitarEmprestimo({
+      const criada = await equipamentoService.solicitarEmprestimo({
         equipamentoId: equipamentoSelecionado.id,
         dataRetirada,
         horarioRetirada,
@@ -85,22 +95,18 @@ export default function EquipamentosPage() {
         horarioDevolucao,
         finalidade: finalidade.trim() || 'Serviço técnico profissional de engenharia',
         numeroArt: numeroArt.trim() || undefined,
+        termoAceito: concordouTermo,
       })
 
-      const protocoloGerado =
-        'HUB-' +
-        new Date().getFullYear() +
-        '-' +
-        Math.floor(1000 + Math.random() * 9000)
-
       setSolicitacaoConfirmada({
-        protocolo: protocoloGerado,
+        protocolo: criada.protocolo,
+        pendente: criada.status === 'PENDENTE',
         equipamentoNome: equipamentoSelecionado.nome,
         patrimonio: equipamentoSelecionado.patrimonio,
         periodo: `${new Date(dataRetirada + 'T12:00:00').toLocaleDateString('pt-BR')} às ${horarioRetirada} até ${new Date(dataDevolucao + 'T12:00:00').toLocaleDateString('pt-BR')} às ${horarioDevolucao}`,
       })
-    } catch {
-      alert('Não foi possível registrar a solicitação de empréstimo.')
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
     } finally {
       setEnviando(false)
     }
@@ -114,9 +120,9 @@ export default function EquipamentosPage() {
   }
 
   // Contadores rápidos para o header
-  const totalEquipamentos = EQUIPAMENTOS_INICIAIS.length
-  const totalDisponiveis = EQUIPAMENTOS_INICIAIS.filter((e) => e.status === 'disponivel').length
-  const totalEmUso = EQUIPAMENTOS_INICIAIS.filter((e) => e.status === 'em_uso').length
+  const totalEquipamentos = equipamentos.length
+  const totalDisponiveis = equipamentos.filter((e) => e.status === 'disponivel').length
+  const totalEmUso = equipamentos.filter((e) => e.status === 'em_uso').length
 
   return (
     <div className="equipamentos-page-container">
@@ -232,7 +238,21 @@ export default function EquipamentosPage() {
           GRID DE CARDS DE EQUIPAMENTOS
           ============================================================ */}
       <section className="grid-equipamentos-cards">
-        {equipamentosFiltrados.length === 0 ? (
+        {carregando ? (
+          <div className="empty-state-hub">
+            <span className="empty-icone-hub">⏳</span>
+            <h3 className="empty-titulo-hub">Carregando equipamentos...</h3>
+          </div>
+        ) : erroAoCarregar ? (
+          <div className="empty-state-hub">
+            <span className="empty-icone-hub">⚠️</span>
+            <h3 className="empty-titulo-hub">Não foi possível carregar os equipamentos</h3>
+            <p className="empty-desc-hub">{mensagemDeErro(erroAoCarregar)}</p>
+            <button type="button" className="btn btn-primario" onClick={() => recarregar()}>
+              Tentar novamente
+            </button>
+          </div>
+        ) : equipamentosFiltrados.length === 0 ? (
           <div className="empty-state-hub">
             <span className="empty-icone-hub">🔍</span>
             <h3 className="empty-titulo-hub">Nenhum equipamento encontrado</h3>
@@ -406,7 +426,9 @@ export default function EquipamentosPage() {
                 <div className="icone-sucesso-hub-animado">✓</div>
                 <h4 className="sucesso-hub-titulo">Solicitação Registrada com Sucesso!</h4>
                 <p className="sucesso-hub-mensagem">
-                  Seu pedido de empréstimo foi recebido e aguarda retirada no balcão da Mútua-PI.
+                  {solicitacaoConfirmada.pendente
+                    ? 'Seu pedido foi recebido e aguarda a aprovação da gestão. Depois de aprovado, a retirada é feita no balcão da Mútua-PI.'
+                    : 'Seu pedido de empréstimo foi recebido e aguarda retirada no balcão da Mútua-PI.'}
                 </p>
 
                 <div className="card-resumo-solicitacao">

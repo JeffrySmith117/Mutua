@@ -1,12 +1,15 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 })
+
+// Login e cadastro: um 401 aqui significa "senha incorreta", não "sessão expirada".
+const ROTAS_DE_AUTENTICACAO = ['/auth/entrar', '/auth/cadastrar']
 
 // Interceptor: adiciona token de autenticação em todas as requisições
 api.interceptors.request.use((config) => {
@@ -21,12 +24,50 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const rotaDeAutenticacao = ROTAS_DE_AUTENTICACAO.some((rota) => error.config?.url?.endsWith(rota))
+    if (error.response?.status === 401 && !rotaDeAutenticacao) {
       localStorage.removeItem('@mutua:token')
+      localStorage.removeItem('@mutua:usuario')
       window.location.href = '/entrar'
     }
     return Promise.reject(error)
   }
 )
+
+/**
+ * Modo de demonstração autônomo (sem back-end): defina VITE_USE_MOCK=true no .env. Com a API ligada (padrão),
+ * os serviços repassam o erro real para a tela, em vez de simular sucesso.
+ */
+export const USAR_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
+
+/** Chamar no início de cada `catch` que tem alternativa local: fora do modo mock, o erro segue para a tela. */
+export function falharSeNaoForMock(erro: unknown): void {
+  if (!USAR_MOCK) {
+    throw erro
+  }
+}
+
+interface CorpoDeErro {
+  message?: string
+  validationErrors?: { field: string; message: string }[]
+}
+
+/** Texto amigável para mostrar ao usuário a partir de um erro da API (formato descrito em docs/contrato). */
+export function mensagemDeErro(erro: unknown): string {
+  if (axios.isAxiosError<CorpoDeErro>(erro)) {
+    if (!erro.response) {
+      return 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.'
+    }
+    const corpo = erro.response.data
+    const detalhes = corpo?.validationErrors?.map((e) => e.message).filter(Boolean) ?? []
+    if (detalhes.length > 0) {
+      return detalhes.join(' ')
+    }
+    if (corpo?.message) {
+      return corpo.message
+    }
+  }
+  return 'Ocorreu um erro inesperado. Tente novamente.'
+}
 
 export default api
