@@ -93,3 +93,4 @@ Baseada em módulo 4/8px:
      - `• Reservado` (dot azul)
 4. **Dock / Barra Flutuante**: Ações principais e navegações contextuais podem usar docks translúcidos em pílula (`backdrop-filter: blur(14px)`).
 5. **Transições**: Sempre rápidas e suaves: `transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1)`.
+

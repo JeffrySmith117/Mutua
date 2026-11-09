@@ -42,3 +42,4 @@ Sempre respeite as etapas para manter estabilidade e coerência:
 ## 4. Validação Contínua
 
 Sempre execute `npm run build` no diretório `frontend` para garantir que TypeScript e Vite continuam compilando sem erros antes de concluir qualquer etapa.
+

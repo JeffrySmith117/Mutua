@@ -104,3 +104,4 @@ docker compose up -d     # Subir banco PostgreSQL e serviços auxiliares
 - **Pílulas**: Todos os botões principais, chips de status e filtros utilizam `border-radius: 100px`.
 - **Tipografia**: Família `Inter Tight` ou `Inter`, com tracking tight nos títulos (`-0.04em`) e espaçamento aberto em micro-labels (`+0.04em uppercase`).
 - **Acessibilidade**: Contraste mínimo WCAG AA em todos os textos e estados de foco visíveis em links e botões.
+
