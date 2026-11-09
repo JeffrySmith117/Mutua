@@ -1,0 +1,25 @@
+name: Back-end
+
+on:
+  push:
+    branches: [develop, main]
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+
+jobs:
+  build-e-testes:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      # Os testes usam um PostgreSQL real embutido, sem precisar de Docker.
+      - name: Build e testes
+        run: mvn -B verify
