@@ -145,6 +145,20 @@ Cadastro público de novos associados. **Importante**: Todo cadastro público na
 #### `GET /api/v1/auth/me` 🔒
 Retorna os dados do usuário dono do token JWT atual.
 
+#### `PATCH /api/v1/auth/senha` 🔒
+Troca a senha do próprio usuário. Responde `204 No Content`.
+
+**Request Body:**
+```json
+{
+  "senhaAtual": "senhaSegura123",
+  "novaSenha": "outraSenha456"
+}
+```
+Senha atual incorreta, nova senha igual à atual ou fora de 8 a 72 caracteres retornam `400` (com o campo em
+`validationErrors`). A senha atual errada **não** é `401`, para o front não tratá-la como sessão expirada. Tokens
+já emitidos continuam válidos até expirarem.
+
 ---
 
 ### 4.2 Módulo de Ambientes (`/api/v1/ambientes`)
@@ -372,6 +386,63 @@ Consulta com filtros de auditoria para fiscalização.
 
 **Response Body (200 OK):**
 Lista paginada de objetos com a linha do tempo cronológica (`linhaDoTempo`), dados de vistoria e mascaramento de CPF em conformidade com a LGPD.
+
+---
+
+### 4.6 Cadastro de Recursos (`/api/v1/admin/recursos`) — Apenas perfil `ADMIN`
+
+Cadastro de ambientes e equipamentos. Um novo espaço ou equipamento é só um registro, sem mudança de código.
+
+| Método | Rota | O que faz |
+| :--- | :--- | :--- |
+| `GET` | `/admin/recursos` | Lista todos os recursos, inclusive os inativos. |
+| `GET` | `/admin/recursos/{id}` | Detalha um recurso. |
+| `POST` | `/admin/recursos` | Cadastra (`201 Created`). |
+| `PUT` | `/admin/recursos/{id}` | Atualiza os dados. O `tipo` não pode ser alterado (`400`). |
+| `PATCH` | `/admin/recursos/{id}/ativo` | Ativa ou desativa (`{"ativo": false}`). |
+
+**Request Body (`POST` e `PUT`)** — só `nome` e `tipo` são obrigatórios; o restante tem padrão
+(capacidade 1, prazo de 1 dia, segunda a sexta das 08h às 18h, sem aprovação):
+```json
+{
+  "nome": "Sala de Estudo 1",
+  "tipo": "SALA",
+  "localizacao": "1º Andar • Sede Mútua-PI",
+  "descricao": "Sala silenciosa para estudo individual ou em dupla.",
+  "capacidade": 6,
+  "exigeAprovacao": false,
+  "horarioAbertura": "08:00",
+  "horarioFechamento": "18:00",
+  "diasSemana": [1, 2, 3, 4, 5],
+  "recursosDisponiveis": ["Wi-Fi 6", "Climatização"]
+}
+```
+`tipo` aceita `COWORKING`, `SALA`, `AUDITORIO` e `EQUIPAMENTO`. Equipamentos exigem `patrimonio` (único, `409`
+se repetido) e aceitam `categoria`, `prazoMaxDias`, `exigeArtSisant` e `especificacoes`; ambientes não têm
+patrimônio. `diasSemana` usa 1 (segunda) a 7 (domingo).
+
+**Regras:** um recurso com reservas `PENDENTE`, `CONFIRMADA` ou `EM_USO` ainda não encerradas não pode ser
+desativado (`409`). Recursos inativos somem das listagens públicas e não aceitam novas reservas (`404`).
+
+### 4.7 Criação de Usuários (`/api/v1/admin/usuarios`) — Apenas perfil `ADMIN`
+
+#### `POST /api/v1/admin/usuarios`
+Cria uma conta com o perfil escolhido, inclusive outro `ADMIN` (o cadastro público só cria `PROFISSIONAL`).
+Responde `201 Created` com o usuário.
+
+**Request Body:**
+```json
+{
+  "nome": "Maria da Silva",
+  "email": "maria@mutua-pi.com.br",
+  "senha": "senhaSegura123",
+  "cpf": "123.456.789-00",
+  "registroCrea": "CREA-PI 100/D",
+  "telefone": "(86) 99999-0000",
+  "perfil": "ADMIN"
+}
+```
+`registroCrea` e `telefone` são opcionais. E-mail ou CPF já cadastrado retorna `409`.
 
 ---
 

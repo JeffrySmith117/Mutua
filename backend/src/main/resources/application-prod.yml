@@ -1,0 +1,28 @@
+# Perfil de produção (SPRING_PROFILES_ACTIVE=prod). Não há valores padrão: se faltar alguma variável,
+# a API não sobe, em vez de rodar com segredo de desenvolvimento.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+server:
+  # Use só atrás de um proxy reverso confiável (Nginx, Render, Railway...): é daí que vem o IP real do cliente
+  # usado no limite de tentativas de login. Sem proxy, o cabeçalho X-Forwarded-For poderia ser forjado.
+  forward-headers-strategy: framework
+
+mutua:
+  jwt:
+    secret: ${JWT_SECRET}
+  cors:
+    origens: ${CORS_ORIGENS}
+  admin:
+    email: ${ADMIN_EMAIL}
+    senha: ${ADMIN_SENHA}
+
+# A documentação interativa da API fica só no desenvolvimento.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
