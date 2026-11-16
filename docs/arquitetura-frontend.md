@@ -10,7 +10,7 @@
 
 O Front-end foi construído com foco em **alta responsividade (mobile-first para o associado e desktop para a administração)**, performance instantânea (Vite) e conformidade estrita com os requisitos da Mútua-PI / ICEV Software House.
 
-O sistema possui uma arquitetura desacoplada e **resiliente**: todos os serviços HTTP em `src/services/` estão preparados para consumir a API REST real do Spring Boot via Axios e, ao mesmo tempo, possuem **fallbacks com bases mock completas e simulação de regras de negócio**, permitindo demonstrações autônomas sem depender do banco de dados estar rodando.
+O sistema possui uma arquitetura desacoplada e **resiliente**: todos os serviços HTTP em `src/services/` estão preparados para consumir a API REST real do Spring Boot via Axios e, ao mesmo tempo, possuem um **modo de demonstração com bases mock** (`VITE_USE_MOCK=true`, ver a seção 4), que permite demonstrações autônomas sem depender do banco de dados estar rodando.
 
 ---
 
@@ -93,26 +93,29 @@ O painel administrativo reúne 4 abas integradas:
 
 ## 4. Comunicação com a API e Mock Integrado
 
-Todos os módulos de `src/services/` utilizam o seguinte padrão seguro:
+Todos os módulos de `src/services/` seguem este padrão:
 
 ```typescript
-export const recursoService = {
-  async listar(): Promise<Recurso[]> {
+export const ambienteService = {
+  async listar(): Promise<AmbienteCompleto[]> {
     try {
-      const resposta = await api.get<Recurso[]>('/recursos')
-      return resposta.data
-    } catch (error) {
-      // Se a API não estiver respondendo, usa os dados simulados realistas
-      return RECURSOS_MOCK
+      const resposta = await api.get<AmbienteApi[]>('/ambientes')
+      return resposta.data.map(paraAmbiente) // adapta o formato da API ao que a tela usa
+    } catch (erro) {
+      falharSeNaoForMock(erro) // com a API ligada, o erro real segue para a tela
+      return AMBIENTES_INICIAIS // só chega aqui no modo de demonstração
     }
   }
 }
 ```
 
-Isso garante que o Front-end:
-- Nunca quebra com tela em branco em caso de instabilidade na API.
-- Funciona perfeitamente em demos presenciais e validações com a Mútua-PI.
-- Conecta-se instantaneamente à API Spring Boot assim que o Back-end estiver no ar.
+- **Com a API ligada (padrão, `VITE_USE_MOCK=false`)**: erros como conflito de horário (409) ou validação (400) chegam à
+  tela com a mensagem do back-end (`mensagemDeErro`). Nada é simulado, para um erro nunca aparecer como sucesso.
+- **Modo de demonstração (`VITE_USE_MOCK=true`)**: se a API falhar, os serviços usam os dados simulados. Serve para demos
+  sem o back-end no ar, mas **não deve ser usado para testar a integração**.
+- Os formatos da API são convertidos nos serviços: `perfil` em minúsculas (`admin`, `profissional`), `status` de reserva
+  em minúsculas e os tipos de ambiente/equipamento no vocabulário das telas.
+- O catálogo de ambientes e equipamentos e "Minhas Reservas" vêm da API; o dashboard ainda mostra dados de demonstração.
 
 ---
 

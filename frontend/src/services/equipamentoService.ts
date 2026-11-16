@@ -1,5 +1,5 @@
-import api from './api'
-import type { Equipamento, Reserva } from '../types'
+import api, { falharSeNaoForMock } from './api'
+import type { Equipamento, Reserva, ReservaCriada, StatusEquipamento } from '../types'
 
 export interface FiltrosEquipamentos {
   categoria?: string
@@ -16,6 +16,8 @@ export interface CriarSolicitacaoEquipamentoDTO {
   finalidade: string
   numeroArt?: string
   observacoes?: string
+  /** O empréstimo exige o aceite do Termo de Guarda e Responsabilidade. */
+  termoAceito?: boolean
 }
 
 export interface EquipamentoCompleto extends Equipamento {
@@ -199,12 +201,52 @@ export const EQUIPAMENTOS_INICIAIS: EquipamentoCompleto[] = [
   },
 ]
 
+// Formato devolvido por GET /equipamentos (ver docs/contrato-api-backend.md).
+interface EquipamentoApi {
+  id: string
+  nome: string
+  patrimonio: string
+  categoria?: string
+  descricao?: string
+  prazoMaximoDias: number
+  exigeArtSisAnt: boolean
+  status: string
+  especificacoes?: string[]
+  ativo: boolean
+}
+
+const STATUS_DA_API: Record<string, StatusEquipamento> = {
+  DISPONIVEL: 'disponivel',
+  EM_CAMPO: 'em_uso',
+}
+
+// A API não tem itens inclusos nem condição atual; as telas recebem textos padrão.
+const paraEquipamento = (equipamento: EquipamentoApi): EquipamentoCompleto => ({
+  id: equipamento.id,
+  nome: equipamento.nome,
+  patrimonio: equipamento.patrimonio,
+  categoria: equipamento.categoria ?? 'Geral',
+  status: STATUS_DA_API[equipamento.status] ?? 'indisponivel',
+  descricao: equipamento.descricao ?? '',
+  especificacoes: equipamento.especificacoes ?? [],
+  itensInclusos: [],
+  requisitosUso: [
+    equipamento.exigeArtSisAnt
+      ? 'ART e cadastro SISANT/ANAC quando aplicável'
+      : 'Termo de Responsabilidade e Guarda assinado no balcão',
+  ],
+  condicaoAtual: equipamento.status === 'EM_CAMPO' ? 'Em campo com associado' : 'Disponível no balcão',
+  tempoMaximoEmprestimo: `Até ${equipamento.prazoMaximoDias} dia${equipamento.prazoMaximoDias > 1 ? 's' : ''}`,
+  ativo: equipamento.ativo,
+})
+
 export const equipamentoService = {
   async listar(filtros?: FiltrosEquipamentos): Promise<EquipamentoCompleto[]> {
     try {
-      const resposta = await api.get('/equipamentos', { params: filtros })
-      return resposta.data
-    } catch {
+      const resposta = await api.get<EquipamentoApi[]>('/equipamentos', { params: filtros })
+      return resposta.data.map(paraEquipamento)
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       // Fallback autônomo com filtros em memória
       let filtrados = [...EQUIPAMENTOS_INICIAIS]
 
@@ -234,21 +276,23 @@ export const equipamentoService = {
 
   async buscarPorId(id: string): Promise<EquipamentoCompleto | null> {
     try {
-      const resposta = await api.get(`/equipamentos/${id}`)
-      return resposta.data
-    } catch {
+      const resposta = await api.get<EquipamentoApi>(`/equipamentos/${id}`)
+      return paraEquipamento(resposta.data)
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return EQUIPAMENTOS_INICIAIS.find((e) => e.id === id) || null
     }
   },
 
-  async solicitarEmprestimo(dados: CriarSolicitacaoEquipamentoDTO): Promise<Reserva> {
+  async solicitarEmprestimo(dados: CriarSolicitacaoEquipamentoDTO): Promise<ReservaCriada> {
     try {
-      const resposta = await api.post<Reserva>('/reservas', {
+      const resposta = await api.post<ReservaCriada>('/reservas', {
         tipo: 'equipamento',
         ...dados,
       })
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       // Criação simulada de reserva no armazenamento local
       const equipamento = EQUIPAMENTOS_INICIAIS.find((e) => e.id === dados.equipamentoId)
       const novaReserva: Reserva = {
@@ -275,7 +319,11 @@ export const equipamentoService = {
         // Ignora erro de storage local
       }
 
-      return novaReserva
+      return {
+        id: novaReserva.id,
+        protocolo: 'HUB-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000),
+        status: 'PENDENTE',
+      }
     }
   },
 }

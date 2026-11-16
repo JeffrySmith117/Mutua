@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   adminService,
   type SolicitacaoPendente,
@@ -8,11 +9,16 @@ import {
   type StatusHistorico,
   type TipoRecursoHistorico,
 } from '../../services/adminService'
+import { mensagemDeErro } from '../../services/api'
 import type { CondicaoEquipamento } from '../../types'
 import HistoricoModalAuditoria from './HistoricoModalAuditoria'
 import './Admin.css'
 
 export default function AdminPage() {
+  const queryClient = useQueryClient()
+  // Evita disparar duas ações administrativas ao mesmo tempo (clique duplo, aprovar e recusar em seguida).
+  const acaoEmAndamento = useRef(false)
+  const atualizarCatalogoDeEquipamentos = () => queryClient.invalidateQueries({ queryKey: ['equipamentos'] })
   const [abaAtiva, setAbaAtiva] = useState<'pendencias' | 'balcao' | 'inventario' | 'historico'>('pendencias')
   const [metricas, setMetricas] = useState<MetricasAdmin | null>(null)
   const [pendencias, setPendencias] = useState<SolicitacaoPendente[]>([])
@@ -54,6 +60,8 @@ export default function AdminPage() {
         setPendencias(dadosPendencias)
         setMovimentacoes(dadosMov)
         setHistorico(dadosHist)
+      } catch (erro) {
+        alert(mensagemDeErro(erro))
       } finally {
         setCarregando(false)
       }
@@ -118,7 +126,17 @@ export default function AdminPage() {
 
   // Aprovação
   const handleAprovar = async (sol: SolicitacaoPendente) => {
-    await adminService.aprovarSolicitacao(sol.id)
+    if (acaoEmAndamento.current) return
+    acaoEmAndamento.current = true
+    try {
+      await adminService.aprovarSolicitacao(sol.id)
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    } finally {
+      acaoEmAndamento.current = false
+    }
+    atualizarCatalogoDeEquipamentos()
     setPendencias((prev) => prev.filter((p) => p.id !== sol.id))
     if (metricas) {
       setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
@@ -128,11 +146,20 @@ export default function AdminPage() {
 
   // Recusa
   const handleConfirmarRecusa = async () => {
-    if (!solicitacaoParaRecusa) return
-    await adminService.recusarSolicitacao(
-      solicitacaoParaRecusa.id,
-      motivoRecusa || 'Incompatibilidade com o regulamento de uso'
-    )
+    if (!solicitacaoParaRecusa || acaoEmAndamento.current) return
+    acaoEmAndamento.current = true
+    try {
+      await adminService.recusarSolicitacao(
+        solicitacaoParaRecusa.id,
+        motivoRecusa || 'Incompatibilidade com o regulamento de uso'
+      )
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    } finally {
+      acaoEmAndamento.current = false
+    }
+    atualizarCatalogoDeEquipamentos()
     setPendencias((prev) => prev.filter((p) => p.id !== solicitacaoParaRecusa.id))
     if (metricas) {
       setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
@@ -144,12 +171,21 @@ export default function AdminPage() {
 
   // Devolução no Balcão
   const handleConfirmarDevolucao = async () => {
-    if (!movimentacaoParaDevolucao) return
-    await adminService.registrarDevolucao(
-      movimentacaoParaDevolucao.id,
-      condicaoDevolucao,
-      obsDevolucao
-    )
+    if (!movimentacaoParaDevolucao || acaoEmAndamento.current) return
+    acaoEmAndamento.current = true
+    try {
+      await adminService.registrarDevolucao(
+        movimentacaoParaDevolucao.id,
+        condicaoDevolucao,
+        obsDevolucao
+      )
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    } finally {
+      acaoEmAndamento.current = false
+    }
+    atualizarCatalogoDeEquipamentos()
 
     setMovimentacoes((prev) =>
       prev.map((m) =>

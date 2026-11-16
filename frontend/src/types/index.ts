@@ -56,6 +56,8 @@ export type StatusReserva =
   | 'cancelada'
   | 'concluida'
   | 'em_andamento'
+  | 'recusada'
+  | 'nao_compareceu'
 
 export type TipoReserva = 'ambiente' | 'equipamento'
 
@@ -104,6 +106,15 @@ export interface PaginacaoResponse<T> {
   pagina: number
   porPagina: number
   totalPaginas: number
+}
+
+// Resposta de POST /reservas (reserva de ambiente ou empréstimo de equipamento)
+export interface ReservaCriada {
+  id: string
+  protocolo: string
+  /** PENDENTE aguarda despacho da gestão; CONFIRMADA já está garantida. */
+  status: string
+  mensagem?: string
 }
 
 // --- Filtros ---
