@@ -29,9 +29,8 @@ const STATUS_DA_API: Record<string, StatusReserva> = {
   EM_USO: 'em_andamento',
   CONCLUIDA: 'concluida',
   CANCELADA: 'cancelada',
-  // A tela ainda não tem abas próprias para estes dois; aparecem junto com as canceladas.
-  RECUSADA: 'cancelada',
-  NAO_COMPARECEU: 'cancelada',
+  RECUSADA: 'recusada',
+  NAO_COMPARECEU: 'nao_compareceu',
 }
 
 const paraItemReserva = (reserva: ItemReservaApi): ItemReservaCompleto => ({

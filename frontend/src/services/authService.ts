@@ -46,7 +46,7 @@ const criarUsuarioMock = (
   registroCrea?: string
 ): Usuario => ({
   id: 'usr-' + Math.random().toString(36).substring(2, 9),
-  nome: nome || (email.toLowerCase().includes('elias') ? 'Elias Pio Mendes' : 'Associado Mútua-PI'),
+  nome: nome || 'Associado Mútua-PI',
   email: email,
   cpf: cpf || '123.456.789-00',
   registroCrea: registroCrea || 'CREA-PI 32415/D',

@@ -310,11 +310,11 @@ export default function CadastroPage() {
                       id="cadastro-senha"
                       type={mostrarSenha ? 'text' : 'password'}
                       className="auth-input"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                       autoComplete="new-password"
                     />
                     <button
@@ -344,7 +344,7 @@ export default function CadastroPage() {
                         className={`auth-forca-progresso ${
                           senha.length === 0
                             ? ''
-                            : senha.length < 6
+                            : senha.length < 8
                             ? 'fraca'
                             : senha.length < 10
                             ? 'media'
@@ -355,7 +355,7 @@ export default function CadastroPage() {
                     <span className="auth-forca-texto">
                       {senha.length === 0
                         ? ''
-                        : senha.length < 6
+                        : senha.length < 8
                         ? 'Fraca'
                         : senha.length < 10
                         ? 'Média'

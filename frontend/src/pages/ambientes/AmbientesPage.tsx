@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ambienteService, type AmbienteCompleto } from '../../services/ambienteService'
 import { mensagemDeErro } from '../../services/api'
 import './Ambientes.css'
+import { dataLocal } from '../../utils/data'
 
 const SEM_AMBIENTES: AmbienteCompleto[] = []
 
@@ -18,7 +19,7 @@ export default function AmbientesPage() {
   // Estados do modal de reserva
   const [ambienteSelecionado, setAmbienteSelecionado] = useState<AmbienteCompleto | null>(null)
   const [dataReserva, setDataReserva] = useState(
-    new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    dataLocal(1)
   )
   const [horarioInicio, setHorarioInicio] = useState('14:00')
   const [horarioFim, setHorarioFim] = useState('16:00')
@@ -460,7 +461,7 @@ export default function AmbientesPage() {
                     id="data-reserva"
                     type="date"
                     required
-                    min={new Date().toISOString().split('T')[0]}
+                    min={dataLocal()}
                     value={dataReserva}
                     onChange={(e) => setDataReserva(e.target.value)}
                     className="input-modal-padrao"
@@ -469,7 +470,7 @@ export default function AmbientesPage() {
                     <button
                       type="button"
                       className="btn-atalho-data"
-                      onClick={() => setDataReserva(new Date().toISOString().split('T')[0])}
+                      onClick={() => setDataReserva(dataLocal())}
                     >
                       Hoje
                     </button>
@@ -478,7 +479,7 @@ export default function AmbientesPage() {
                       className="btn-atalho-data"
                       onClick={() =>
                         setDataReserva(
-                          new Date(Date.now() + 86400000).toISOString().split('T')[0]
+                          dataLocal(1)
                         )
                       }
                     >

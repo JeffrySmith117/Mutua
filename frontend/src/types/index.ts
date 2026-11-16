@@ -56,6 +56,8 @@ export type StatusReserva =
   | 'cancelada'
   | 'concluida'
   | 'em_andamento'
+  | 'recusada'
+  | 'nao_compareceu'
 
 export type TipoReserva = 'ambiente' | 'equipamento'
 

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { equipamentoService, type EquipamentoCompleto } from '../../services/equipamentoService'
 import { mensagemDeErro } from '../../services/api'
 import './Equipamentos.css'
+import { dataLocal } from '../../utils/data'
 
 const SEM_EQUIPAMENTOS: EquipamentoCompleto[] = []
 
@@ -20,11 +21,11 @@ export default function EquipamentosPage() {
     null
   )
   const [dataRetirada, setDataRetirada] = useState(
-    new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    dataLocal(1)
   )
   const [horarioRetirada, setHorarioRetirada] = useState('08:30')
   const [dataDevolucao, setDataDevolucao] = useState(
-    new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]
+    dataLocal(3)
   )
   const [horarioDevolucao, setHorarioDevolucao] = useState('17:00')
   const [finalidade, setFinalidade] = useState('')
@@ -502,7 +503,7 @@ export default function EquipamentosPage() {
                       id="data-retirada"
                       type="date"
                       required
-                      min={new Date().toISOString().split('T')[0]}
+                      min={dataLocal()}
                       value={dataRetirada}
                       onChange={(e) => setDataRetirada(e.target.value)}
                       className="input-hub-padrao"

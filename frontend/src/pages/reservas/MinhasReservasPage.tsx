@@ -3,7 +3,21 @@ import { useNavigate } from 'react-router-dom'
 import { reservaService, type ItemReservaCompleto } from '../../services/reservaService'
 import { mensagemDeErro } from '../../services/api'
 import { useAuthStore } from '../../store/authStore'
+import type { StatusReserva } from '../../types'
 import './MinhasReservas.css'
+
+const STATUS_ATIVAS: StatusReserva[] = ['confirmada', 'em_andamento']
+const STATUS_ENCERRADAS_SEM_USO: StatusReserva[] = ['cancelada', 'recusada', 'nao_compareceu']
+
+const ROTULO_STATUS: Record<StatusReserva, string> = {
+  confirmada: '● Confirmada',
+  pendente: '⏳ Em Análise',
+  em_andamento: '⚡ Em Uso',
+  concluida: '✓ Concluída',
+  cancelada: '✕ Cancelada',
+  recusada: '✕ Recusada',
+  nao_compareceu: '⚠ Não Compareceu',
+}
 
 export default function MinhasReservasPage() {
   const navigate = useNavigate()
@@ -44,10 +58,10 @@ export default function MinhasReservasPage() {
   const reservasFiltradas = useMemo(() => {
     return reservas.filter((item) => {
       // Filtro de Aba / Status
-      if (abaStatus === 'ativas' && item.status !== 'confirmada') return false
+      if (abaStatus === 'ativas' && !STATUS_ATIVAS.includes(item.status)) return false
       if (abaStatus === 'pendentes' && item.status !== 'pendente') return false
       if (abaStatus === 'concluidas' && item.status !== 'concluida') return false
-      if (abaStatus === 'canceladas' && item.status !== 'cancelada') return false
+      if (abaStatus === 'canceladas' && !STATUS_ENCERRADAS_SEM_USO.includes(item.status)) return false
 
       // Filtro de Tipo
       if (filtroTipo !== 'todos' && item.tipo !== filtroTipo) return false
@@ -199,7 +213,7 @@ export default function MinhasReservasPage() {
             className={`aba-status-btn ${abaStatus === 'ativas' ? 'aba-ativa' : ''}`}
             onClick={() => setAbaStatus('ativas')}
           >
-            ● Confirmadas / Ativas ({reservas.filter((r) => r.status === 'confirmada').length})
+            ● Confirmadas / Ativas ({reservas.filter((r) => STATUS_ATIVAS.includes(r.status)).length})
           </button>
           <button
             type="button"
@@ -220,7 +234,7 @@ export default function MinhasReservasPage() {
             className={`aba-status-btn ${abaStatus === 'canceladas' ? 'aba-ativa' : ''}`}
             onClick={() => setAbaStatus('canceladas')}
           >
-            Canceladas ({reservas.filter((r) => r.status === 'cancelada').length})
+            Canceladas / Recusadas ({reservas.filter((r) => STATUS_ENCERRADAS_SEM_USO.includes(r.status)).length})
           </button>
         </div>
 
@@ -324,10 +338,7 @@ export default function MinhasReservasPage() {
                     </div>
 
                     <span className={`badge-status-reserva status-reserva-${reserva.status}`}>
-                      {reserva.status === 'confirmada' && '● Confirmada'}
-                      {reserva.status === 'pendente' && '⏳ Em Análise'}
-                      {reserva.status === 'concluida' && '✓ Concluída'}
-                      {reserva.status === 'cancelada' && '✕ Cancelada'}
+                      {ROTULO_STATUS[reserva.status]}
                     </span>
                   </div>
 
@@ -465,19 +476,19 @@ export default function MinhasReservasPage() {
                 <div className="grade-dados-comprovante">
                   <div>
                     <span className="rotulo-dado">Nome do Profissional:</span>
-                    <strong>{usuario?.nome || 'Elias Pio Mendes'}</strong>
+                    <strong>{usuario?.nome ?? ''}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">Registro CREA-PI:</span>
-                    <strong>{usuario?.registroCrea || 'CREA-PI 32415/D'}</strong>
+                    <strong>{usuario?.registroCrea ?? ''}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">CPF:</span>
-                    <strong>{usuario?.cpf || '123.456.789-00'}</strong>
+                    <strong>{usuario?.cpf ?? ''}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">E-mail Cadastrado:</span>
-                    <strong>{usuario?.email || 'elias.mendes@creapi.org.br'}</strong>
+                    <strong>{usuario?.email ?? ''}</strong>
                   </div>
                 </div>
               </div>
