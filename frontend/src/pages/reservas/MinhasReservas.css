@@ -16,11 +16,10 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1.5rem;
-  background: #ffffff;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-xl);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   padding: 2rem 2.25rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
 
 .badge-modulo-reservas {
@@ -29,33 +28,33 @@
   gap: 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--cor-primaria);
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(27, 77, 110, 0.08);
+  background: var(--accent-subtle);
   padding: 0.25rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   margin-bottom: 0.75rem;
 }
 
 .ponto-status-reservas {
   width: 7px;
   height: 7px;
-  background: var(--cor-primaria);
+  background: var(--accent);
   border-radius: 50%;
 }
 
 .reservas-titulo {
   font-size: 1.65rem;
   font-weight: 800;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
 }
 
 .reservas-subtitulo {
   font-size: 0.9rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   line-height: 1.55;
   max-width: 650px;
 }
@@ -74,18 +73,17 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  background: #ffffff;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-xl);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .abas-status-grupo {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  border-bottom: 1px solid var(--cor-borda);
+  border-bottom: 1px solid var(--line);
   padding-bottom: 0.85rem;
 }
 
@@ -95,21 +93,21 @@
   padding: 0.5rem 0.85rem;
   font-size: 0.825rem;
   font-weight: 600;
-  color: var(--cor-texto-secundario);
-  border-radius: var(--raio-md);
+  color: var(--fg-muted);
+  border-radius: var(--radius-element);
   cursor: pointer;
-  transition: all var(--transicao-rapida);
+  transition: all var(--transition-fast);
+  font-family: var(--font);
 }
 
 .aba-status-btn:hover {
-  background: var(--cor-fundo-alt);
-  color: var(--cor-texto-principal);
+  background: var(--bg-alt);
+  color: var(--fg);
 }
 
 .aba-ativa {
-  background: var(--cor-primaria-gradiente) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(27, 77, 110, 0.25);
+  background: var(--fg) !important;
+  color: var(--fg-invert) !important;
 }
 
 .linha-busca-tipo-reservas {
@@ -131,7 +129,7 @@
 .icone-lupa-reservas {
   position: absolute;
   left: 0.9rem;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
   display: flex;
   pointer-events: none;
 }
@@ -140,19 +138,20 @@
   width: 100%;
   height: 42px;
   padding: 0 1rem 0 2.5rem;
-  background: var(--cor-fundo-alt);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-md);
+  background: var(--bg-alt);
+  border: 1px solid var(--line-hover);
+  border-radius: var(--radius-element);
   font-size: 0.85rem;
-  color: var(--cor-texto-principal);
-  transition: all var(--transicao-rapida);
+  color: var(--fg);
+  transition: all var(--transition-fast);
+  font-family: var(--font);
 }
 
 .input-busca-reservas:focus {
   outline: none;
-  background: #ffffff;
-  border-color: var(--cor-primaria);
-  box-shadow: 0 0 0 3px rgba(27, 77, 110, 0.1);
+  background: var(--card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--line-focus);
 }
 
 .pilulas-tipo-reservas {
@@ -161,27 +160,28 @@
 }
 
 .pilula-tipo-btn {
-  background: var(--cor-fundo-alt);
-  border: 1px solid var(--cor-borda);
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
   padding: 0.4rem 0.8rem;
-  border-radius: var(--raio-md);
+  border-radius: var(--radius-element);
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   cursor: pointer;
-  transition: all var(--transicao-rapida);
+  transition: all var(--transition-fast);
+  font-family: var(--font);
 }
 
 .pilula-tipo-btn:hover {
-  background: #ffffff;
-  border-color: var(--cor-primaria-clara);
-  color: var(--cor-primaria);
+  background: var(--card);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .pilula-tipo-ativa {
-  background: var(--cor-primaria) !important;
-  border-color: var(--cor-primaria) !important;
-  color: #ffffff !important;
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: var(--fg-invert) !important;
 }
 
 /* ============================================================
@@ -194,19 +194,17 @@
 }
 
 .card-reserva-associado {
-  background: #ffffff;
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-xl);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   overflow: hidden;
   display: flex;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-  transition: all var(--transicao-rapida);
+  transition: all var(--transition-fast);
 }
 
 .card-reserva-associado:hover {
   transform: translateY(-2px);
-  box-shadow: var(--sombra-md);
-  border-color: rgba(27, 77, 110, 0.25);
+  border-color: var(--line-hover);
 }
 
 .faixa-lateral-tipo {
@@ -215,11 +213,11 @@
 }
 
 .faixa-ambiente {
-  background: var(--cor-primaria);
+  background: var(--accent);
 }
 
 .faixa-equipamento {
-  background: var(--cor-secundaria);
+  background: var(--accent);
 }
 
 .card-reserva-conteudo {
@@ -243,17 +241,17 @@
   gap: 0.45rem;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   text-transform: uppercase;
 }
 
 .divisor-ponto {
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
 }
 
 .protocolo-badge {
-  color: var(--cor-primaria);
-  font-family: monospace;
+  color: var(--accent);
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -261,7 +259,7 @@
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.25rem 0.65rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
 }
 
@@ -277,7 +275,7 @@
 
 .status-reserva-concluida {
   background: rgba(100, 116, 139, 0.12);
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
 }
 
 .status-reserva-cancelada {
@@ -288,20 +286,20 @@
 .reserva-card-titulo {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
   margin-bottom: 0.25rem;
 }
 
 .reserva-card-subtitulo {
   font-size: 0.8rem;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
   margin-bottom: 1rem;
 }
 
 .reserva-dados-grid-box {
-  background: var(--cor-fundo-alt);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-md);
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-element);
   padding: 0.85rem 1rem;
   display: flex;
   flex-direction: column;
@@ -314,17 +312,17 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.78rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
 }
 
 .dado-linha svg {
-  color: var(--cor-primaria);
+  color: var(--accent);
   flex-shrink: 0;
 }
 
 .finalidade-reserva-caixa {
-  background: #ffffff;
-  border-left: 3px solid rgba(27, 77, 110, 0.3);
+  background: var(--bg-alt);
+  border-left: 3px solid var(--line-hover);
   padding: 0.6rem 0.85rem;
   margin-bottom: 1.25rem;
 }
@@ -332,7 +330,7 @@
 .finalidade-rotulo {
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
   text-transform: uppercase;
   display: block;
   margin-bottom: 0.2rem;
@@ -340,7 +338,7 @@
 
 .finalidade-texto {
   font-size: 0.78rem;
-  color: var(--cor-texto-principal);
+  color: var(--fg);
   line-height: 1.4;
 }
 
@@ -351,28 +349,29 @@
   gap: 0.6rem;
   margin-top: auto;
   padding-top: 0.85rem;
-  border-top: 1px solid var(--cor-fundo-alt);
+  border-top: 1px solid var(--bg-alt);
 }
 
 .btn-acao-outline {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: #ffffff;
-  border: 1px solid var(--cor-borda);
+  background: var(--card);
+  border: 1px solid var(--line);
   padding: 0.45rem 0.85rem;
-  border-radius: var(--raio-md);
+  border-radius: var(--radius-element);
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   cursor: pointer;
-  transition: all var(--transicao-rapida);
+  transition: all var(--transition-fast);
+  font-family: var(--font);
 }
 
 .btn-acao-outline:hover {
-  background: var(--cor-fundo-alt);
-  color: var(--cor-primaria);
-  border-color: var(--cor-primaria);
+  background: var(--bg-alt);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .btn-acao-destaque {
@@ -382,17 +381,18 @@
   background: rgba(46, 175, 125, 0.12);
   border: 1px solid rgba(46, 175, 125, 0.3);
   padding: 0.45rem 0.85rem;
-  border-radius: var(--raio-md);
+  border-radius: var(--radius-element);
   font-size: 0.78rem;
   font-weight: 700;
   color: #1a7452;
   cursor: pointer;
-  transition: all var(--transicao-rapida);
+  transition: all var(--transition-fast);
+  font-family: var(--font);
 }
 
 .btn-acao-destaque:hover {
-  background: var(--cor-secundaria);
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--fg-invert);
 }
 
 .btn-acao-perigo {
@@ -400,12 +400,13 @@
   border: 1px solid rgba(239, 68, 68, 0.25);
   color: #dc2626;
   padding: 0.45rem 0.85rem;
-  border-radius: var(--raio-md);
+  border-radius: var(--radius-element);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   margin-left: auto;
-  transition: all var(--transicao-rapida);
+  transition: all var(--transition-fast);
+  font-family: var(--font);
 }
 
 .btn-acao-perigo:hover {
@@ -414,9 +415,9 @@
 
 /* Empty State */
 .empty-state-reservas {
-  background: #ffffff;
-  border: 1px dashed var(--cor-borda);
-  border-radius: var(--raio-xl);
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-card);
   padding: 4rem 2rem;
   display: flex;
   flex-direction: column;
@@ -432,12 +433,12 @@
 .empty-titulo-reservas {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
 }
 
 .empty-desc-reservas {
   font-size: 0.875rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   max-width: 480px;
   line-height: 1.5;
 }
@@ -455,14 +456,14 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
 }
 
 .spinner-carregando {
   width: 36px;
   height: 36px;
-  border: 3px solid rgba(27, 77, 110, 0.15);
-  border-top-color: var(--cor-primaria);
+  border: 3px solid rgba(5, 150, 105, 0.15);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: girar 0.8s linear infinite;
 }
@@ -473,7 +474,7 @@
 .modal-comprovante-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 48, 73, 0.55);
+  background: rgba(9, 9, 11, 0.5);
   backdrop-filter: blur(6px);
   z-index: 100;
   display: flex;
@@ -484,20 +485,20 @@
 }
 
 .modal-comprovante-container {
-  background: #ffffff;
-  border-radius: var(--raio-xl);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   max-width: 650px;
   width: 100%;
   max-height: 92vh;
   overflow-y: auto;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
 }
 
 .comprovante-papel-timbrado {
   padding: 2.25rem 2.25rem 1.5rem 2.25rem;
-  background: #ffffff;
+  background: var(--card);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -518,46 +519,46 @@
 .marca-principal {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
 }
 
 .marca-sub {
   font-size: 0.72rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .comprovante-protocolo-bloco {
   text-align: right;
-  background: var(--cor-fundo-alt);
-  border: 1px solid var(--cor-borda);
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
   padding: 0.4rem 0.75rem;
-  border-radius: var(--raio-md);
+  border-radius: var(--radius-element);
 }
 
 .comprovante-protocolo-rotulo {
   font-size: 0.62rem;
   font-weight: 800;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
   display: block;
 }
 
 .comprovante-protocolo-numero {
   font-size: 0.95rem;
-  color: var(--cor-primaria);
-  font-family: monospace;
+  color: var(--accent);
+  font-family: var(--font-mono);
 }
 
 .comprovante-divisor {
   height: 2px;
-  background: linear-gradient(90deg, var(--cor-primaria), var(--cor-secundaria));
+  background: var(--accent);
 }
 
 .comprovante-titulo-documento {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
   text-align: center;
   letter-spacing: 0.04em;
   margin-top: 0.25rem;
@@ -572,10 +573,10 @@
 .secao-comprovante-titulo {
   font-size: 0.72rem;
   font-weight: 800;
-  color: var(--cor-primaria);
+  color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--cor-fundo-alt);
+  border-bottom: 1px solid var(--bg-alt);
   padding-bottom: 0.25rem;
 }
 
@@ -583,10 +584,10 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
-  background: var(--cor-fundo-alt);
+  background: var(--bg-alt);
   padding: 0.85rem 1rem;
-  border-radius: var(--raio-md);
-  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius-element);
+  border: 1px solid var(--line);
 }
 
 .coluna-cheia {
@@ -596,7 +597,7 @@
 .rotulo-dado {
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
   display: block;
   margin-bottom: 0.1rem;
 }
@@ -604,18 +605,18 @@
 .grade-dados-comprovante strong,
 .grade-dados-comprovante span {
   font-size: 0.825rem;
-  color: var(--cor-texto-principal);
+  color: var(--fg);
 }
 
 .destaque-item-nome {
   font-size: 0.95rem !important;
-  color: var(--cor-primaria-escura) !important;
+  color: var(--fg) !important;
 }
 
 .comprovante-autenticidade {
-  background: #f8fafc;
-  border: 1px dashed var(--cor-borda);
-  border-radius: var(--raio-md);
+  background: var(--bg-alt);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-element);
   padding: 0.85rem 1rem;
   display: flex;
   flex-direction: column;
@@ -627,28 +628,28 @@
   align-items: center;
   justify-content: space-between;
   font-size: 0.72rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
 }
 
 .codigo-autenticidade code {
   font-weight: 700;
-  color: var(--cor-primaria);
+  color: var(--accent);
 }
 
 .aviso-apresentacao {
   font-size: 0.7rem;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
   font-style: italic;
 }
 
 .comprovante-botoes-rodape {
   padding: 1rem 2.25rem 1.5rem 2.25rem;
-  border-top: 1px solid var(--cor-borda);
+  border-top: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 0.85rem;
-  background: var(--cor-fundo-alt);
+  background: var(--bg-alt);
 }
 
 /* ============================================================
@@ -658,7 +659,7 @@
 .modal-checkin-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 48, 73, 0.55);
+  background: rgba(9, 9, 11, 0.5);
   backdrop-filter: blur(6px);
   z-index: 100;
   display: flex;
@@ -670,12 +671,12 @@
 
 .modal-perigo-container,
 .modal-checkin-container {
-  background: #ffffff;
-  border-radius: var(--raio-xl);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   max-width: 480px;
   width: 100%;
   padding: 2.25rem;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -702,7 +703,7 @@
 
 .perigo-descricao {
   font-size: 0.85rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   line-height: 1.5;
 }
 
@@ -736,26 +737,26 @@
 .checkin-titulo {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
 }
 
 .checkin-descricao {
   font-size: 0.85rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   line-height: 1.5;
 }
 
 .checkin-card-instrucao {
   width: 100%;
-  background: var(--cor-fundo-alt);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-md);
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-element);
   padding: 0.75rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
   font-size: 0.8rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
 }
 
 .checkin-sucesso-bloco {
@@ -769,7 +770,7 @@
   width: 60px;
   height: 60px;
   background: rgba(46, 175, 125, 0.15);
-  color: var(--cor-secundaria);
+  color: var(--accent);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -781,12 +782,12 @@
 .checkin-sucesso-titulo {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--cor-primaria-escura);
+  color: var(--fg);
 }
 
 .checkin-sucesso-desc {
   font-size: 0.85rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
 }
 
 /* ============================================================
