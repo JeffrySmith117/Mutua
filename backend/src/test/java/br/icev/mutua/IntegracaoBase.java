@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.UUID;
 
+import br.icev.mutua.common.Relogio;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,6 +44,12 @@ abstract class IntegracaoBase {
         registro.add("spring.datasource.url", () -> POSTGRES.getJdbcUrl("postgres", "postgres"));
         registro.add("spring.datasource.username", () -> "postgres");
         registro.add("spring.datasource.password", () -> "postgres");
+    }
+
+    /** Testes que fixam o relógio do sistema não vazam o horário para os demais. */
+    @AfterEach
+    void restaurarRelogio() {
+        Relogio.restaurar();
     }
 
     @Autowired

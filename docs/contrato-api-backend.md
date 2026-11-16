@@ -324,6 +324,7 @@ Cancela a reserva solicitada (libera o horário para outros profissionais).
 
 #### `POST /api/v1/reservas/{id}/checkin` 🔒
 Realiza o check-in presencial em salas ou mesas de coworking.
+**Janela:** abre 15 minutos antes do início e fecha 30 minutos depois dele (`mutua.reserva.antecedencia-checkin-minutos` e `tolerancia-checkin-minutos`). Fora dela responde `409`. Depois da tolerância a reserva passa a `NAO_COMPARECEU`.
 
 ---
 
@@ -359,10 +360,14 @@ Rejeita a solicitação informando o parecer formal.
 ```
 
 #### `GET /api/v1/admin/movimentacoes` 🔒
-Lista as movimentações ativas de balcão do Crea Tec HUB (equipamentos aguardando retirada e equipamentos em campo).
+Lista as movimentações de balcão do Crea Tec HUB: todas as que estão aguardando retirada ou em campo (sem corte) e as 100 devoluções mais recentes. Cada item traz `emAtraso: true` quando o equipamento está em campo depois da `dataDevolucaoPrevista`.
 
 #### `POST /api/v1/admin/movimentacoes/{id}/retirar` 🔒
-Registra a retirada no balcão físico, emitindo o termo e marcando como `EM_USO`.
+Registra a retirada no balcão físico, emitindo o termo e marcando como `EM_USO`. Só é aceita dentro do período reservado (`409` antes do início ou depois do fim).
+
+**Solicitações de equipamento:** retirada e devolução precisam cair nos dias da semana e no horário de funcionamento do balcão (`400` caso contrário).
+
+**Limites de tamanho** (`400` com o campo indicado): `finalidade` até 1000 caracteres, `documentoVinculado` até 180, `numeroArt` até 150, e motivo, observação e parecer até 500.
 
 #### `POST /api/v1/admin/movimentacoes/{id}/devolver` 🔒
 Registra a devolução do equipamento e sua conferência física.

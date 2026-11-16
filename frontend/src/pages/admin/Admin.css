@@ -473,6 +473,11 @@
   color: #b45309;
 }
 
+.status-em_campo.status-em_atraso {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
 .status-devolvido {
   background: rgba(16, 185, 129, 0.12);
   color: #065f46;

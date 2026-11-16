@@ -38,6 +38,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID>, JpaSpec
 
     long countByStatusAndRecursoTipo(StatusReserva status, TipoRecurso tipo);
 
+    long countByStatusAndRecursoTipoAndDataFimBefore(StatusReserva status, TipoRecurso tipo, LocalDateTime limite);
+
     @Query("select distinct r.recurso.id from Reserva r where r.status = :status")
     List<UUID> idsDeRecursosComStatus(@Param("status") StatusReserva status);
 

@@ -32,11 +32,14 @@ export interface MovimentacaoBalcao {
   condicaoDevolucao?: CondicaoEquipamento
   statusMovimentacao: 'aguardando_retirada' | 'em_campo' | 'devolvido' | 'avaria_registrada'
   observacoes?: string
+  /** Em campo depois da devolução prevista. */
+  emAtraso?: boolean
 }
 
 export interface MetricasAdmin {
   solicitacoesPendentes: number
   equipamentosEmCampo: number
+  equipamentosEmAtraso?: number
   taxaOcupacaoSalas: string
   totalReservasMes: number
   profissionaisAtivos: number

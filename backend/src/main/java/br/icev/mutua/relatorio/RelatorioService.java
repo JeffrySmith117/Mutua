@@ -78,6 +78,8 @@ public class RelatorioService {
         return new MetricasAdmin(
                 reservas.countByStatus(StatusReserva.PENDENTE),
                 reservas.countByStatusAndRecursoTipo(StatusReserva.EM_USO, TipoRecurso.EQUIPAMENTO),
+                reservas.countByStatusAndRecursoTipoAndDataFimBefore(StatusReserva.EM_USO, TipoRecurso.EQUIPAMENTO,
+                        Relogio.agora()),
                 taxaOcupacaoSalas(mes, inicio, fim),
                 totalMes,
                 usuarios.countByPerfilAndAtivoTrue(Perfil.PROFISSIONAL));

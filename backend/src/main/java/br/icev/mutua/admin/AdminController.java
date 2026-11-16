@@ -56,7 +56,7 @@ public class AdminController {
 
     @PostMapping("/pendencias/{id}/aprovar")
     public SolicitacaoPendenteResponse aprovar(@AuthenticationPrincipal Usuario admin, @PathVariable UUID id,
-                                               @RequestBody(required = false) AprovarRequest req) {
+                                               @Valid @RequestBody(required = false) AprovarRequest req) {
         return SolicitacaoPendenteResponse.de(
                 reservas.aprovar(admin, id, req == null ? null : req.observacao()));
     }
