@@ -277,7 +277,11 @@ export default function AdminPage() {
           <div className="kpi-info-bloco">
             <span className="kpi-valor-grande">{metricas?.equipamentosEmCampo ?? 1}</span>
             <span className="kpi-rotulo-texto">Equipamentos em Campo</span>
-            <span className="kpi-descricao-texto">Com termo de guarda ativo</span>
+            <span className="kpi-descricao-texto">
+              {metricas?.equipamentosEmAtraso
+                ? `⚠ ${metricas.equipamentosEmAtraso} em atraso na devolução`
+                : 'Com termo de guarda ativo'}
+            </span>
           </div>
         </div>
 
@@ -467,8 +471,8 @@ export default function AdminPage() {
                       </td>
                       <td>{formatarDataHora(mov.dataDevolucaoPrevista)}</td>
                       <td>
-                        <span className={`badge-balcao-status status-${mov.statusMovimentacao}`}>
-                          {mov.statusMovimentacao === 'em_campo' && '● Em Campo'}
+                        <span className={`badge-balcao-status status-${mov.statusMovimentacao}${mov.emAtraso ? ' status-em_atraso' : ''}`}>
+                          {mov.statusMovimentacao === 'em_campo' && (mov.emAtraso ? '⚠ Em Atraso' : '● Em Campo')}
                           {mov.statusMovimentacao === 'devolvido' && '✓ Devolvido'}
                           {mov.statusMovimentacao === 'aguardando_retirada' && '⏳ Aguarda Retirada'}
                         </span>

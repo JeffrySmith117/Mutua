@@ -16,7 +16,8 @@ public final class RelatorioDtos {
     private RelatorioDtos() {
     }
 
-    public record MetricasAdmin(long solicitacoesPendentes, long equipamentosEmCampo, String taxaOcupacaoSalas,
+    public record MetricasAdmin(long solicitacoesPendentes, long equipamentosEmCampo, long equipamentosEmAtraso,
+                                String taxaOcupacaoSalas,
                                 long totalReservasMes, long profissionaisAtivos) {
     }
 

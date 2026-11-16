@@ -91,6 +91,9 @@ class ReservaRegrasQaTest extends IntegracaoBase {
         JsonNode atrasada = movimentacao(admin, id);
         assertThat(atrasada.get("emAtraso").asBoolean()).isTrue();
         assertThat(atrasada.get("statusMovimentacao").asText()).isEqualTo("em_campo");
+        mvc.perform(get("/admin/metricas").header("Authorization", "Bearer " + admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.equipamentosEmAtraso").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)));
     }
 
     // ---------- helpers ----------
