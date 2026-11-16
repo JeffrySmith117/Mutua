@@ -120,11 +120,15 @@ public class ReservaService {
             throw ApiException.conflito("Equipamentos são retirados no balcão do Crea Tec HUB, não por check-in.");
         }
         LocalDateTime agora = Relogio.agora();
-        if (!reserva.getDataInicio().toLocalDate().equals(agora.toLocalDate())) {
-            throw ApiException.conflito("O check-in só é permitido no dia do agendamento.");
+        LocalDateTime abertura = reserva.getDataInicio().minusMinutes(props.antecedenciaCheckinMinutos());
+        LocalDateTime fechamento = reserva.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos());
+        if (agora.isBefore(abertura)) {
+            throw ApiException.conflito("Fora da janela de check-in: ele abre " + props.antecedenciaCheckinMinutos()
+                    + " minuto(s) antes do início da reserva.");
         }
-        if (!agora.isBefore(reserva.getDataFim())) {
-            throw ApiException.conflito("O horário desta reserva já foi encerrado.");
+        if (agora.isAfter(fechamento)) {
+            throw ApiException.conflito("A tolerância de " + props.toleranciaCheckinMinutos()
+                    + " minuto(s) para o check-in já terminou.");
         }
         reserva.mudarPara(StatusReserva.EM_USO);
         auditoria.registrar(reserva, "checkin", "Check-in realizado", usuario.getNome(),
@@ -214,8 +218,8 @@ public class ReservaService {
     public boolean podeCheckin(Reserva r, LocalDateTime agora) {
         return r.getStatus() == StatusReserva.CONFIRMADA
                 && !r.getRecurso().isEquipamento()
-                && r.getDataInicio().toLocalDate().equals(agora.toLocalDate())
-                && agora.isBefore(r.getDataFim());
+                && !agora.isBefore(r.getDataInicio().minusMinutes(props.antecedenciaCheckinMinutos()))
+                && !agora.isAfter(r.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos()));
     }
 
     private void naoCompareceu(Reserva r, String descricao) {
@@ -243,8 +247,8 @@ public class ReservaService {
             }
             // Retirada e devolução acontecem no balcão, dentro do horário de atendimento.
             if (foraDoExpediente(recurso, p.inicio()) || foraDoExpediente(recurso, p.fim())) {
-                throw ApiException.campoInvalido("dataInicio", "Retirada e devolução devem ocorrer no horário do "
-                        + "balcão (" + Horarios.descrever(recurso) + ").");
+                throw ApiException.campoInvalido("dataInicio", "Retirada e devolução devem ocorrer nos dias e no "
+                        + "horário do balcão (" + Horarios.descrever(recurso) + ").");
             }
             return;
         }
@@ -263,7 +267,8 @@ public class ReservaService {
     }
 
     private boolean foraDoExpediente(Recurso recurso, LocalDateTime momento) {
-        return momento.toLocalTime().isBefore(recurso.getHorarioAbertura())
+        return !recurso.getDiasSemana().contains(momento.getDayOfWeek().getValue())
+                || momento.toLocalTime().isBefore(recurso.getHorarioAbertura())
                 || momento.toLocalTime().isAfter(recurso.getHorarioFechamento());
     }
 

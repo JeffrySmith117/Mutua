@@ -32,6 +32,8 @@ mutua:
   reserva:
     antecedencia-minima-cancelamento-horas: 2
     tolerancia-checkin-minutos: 30
+    # O check-in abre este tempo antes do início e fecha após a tolerância acima.
+    antecedencia-checkin-minutos: 15
     intervalo-vencimentos-ms: 60000
   login:
     # Falhas de login toleradas por janela de tempo, por e-mail+IP e por IP.
