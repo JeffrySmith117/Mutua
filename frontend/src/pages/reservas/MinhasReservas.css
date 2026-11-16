@@ -283,6 +283,21 @@
   color: #dc2626;
 }
 
+.status-reserva-em_uso {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0284c7;
+}
+
+.status-reserva-recusada {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.status-reserva-nao_compareceu {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
 .reserva-card-titulo {
   font-size: 1.15rem;
   font-weight: 700;

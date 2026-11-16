@@ -42,7 +42,14 @@ function App() {
             <Route path="ambientes" element={<AmbientesPage />} />
             <Route path="equipamentos" element={<EquipamentosPage />} />
             <Route path="minhas-reservas" element={<MinhasReservasPage />} />
-            <Route path="admin" element={<AdminPage />} />
+            <Route
+              path="admin"
+              element={
+                <RotaProtegida perfisPermitidos={['admin']}>
+                  <AdminPage />
+                </RotaProtegida>
+              }
+            />
           </Route>
 
           {/* Fallback inteligente */}

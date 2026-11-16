@@ -120,8 +120,14 @@ public class ReservaService {
             throw ApiException.conflito("Equipamentos são retirados no balcão do Crea Tec HUB, não por check-in.");
         }
         LocalDateTime agora = Relogio.agora();
-        if (!reserva.getDataInicio().toLocalDate().equals(agora.toLocalDate())) {
-            throw ApiException.conflito("O check-in só é permitido no dia do agendamento.");
+        LocalDateTime inicioJanela = reserva.getDataInicio().minusMinutes(15);
+        if (agora.isBefore(inicioJanela)) {
+            throw ApiException.conflito("O check-in só é liberado a partir de 15 minutos antes do início do agendamento.");
+        }
+        LocalDateTime fimJanela = reserva.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos());
+        if (agora.isAfter(fimJanela)) {
+            throw ApiException.conflito("O prazo limite de tolerância para check-in ("
+                    + props.toleranciaCheckinMinutos() + " minutos) foi ultrapassado.");
         }
         if (!agora.isBefore(reserva.getDataFim())) {
             throw ApiException.conflito("O horário desta reserva já foi encerrado.");
@@ -212,10 +218,12 @@ public class ReservaService {
     }
 
     public boolean podeCheckin(Reserva r, LocalDateTime agora) {
-        return r.getStatus() == StatusReserva.CONFIRMADA
-                && !r.getRecurso().isEquipamento()
-                && r.getDataInicio().toLocalDate().equals(agora.toLocalDate())
-                && agora.isBefore(r.getDataFim());
+        if (r.getStatus() != StatusReserva.CONFIRMADA || r.getRecurso().isEquipamento()) {
+            return false;
+        }
+        LocalDateTime inicioJanela = r.getDataInicio().minusMinutes(15);
+        LocalDateTime fimJanela = r.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos());
+        return !agora.isBefore(inicioJanela) && !agora.isAfter(fimJanela) && agora.isBefore(r.getDataFim());
     }
 
     private void naoCompareceu(Reserva r, String descricao) {
@@ -263,6 +271,9 @@ public class ReservaService {
     }
 
     private boolean foraDoExpediente(Recurso recurso, LocalDateTime momento) {
+        if (!recurso.getDiasSemana().contains(momento.getDayOfWeek().getValue())) {
+            return true;
+        }
         return momento.toLocalTime().isBefore(recurso.getHorarioAbertura())
                 || momento.toLocalTime().isAfter(recurso.getHorarioFechamento());
     }

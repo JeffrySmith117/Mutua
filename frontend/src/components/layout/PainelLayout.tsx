@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useThemeStore } from '../../store/themeStore'
 import './PainelLayout.css'
@@ -13,17 +13,12 @@ export default function PainelLayout() {
   const { tema, alternarTema } = useThemeStore()
   const navigate = useNavigate()
 
-  // Usuário padrão de exibição caso não haja login persistido ainda
-  const usuarioExibicao = usuario || {
-    id: 'mock-1',
-    nome: 'Elias Pio Mendes',
-    email: 'elias.mendes@creapi.org.br',
-    cpf: '123.456.789-00',
-    registroCrea: 'CREA-PI 32415/D',
-    perfil: 'profissional' as const,
-    ativo: true,
-    criadoEm: new Date().toISOString(),
+  // D21: Redireciona para o login caso não haja sessão ativa
+  if (!usuario) {
+    return <Navigate to="/entrar" replace />
   }
+
+  const ehAdmin = String(usuario.perfil).toLowerCase() === 'admin'
 
   const obterIniciais = (nome: string) => {
     return nome
@@ -166,19 +161,21 @@ export default function PainelLayout() {
               <span className="nav-texto">Minhas Reservas</span>
             </NavLink>
 
-            <NavLink
-              to="/admin"
-              className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
-              onClick={fecharSidebar}
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-              </span>
-              <span className="nav-texto">Painel Gestor (Admin)</span>
-              <span className="nav-tag-destaque" style={{ background: '#f59e0b' }}>3</span>
-            </NavLink>
+            {ehAdmin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
+                onClick={fecharSidebar}
+              >
+                <span className="nav-icone">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                </span>
+                <span className="nav-texto">Painel Gestor (Admin)</span>
+                <span className="nav-tag-destaque" style={{ background: '#f59e0b' }}>Admin</span>
+              </NavLink>
+            )}
           </div>
 
           <div className="nav-grupo">
@@ -323,11 +320,11 @@ export default function PainelLayout() {
                 aria-expanded={menuPerfilAberto}
               >
                 <div className="perfil-avatar">
-                  {obterIniciais(usuarioExibicao.nome)}
+                  {obterIniciais(usuario.nome)}
                 </div>
                 <div className="perfil-info">
-                  <span className="perfil-nome">{usuarioExibicao.nome}</span>
-                  <span className="perfil-crea">{usuarioExibicao.registroCrea || 'Profissional CREA-PI'}</span>
+                  <span className="perfil-nome">{usuario.nome}</span>
+                  <span className="perfil-crea">{usuario.registroCrea || 'Profissional CREA-PI'}</span>
                 </div>
                 <svg
                   width="16"
@@ -350,10 +347,10 @@ export default function PainelLayout() {
                   />
                   <div className="dropdown-perfil">
                     <div className="dropdown-cabecalho">
-                      <p className="dropdown-nome">{usuarioExibicao.nome}</p>
-                      <p className="dropdown-email">{usuarioExibicao.email}</p>
+                      <p className="dropdown-nome">{usuario.nome}</p>
+                      <p className="dropdown-email">{usuario.email}</p>
                       <span className="dropdown-tag-tipo">
-                        {usuarioExibicao.perfil === 'admin' ? 'Administrador' : 'Profissional Habilitado'}
+                        {ehAdmin ? 'Administrador' : 'Profissional Habilitado'}
                       </span>
                     </div>
 

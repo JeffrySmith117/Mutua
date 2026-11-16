@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { authService } from '../../services/authService'
+import { extrairMensagemErro } from '../../utils/erroApi'
 import './Auth.css'
 
 export default function CadastroPage() {
@@ -44,8 +45,12 @@ export default function CadastroPage() {
   }
 
   function validarEtapa2(): boolean {
-    if (senha.length < 6) {
-      setErro('A senha deve ter no mínimo 6 caracteres.')
+    if (senha.length < 8) {
+      setErro('A senha deve ter no mínimo 8 caracteres.')
+      return false
+    }
+    if (senha.length > 72) {
+      setErro('A senha deve ter no máximo 72 caracteres.')
       return false
     }
     if (senha !== confirmarSenha) {
@@ -81,8 +86,8 @@ export default function CadastroPage() {
       })
       definirUsuario(resposta.usuario, resposta.token)
       navigate('/')
-    } catch {
-      setErro('Não foi possível criar a conta. Verifique os dados e tente novamente.')
+    } catch (err) {
+      setErro(extrairMensagemErro(err, 'Não foi possível criar a conta. Verifique os dados e tente novamente.'))
       definirCarregando(false)
     }
   }
@@ -309,11 +314,12 @@ export default function CadastroPage() {
                       id="cadastro-senha"
                       type={mostrarSenha ? 'text' : 'password'}
                       className="auth-input"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
+                      maxLength={72}
                       autoComplete="new-password"
                     />
                     <button
@@ -343,9 +349,9 @@ export default function CadastroPage() {
                         className={`auth-forca-progresso ${
                           senha.length === 0
                             ? ''
-                            : senha.length < 6
+                            : senha.length < 8
                             ? 'fraca'
-                            : senha.length < 10
+                            : senha.length < 12
                             ? 'media'
                             : 'forte'
                         }`}
@@ -354,9 +360,9 @@ export default function CadastroPage() {
                     <span className="auth-forca-texto">
                       {senha.length === 0
                         ? ''
-                        : senha.length < 6
+                        : senha.length < 8
                         ? 'Fraca'
-                        : senha.length < 10
+                        : senha.length < 12
                         ? 'Média'
                         : 'Forte'}
                     </span>

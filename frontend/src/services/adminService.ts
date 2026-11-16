@@ -449,21 +449,13 @@ export const adminService = {
   },
 
   async aprovarSolicitacao(id: string, observacao?: string): Promise<boolean> {
-    try {
-      await api.post(`/admin/pendencias/${id}/aprovar`, { observacao })
-      return true
-    } catch {
-      return true
-    }
+    await api.post(`/admin/pendencias/${id}/aprovar`, { observacao })
+    return true
   },
 
   async recusarSolicitacao(id: string, motivo: string): Promise<boolean> {
-    try {
-      await api.post(`/admin/pendencias/${id}/recusar`, { motivo })
-      return true
-    } catch {
-      return true
-    }
+    await api.post(`/admin/pendencias/${id}/recusar`, { motivo })
+    return true
   },
 
   async registrarRetirada(
@@ -471,12 +463,8 @@ export const adminService = {
     condicao: CondicaoEquipamento,
     observacao?: string
   ): Promise<boolean> {
-    try {
-      await api.post(`/admin/movimentacoes/${id}/retirar`, { condicao, observacao })
-      return true
-    } catch {
-      return true
-    }
+    await api.post(`/admin/movimentacoes/${id}/retirar`, { condicao, observacao })
+    return true
   },
 
   async registrarDevolucao(
@@ -484,12 +472,8 @@ export const adminService = {
     condicao: CondicaoEquipamento,
     observacao?: string
   ): Promise<boolean> {
-    try {
-      await api.post(`/admin/movimentacoes/${id}/devolver`, { condicao, observacao })
-      return true
-    } catch {
-      return true
-    }
+    await api.post(`/admin/movimentacoes/${id}/devolver`, { condicao, observacao })
+    return true
   },
 
   async obterMetricas(): Promise<MetricasAdmin> {

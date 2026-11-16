@@ -1,5 +1,5 @@
 import api from './api'
-import type { Usuario } from '../types'
+import type { PerfilUsuario, Usuario } from '../types'
 
 export interface LoginDTO {
   email: string
@@ -20,75 +20,48 @@ export interface AuthResponse {
   token: string
 }
 
-// Mock institucional de contingência para desenvolvimento do frontend sem backend ativo
-const criarUsuarioMock = (
-  email: string,
-  nome?: string,
-  cpf?: string,
-  registroCrea?: string
-): Usuario => ({
-  id: 'usr-' + Math.random().toString(36).substring(2, 9),
-  nome: nome || (email.toLowerCase().includes('elias') ? 'Elias Pio Mendes' : 'Associado Mútua-PI'),
-  email: email,
-  cpf: cpf || '123.456.789-00',
-  registroCrea: registroCrea || 'CREA-PI 32415/D',
-  perfil: 'profissional',
-  ativo: true,
-  criadoEm: new Date().toISOString(),
-})
+function normalizarPerfil(perfil: unknown): PerfilUsuario {
+  const p = String(perfil ?? '').toLowerCase()
+  if (p === 'admin') return 'admin'
+  if (p === 'colaborador') return 'colaborador'
+  return 'profissional'
+}
+
+function normalizarUsuario(u: Usuario): Usuario {
+  return {
+    ...u,
+    perfil: normalizarPerfil(u.perfil),
+  }
+}
 
 export const authService = {
   async entrar(dados: LoginDTO): Promise<AuthResponse> {
-    try {
-      const resposta = await api.post<AuthResponse>('/auth/entrar', dados)
-      return resposta.data
-    } catch (erro) {
-      console.warn(
-        '[Mútua-PI] Backend não detectado. Iniciando sessão com dados simulados para desenvolvimento frontend:',
-        erro
-      )
-      // Simulação de latência de rede realista (300ms)
-      await new Promise((resolve) => setTimeout(resolve, 300))
-
-      return {
-        usuario: criarUsuarioMock(dados.email),
-        token: 'mock-token-mutua-' + Date.now(),
-      }
+    const resposta = await api.post<AuthResponse>('/auth/entrar', dados)
+    return {
+      token: resposta.data.token,
+      usuario: normalizarUsuario(resposta.data.usuario),
     }
   },
 
   async cadastrar(dados: CadastroDTO): Promise<AuthResponse> {
-    try {
-      const resposta = await api.post<AuthResponse>('/auth/cadastrar', dados)
-      return resposta.data
-    } catch (erro) {
-      console.warn(
-        '[Mútua-PI] Backend não detectado. Concluindo cadastro simulado para desenvolvimento frontend:',
-        erro
-      )
-      await new Promise((resolve) => setTimeout(resolve, 300))
-
-      return {
-        usuario: criarUsuarioMock(dados.email, dados.nome, dados.cpf, dados.registroCrea),
-        token: 'mock-token-mutua-' + Date.now(),
-      }
+    const resposta = await api.post<AuthResponse>('/auth/cadastrar', dados)
+    return {
+      token: resposta.data.token,
+      usuario: normalizarUsuario(resposta.data.usuario),
     }
   },
 
   async perfil(): Promise<Usuario> {
-    try {
-      const resposta = await api.get<Usuario>('/auth/perfil')
-      return resposta.data
-    } catch {
-      return criarUsuarioMock('elias.mendes@creapi.org.br')
-    }
+    const resposta = await api.get<Usuario>('/auth/perfil')
+    return normalizarUsuario(resposta.data)
   },
 
   async sair(): Promise<void> {
     try {
       await api.post('/auth/sair')
-    } catch {
-      // Ignora erro de rede quando backend estiver offline
+    } finally {
+      localStorage.removeItem('@mutua:token')
+      localStorage.removeItem('@mutua:usuario')
     }
   },
 }

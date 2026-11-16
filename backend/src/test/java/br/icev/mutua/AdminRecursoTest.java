@@ -50,7 +50,7 @@ class AdminRecursoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$", hasSize(1)));
 
         reservar(profissional, recursoId, proximoDiaUtil(30)).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("CONFIRMADA"));
+                .andExpect(jsonPath("$.status").value("confirmada"));
     }
 
     @Test

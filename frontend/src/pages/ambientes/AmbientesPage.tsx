@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AMBIENTES_INICIAIS, ambienteService } from '../../services/ambienteService'
+import { obterDataHojeLocal, obterDataAmanhaLocal } from '../../utils/dataLocal'
+import { extrairMensagemErro } from '../../utils/erroApi'
 import './Ambientes.css'
 
 type AmbienteCompleto = (typeof AMBIENTES_INICIAIS)[0]
@@ -15,15 +17,14 @@ export default function AmbientesPage() {
 
   // Estados do modal de reserva
   const [ambienteSelecionado, setAmbienteSelecionado] = useState<AmbienteCompleto | null>(null)
-  const [dataReserva, setDataReserva] = useState(
-    new Date(Date.now() + 86400000).toISOString().split('T')[0]
-  )
+  const [dataReserva, setDataReserva] = useState(() => obterDataAmanhaLocal())
   const [horarioInicio, setHorarioInicio] = useState('14:00')
   const [horarioFim, setHorarioFim] = useState('16:00')
   const [finalidade, setFinalidade] = useState('')
   const [quantidadePessoas, setQuantidadePessoas] = useState<number>(2)
   const [concordouRegras, setConcordouRegras] = useState(true)
   const [enviando, setEnviando] = useState(false)
+  const [erroEnvio, setErroEnvio] = useState<string>('')
   const [reservaConfirmada, setReservaConfirmada] = useState<{
     protocolo: string
     ambienteNome: string
@@ -60,9 +61,10 @@ export default function AmbientesPage() {
     if (!ambienteSelecionado) return
 
     setEnviando(true)
+    setErroEnvio('')
 
     try {
-      await ambienteService.reservar({
+      const resposta = await ambienteService.reservar({
         ambienteId: ambienteSelecionado.id,
         data: dataReserva,
         horarioInicio,
@@ -71,14 +73,15 @@ export default function AmbientesPage() {
         quantidadePessoas,
       })
 
-      const protocoloGerado =
+      const protocoloReal =
+        resposta?.protocolo ||
         'MUT-' +
-        new Date().getFullYear() +
-        '-' +
-        Math.floor(1000 + Math.random() * 9000)
+          new Date().getFullYear() +
+          '-' +
+          Math.floor(1000 + Math.random() * 9000)
 
       setReservaConfirmada({
-        protocolo: protocoloGerado,
+        protocolo: protocoloReal,
         ambienteNome: ambienteSelecionado.nome,
         data: new Date(dataReserva + 'T12:00:00').toLocaleDateString('pt-BR', {
           day: '2-digit',
@@ -87,8 +90,8 @@ export default function AmbientesPage() {
         }),
         horario: `${horarioInicio} às ${horarioFim}`,
       })
-    } catch {
-      alert('Não foi possível registrar a reserva no momento.')
+    } catch (erro) {
+      setErroEnvio(extrairMensagemErro(erro, 'Não foi possível registrar a reserva no momento.'))
     } finally {
       setEnviando(false)
     }
@@ -98,6 +101,7 @@ export default function AmbientesPage() {
     setAmbienteSelecionado(null)
     setReservaConfirmada(null)
     setFinalidade('')
+    setErroEnvio('')
   }
 
   return (
@@ -412,6 +416,22 @@ export default function AmbientesPage() {
             ) : (
               /* Formulário de Reserva */
               <form onSubmit={handleConfirmarReserva} className="modal-form-corpo">
+                {erroEnvio && (
+                  <div
+                    style={{
+                      background: 'var(--error-bg)',
+                      color: 'var(--error)',
+                      border: '1px solid rgba(220, 38, 38, 0.2)',
+                      padding: '0.75rem 1rem',
+                      borderRadius: 'var(--radius-element)',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ⚠️ {erroEnvio}
+                  </div>
+                )}
+
                 <div className="modal-ambiente-info-resumo">
                   <div className="info-miniatura-item">
                     <span>Capacidade:</span>
@@ -433,7 +453,7 @@ export default function AmbientesPage() {
                     id="data-reserva"
                     type="date"
                     required
-                    min={new Date().toISOString().split('T')[0]}
+                    min={obterDataHojeLocal()}
                     value={dataReserva}
                     onChange={(e) => setDataReserva(e.target.value)}
                     className="input-modal-padrao"
@@ -442,18 +462,14 @@ export default function AmbientesPage() {
                     <button
                       type="button"
                       className="btn-atalho-data"
-                      onClick={() => setDataReserva(new Date().toISOString().split('T')[0])}
+                      onClick={() => setDataReserva(obterDataHojeLocal())}
                     >
                       Hoje
                     </button>
                     <button
                       type="button"
                       className="btn-atalho-data"
-                      onClick={() =>
-                        setDataReserva(
-                          new Date(Date.now() + 86400000).toISOString().split('T')[0]
-                        )
-                      }
+                      onClick={() => setDataReserva(obterDataAmanhaLocal())}
                     >
                       Amanhã
                     </button>

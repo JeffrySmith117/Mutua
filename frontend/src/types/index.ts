@@ -49,13 +49,16 @@ export interface Equipamento {
   ativo: boolean
 }
 
-// --- Reserva ---
+// --- Reserva (7 status do ciclo de vida conforme docs/ciclo-de-vida-reservas.md) ---
 export type StatusReserva =
   | 'pendente'
   | 'confirmada'
-  | 'cancelada'
+  | 'em_uso'
   | 'concluida'
-  | 'em_andamento'
+  | 'cancelada'
+  | 'recusada'
+  | 'nao_compareceu'
+  | 'em_andamento' // compatibilidade retroativa
 
 export type TipoReserva = 'ambiente' | 'equipamento'
 
@@ -111,4 +114,19 @@ export interface FiltroDisponibilidade {
   dataInicio: string
   dataFim: string
   tipo?: TipoReserva
+}
+
+// --- Erros da API ---
+export interface CampoInvalido {
+  campo: string
+  mensagem: string
+}
+
+export interface ErroResposta {
+  timestamp?: string
+  status?: number
+  erro?: string
+  mensagem?: string
+  caminho?: string
+  erros?: CampoInvalido[]
 }

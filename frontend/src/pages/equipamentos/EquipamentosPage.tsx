@@ -5,6 +5,12 @@ import {
   equipamentoService,
   type EquipamentoCompleto,
 } from '../../services/equipamentoService'
+import {
+  obterDataHojeLocal,
+  obterDataAmanhaLocal,
+  obterDataFuturaLocal,
+} from '../../utils/dataLocal'
+import { extrairMensagemErro } from '../../utils/erroApi'
 import './Equipamentos.css'
 
 export default function EquipamentosPage() {
@@ -19,18 +25,15 @@ export default function EquipamentosPage() {
   const [equipamentoSelecionado, setEquipamentoSelecionado] = useState<EquipamentoCompleto | null>(
     null
   )
-  const [dataRetirada, setDataRetirada] = useState(
-    new Date(Date.now() + 86400000).toISOString().split('T')[0]
-  )
+  const [dataRetirada, setDataRetirada] = useState(() => obterDataAmanhaLocal())
   const [horarioRetirada, setHorarioRetirada] = useState('08:30')
-  const [dataDevolucao, setDataDevolucao] = useState(
-    new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]
-  )
+  const [dataDevolucao, setDataDevolucao] = useState(() => obterDataFuturaLocal(3))
   const [horarioDevolucao, setHorarioDevolucao] = useState('17:00')
   const [finalidade, setFinalidade] = useState('')
   const [numeroArt, setNumeroArt] = useState('')
   const [concordouTermo, setConcordouTermo] = useState(true)
   const [enviando, setEnviando] = useState(false)
+  const [erroEnvio, setErroEnvio] = useState<string>('')
   const [solicitacaoConfirmada, setSolicitacaoConfirmada] = useState<{
     protocolo: string
     equipamentoNome: string
@@ -75,9 +78,10 @@ export default function EquipamentosPage() {
     if (!equipamentoSelecionado) return
 
     setEnviando(true)
+    setErroEnvio('')
 
     try {
-      await equipamentoService.solicitarEmprestimo({
+      const resposta = await equipamentoService.solicitarEmprestimo({
         equipamentoId: equipamentoSelecionado.id,
         dataRetirada,
         horarioRetirada,
@@ -87,20 +91,21 @@ export default function EquipamentosPage() {
         numeroArt: numeroArt.trim() || undefined,
       })
 
-      const protocoloGerado =
+      const protocoloReal =
+        resposta?.protocolo ||
         'HUB-' +
-        new Date().getFullYear() +
-        '-' +
-        Math.floor(1000 + Math.random() * 9000)
+          new Date().getFullYear() +
+          '-' +
+          Math.floor(1000 + Math.random() * 9000)
 
       setSolicitacaoConfirmada({
-        protocolo: protocoloGerado,
+        protocolo: protocoloReal,
         equipamentoNome: equipamentoSelecionado.nome,
         patrimonio: equipamentoSelecionado.patrimonio,
         periodo: `${new Date(dataRetirada + 'T12:00:00').toLocaleDateString('pt-BR')} às ${horarioRetirada} até ${new Date(dataDevolucao + 'T12:00:00').toLocaleDateString('pt-BR')} às ${horarioDevolucao}`,
       })
-    } catch {
-      alert('Não foi possível registrar a solicitação de empréstimo.')
+    } catch (erro) {
+      setErroEnvio(extrairMensagemErro(erro, 'Não foi possível registrar a solicitação de empréstimo.'))
     } finally {
       setEnviando(false)
     }
@@ -111,6 +116,7 @@ export default function EquipamentosPage() {
     setSolicitacaoConfirmada(null)
     setFinalidade('')
     setNumeroArt('')
+    setErroEnvio('')
   }
 
   // Contadores rápidos para o header
@@ -452,6 +458,22 @@ export default function EquipamentosPage() {
             ) : (
               /* Formulário de Solicitação */
               <form onSubmit={handleConfirmarSolicitacao} className="modal-hub-form">
+                {erroEnvio && (
+                  <div
+                    style={{
+                      background: 'var(--error-bg)',
+                      color: 'var(--error)',
+                      border: '1px solid rgba(220, 38, 38, 0.2)',
+                      padding: '0.75rem 1rem',
+                      borderRadius: 'var(--radius-element)',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ⚠️ {erroEnvio}
+                  </div>
+                )}
+
                 {/* Resumo do Aparelho */}
                 <div className="modal-aparelho-resumo">
                   <div className="aparelho-resumo-dado">
@@ -480,7 +502,7 @@ export default function EquipamentosPage() {
                       id="data-retirada"
                       type="date"
                       required
-                      min={new Date().toISOString().split('T')[0]}
+                      min={obterDataHojeLocal()}
                       value={dataRetirada}
                       onChange={(e) => setDataRetirada(e.target.value)}
                       className="input-hub-padrao"

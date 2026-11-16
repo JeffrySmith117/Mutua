@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { authService } from '../../services/authService'
+import { extrairMensagemErro } from '../../utils/erroApi'
 import './Auth.css'
 
 export default function LoginPage() {
@@ -22,8 +23,8 @@ export default function LoginPage() {
       const resposta = await authService.entrar({ email, senha })
       definirUsuario(resposta.usuario, resposta.token)
       navigate('/')
-    } catch {
-      setErro('E-mail ou senha incorretos. Verifique e tente novamente.')
+    } catch (err) {
+      setErro(extrairMensagemErro(err, 'E-mail ou senha incorretos. Verifique e tente novamente.'))
       definirCarregando(false)
     }
   }

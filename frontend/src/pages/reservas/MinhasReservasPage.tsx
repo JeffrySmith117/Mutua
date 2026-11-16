@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { reservaService, type ItemReservaCompleto } from '../../services/reservaService'
 import { useAuthStore } from '../../store/authStore'
+import { extrairMensagemErro } from '../../utils/erroApi'
 import './MinhasReservas.css'
 
 export default function MinhasReservasPage() {
@@ -13,6 +14,8 @@ export default function MinhasReservasPage() {
   const [abaStatus, setAbaStatus] = useState<string>('todas')
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
   const [termoBusca, setTermoBusca] = useState('')
+  const [erroAcao, setErroAcao] = useState<string | null>(null)
+  const [processandoAcao, setProcessandoAcao] = useState(false)
 
   // Modais
   const [reservaSelecionadaComprovante, setReservaSelecionadaComprovante] =
@@ -30,6 +33,8 @@ export default function MinhasReservasPage() {
       try {
         const dados = await reservaService.listar()
         setReservas(dados)
+      } catch (err) {
+        setErroAcao(extrairMensagemErro(err))
       } finally {
         setCarregando(false)
       }
@@ -41,10 +46,17 @@ export default function MinhasReservasPage() {
   const reservasFiltradas = useMemo(() => {
     return reservas.filter((item) => {
       // Filtro de Aba / Status
-      if (abaStatus === 'ativas' && item.status !== 'confirmada') return false
+      if (abaStatus === 'ativas' && item.status !== 'confirmada' && item.status !== 'em_uso') return false
       if (abaStatus === 'pendentes' && item.status !== 'pendente') return false
       if (abaStatus === 'concluidas' && item.status !== 'concluida') return false
-      if (abaStatus === 'canceladas' && item.status !== 'cancelada') return false
+      if (
+        abaStatus === 'canceladas' &&
+        item.status !== 'cancelada' &&
+        item.status !== 'recusada' &&
+        item.status !== 'nao_compareceu'
+      ) {
+        return false
+      }
 
       // Filtro de Tipo
       if (filtroTipo !== 'todos' && item.tipo !== filtroTipo) return false
@@ -65,37 +77,51 @@ export default function MinhasReservasPage() {
 
   // Ações
   const handleConfirmarCancelamento = async () => {
-    if (!reservaParaCancelar) return
+    if (!reservaParaCancelar || processandoAcao) return
+    setProcessandoAcao(true)
+    setErroAcao(null)
 
-    await reservaService.cancelar(reservaParaCancelar.id)
-
-    setReservas((prev) =>
-      prev.map((r) =>
-        r.id === reservaParaCancelar.id
-          ? { ...r, status: 'cancelada', permitirCancelamento: false, permitirCheckin: false }
-          : r
+    try {
+      await reservaService.cancelar(reservaParaCancelar.id)
+      setReservas((prev) =>
+        prev.map((r) =>
+          r.id === reservaParaCancelar.id
+            ? { ...r, status: 'cancelada', permitirCancelamento: false, permitirCheckin: false }
+            : r
+        )
       )
-    )
-
-    setReservaParaCancelar(null)
+      setReservaParaCancelar(null)
+    } catch (err) {
+      setErroAcao(extrairMensagemErro(err))
+    } finally {
+      setProcessandoAcao(false)
+    }
   }
 
   const handleExecutarCheckin = async () => {
-    if (!reservaParaCheckin) return
+    if (!reservaParaCheckin || processandoAcao) return
+    setProcessandoAcao(true)
+    setErroAcao(null)
 
-    await reservaService.realizarCheckin(reservaParaCheckin.id)
-    setCheckinConcluido(true)
+    try {
+      await reservaService.realizarCheckin(reservaParaCheckin.id)
+      setCheckinConcluido(true)
 
-    setReservas((prev) =>
-      prev.map((r) =>
-        r.id === reservaParaCheckin.id ? { ...r, permitirCheckin: false } : r
+      setReservas((prev) =>
+        prev.map((r) =>
+          r.id === reservaParaCheckin.id ? { ...r, status: 'em_uso', permitirCheckin: false } : r
+        )
       )
-    )
 
-    setTimeout(() => {
-      setCheckinConcluido(false)
-      setReservaParaCheckin(null)
-    }, 1800)
+      setTimeout(() => {
+        setCheckinConcluido(false)
+        setReservaParaCheckin(null)
+      }, 1800)
+    } catch (err) {
+      setErroAcao(extrairMensagemErro(err))
+    } finally {
+      setProcessandoAcao(false)
+    }
   }
 
   // Formatadores
@@ -124,6 +150,39 @@ export default function MinhasReservasPage() {
 
   return (
     <div className="minhas-reservas-container">
+      {/* Banner de erro geral da página */}
+      {erroAcao && (
+        <div className="banner-erro-reservas" role="alert" style={{
+          background: '#FEF2F2',
+          border: '1px solid #FCA5A5',
+          borderRadius: '12px',
+          padding: '1rem 1.25rem',
+          marginBottom: '1.5rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          color: '#991B1B'
+        }}>
+          <div>
+            <strong>Atenção:</strong> {erroAcao}
+          </div>
+          <button
+            type="button"
+            onClick={() => setErroAcao(null)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontWeight: 600,
+              color: '#991B1B',
+              fontSize: '1rem'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* ============================================================
           CABEÇALHO DA CENTRAL DE RESERVAS
           ============================================================ */}
@@ -186,7 +245,7 @@ export default function MinhasReservasPage() {
             className={`aba-status-btn ${abaStatus === 'ativas' ? 'aba-ativa' : ''}`}
             onClick={() => setAbaStatus('ativas')}
           >
-            ● Confirmadas / Ativas ({reservas.filter((r) => r.status === 'confirmada').length})
+            ● Confirmadas / Em Uso ({reservas.filter((r) => r.status === 'confirmada' || r.status === 'em_uso').length})
           </button>
           <button
             type="button"
@@ -207,7 +266,7 @@ export default function MinhasReservasPage() {
             className={`aba-status-btn ${abaStatus === 'canceladas' ? 'aba-ativa' : ''}`}
             onClick={() => setAbaStatus('canceladas')}
           >
-            Canceladas ({reservas.filter((r) => r.status === 'cancelada').length})
+            Canceladas / Recusadas ({reservas.filter((r) => r.status === 'cancelada' || r.status === 'recusada' || r.status === 'nao_compareceu').length})
           </button>
         </div>
 
@@ -312,9 +371,12 @@ export default function MinhasReservasPage() {
 
                     <span className={`badge-status-reserva status-reserva-${reserva.status}`}>
                       {reserva.status === 'confirmada' && '● Confirmada'}
+                      {reserva.status === 'em_uso' && '▶ Em Uso'}
                       {reserva.status === 'pendente' && '⏳ Em Análise'}
                       {reserva.status === 'concluida' && '✓ Concluída'}
                       {reserva.status === 'cancelada' && '✕ Cancelada'}
+                      {reserva.status === 'recusada' && '✕ Recusada'}
+                      {reserva.status === 'nao_compareceu' && '⚠ Não Compareceu'}
                     </span>
                   </div>
 
@@ -362,6 +424,21 @@ export default function MinhasReservasPage() {
                     <p className="finalidade-texto">{reserva.finalidade}</p>
                   </div>
 
+                  {/* Motivo de Recusa ou Cancelamento se houver */}
+                  {reserva.motivoCancelamentoOuRecusa && (
+                    <div style={{
+                      marginTop: '0.75rem',
+                      padding: '0.625rem 0.875rem',
+                      background: '#FEF2F2',
+                      border: '1px solid #FCA5A5',
+                      borderRadius: '8px',
+                      fontSize: '0.8125rem',
+                      color: '#991B1B'
+                    }}>
+                      <strong>Motivo informado:</strong> {reserva.motivoCancelamentoOuRecusa}
+                    </div>
+                  )}
+
                   {/* Rodapé com Ações */}
                   <div className="card-reserva-rodape-acoes">
                     <button
@@ -382,7 +459,11 @@ export default function MinhasReservasPage() {
                       <button
                         type="button"
                         className="btn-acao-destaque"
-                        onClick={() => setReservaParaCheckin(reserva)}
+                        disabled={processandoAcao}
+                        onClick={() => {
+                          setErroAcao(null)
+                          setReservaParaCheckin(reserva)
+                        }}
                       >
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <polyline points="20 6 9 17 4 12" />
@@ -395,7 +476,11 @@ export default function MinhasReservasPage() {
                       <button
                         type="button"
                         className="btn-acao-perigo"
-                        onClick={() => setReservaParaCancelar(reserva)}
+                        disabled={processandoAcao}
+                        onClick={() => {
+                          setErroAcao(null)
+                          setReservaParaCancelar(reserva)
+                        }}
                       >
                         Cancelar
                       </button>
@@ -452,19 +537,19 @@ export default function MinhasReservasPage() {
                 <div className="grade-dados-comprovante">
                   <div>
                     <span className="rotulo-dado">Nome do Profissional:</span>
-                    <strong>{usuario?.nome || 'Elias Pio Mendes'}</strong>
+                    <strong>{usuario?.nome || 'Associado Mútua-PI'}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">Registro CREA-PI:</span>
-                    <strong>{usuario?.registroCrea || 'CREA-PI 32415/D'}</strong>
+                    <strong>{usuario?.registroCrea || 'CREA-PI'}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">CPF:</span>
-                    <strong>{usuario?.cpf || '123.456.789-00'}</strong>
+                    <strong>{usuario?.cpf || 'Não informado'}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">E-mail Cadastrado:</span>
-                    <strong>{usuario?.email || 'elias.mendes@creapi.org.br'}</strong>
+                    <strong>{usuario?.email || 'associado@mutua-pi.com.br'}</strong>
                   </div>
                 </div>
               </div>
@@ -547,7 +632,7 @@ export default function MinhasReservasPage() {
           MODAL DE CONFIRMAÇÃO DE CANCELAMENTO
           ============================================================ */}
       {reservaParaCancelar && (
-        <div className="modal-perigo-overlay" onClick={() => setReservaParaCancelar(null)}>
+        <div className="modal-perigo-overlay" onClick={() => !processandoAcao && setReservaParaCancelar(null)}>
           <div
             className="modal-perigo-container"
             onClick={(e) => e.stopPropagation()}
@@ -562,10 +647,25 @@ export default function MinhasReservasPage() {
               profissionais associados.
             </p>
 
+            {erroAcao && (
+              <div style={{
+                margin: '1rem 0',
+                padding: '0.75rem',
+                background: '#FEF2F2',
+                border: '1px solid #FCA5A5',
+                borderRadius: '8px',
+                color: '#991B1B',
+                fontSize: '0.875rem'
+              }}>
+                {erroAcao}
+              </div>
+            )}
+
             <div className="perigo-acoes-botoes">
               <button
                 type="button"
                 className="btn btn-secundario"
+                disabled={processandoAcao}
                 onClick={() => setReservaParaCancelar(null)}
               >
                 Voltar e Manter
@@ -573,9 +673,10 @@ export default function MinhasReservasPage() {
               <button
                 type="button"
                 className="btn btn-confirmar-cancelamento"
+                disabled={processandoAcao}
                 onClick={handleConfirmarCancelamento}
               >
-                Confirmar Cancelamento
+                {processandoAcao ? 'Cancelando...' : 'Confirmar Cancelamento'}
               </button>
             </div>
           </div>
@@ -586,7 +687,7 @@ export default function MinhasReservasPage() {
           MODAL DE CHECK-IN PRESENCIAL
           ============================================================ */}
       {reservaParaCheckin && (
-        <div className="modal-checkin-overlay" onClick={() => setReservaParaCheckin(null)}>
+        <div className="modal-checkin-overlay" onClick={() => !processandoAcao && setReservaParaCheckin(null)}>
           <div
             className="modal-checkin-container"
             onClick={(e) => e.stopPropagation()}
@@ -610,6 +711,20 @@ export default function MinhasReservasPage() {
                   <strong>{reservaParaCheckin.titulo}</strong> na sede da Mútua-PI.
                 </p>
 
+                {erroAcao && (
+                  <div style={{
+                    margin: '1rem 0',
+                    padding: '0.75rem',
+                    background: '#FEF2F2',
+                    border: '1px solid #FCA5A5',
+                    borderRadius: '8px',
+                    color: '#991B1B',
+                    fontSize: '0.875rem'
+                  }}>
+                    {erroAcao}
+                  </div>
+                )}
+
                 <div className="checkin-card-instrucao">
                   <span>Sede Mútua-PI • Teresina</span>
                   <strong>Recepção Central • 2º Andar</strong>
@@ -619,6 +734,7 @@ export default function MinhasReservasPage() {
                   <button
                     type="button"
                     className="btn btn-secundario"
+                    disabled={processandoAcao}
                     onClick={() => setReservaParaCheckin(null)}
                   >
                     Agora Não
@@ -626,9 +742,10 @@ export default function MinhasReservasPage() {
                   <button
                     type="button"
                     className="btn btn-primario"
+                    disabled={processandoAcao}
                     onClick={handleExecutarCheckin}
                   >
-                    Confirmar Minha Presença
+                    {processandoAcao ? 'Validando...' : 'Confirmar Minha Presença'}
                   </button>
                 </div>
               </div>
