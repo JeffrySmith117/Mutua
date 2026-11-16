@@ -1,44 +1,47 @@
 /* ============================================================
-   ESTILOS DA DASHBOARD / HOME (Dashboard.css)
-   Estilo Editorial Minimalista de Alto Padrão (Fiel à foto de referência)
+   DASHBOARD PAGE — Design System Mútua-PI
+   Tokens: var(--bg), var(--card), var(--line), var(--fg), var(--accent) …
+   Regra: zero gradientes difusos, zero sombras pesadas, apenas hairlines.
    ============================================================ */
 
+/* ============================================================
+   CONTAINER GERAL DA PÁGINA
+   ============================================================ */
 .editorial-page-container {
   display: flex;
   flex-direction: column;
-  gap: 3.25rem;
+  gap: 2.5rem;
   width: 100%;
-  max-width: 1360px;
+  max-width: var(--max-width);
   margin: 0 auto;
-  animation: fadeIn 0.3s ease-out;
+  padding-bottom: var(--pad-2xl);
+  animation: fadeIn 0.25s ease-out;
 }
 
 /* ============================================================
-   1. HERO COM CORTE DIAGONAL ANGULAR
+   1. HERO — CORTE DIAGONAL ANGULAR
    ============================================================ */
 .editorial-hero {
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-card);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: var(--sombra-card);
-  transition: background-color var(--transicao-normal), border-color var(--transicao-normal);
 }
 
 .editorial-hero-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
-  min-height: 500px;
+  min-height: 480px;
   align-items: stretch;
-  position: relative;
 }
 
+/* Coluna Esquerda */
 .hero-esquerda-conteudo {
-  padding: 3.5rem 3rem;
+  padding: 3rem 2.75rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.35rem;
+  gap: 1.25rem;
   z-index: 2;
 }
 
@@ -49,84 +52,163 @@
   gap: 1rem;
 }
 
+/* Micro-tag editorial em caixa alta */
 .hero-tag-editorial {
-  font-size: 0.725rem;
+  font-family: var(--font);
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
 }
 
+/* Botão de alternância de tema inline */
 .hero-theme-toggle-inline {
-  background: var(--cor-fundo-alt);
-  border: 1px solid var(--cor-borda);
-  border-radius: 9999px;
-  padding: 0.35rem 0.95rem;
-  font-size: 0.775rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.9rem;
+  font-family: var(--font);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   cursor: pointer;
-  transition: all var(--transicao-rapida);
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast);
+  white-space: nowrap;
 }
 
 .hero-theme-toggle-inline:hover {
-  background: var(--cor-superficie);
-  color: var(--cor-texto-principal);
-  border-color: var(--cor-borda-hover);
+  background: var(--card);
+  color: var(--fg);
+  border-color: var(--line-hover);
   transform: translateY(-1px);
 }
 
+/* Título expressivo com tracking fechado */
 .hero-titulo-editorial {
-  font-size: 2.65rem;
+  font-family: var(--font);
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
   font-weight: 800;
-  line-height: 1.12;
-  color: var(--cor-texto-principal);
-  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--fg);
+  letter-spacing: -0.045em;
 }
 
 .hero-titulo-destaque {
-  font-weight: 700;
-  opacity: 0.92;
+  color: var(--fg);
+  font-weight: 800;
 }
 
+/* Descrição */
 .hero-descricao-editorial {
-  font-size: 0.975rem;
-  color: var(--cor-texto-secundario);
+  font-size: 0.9375rem;
+  color: var(--fg-muted);
   line-height: 1.65;
-  max-width: 530px;
+  max-width: 520px;
 }
 
+/* Conjunto de botões em pílula */
 .hero-botoes-pilula-grupo {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-  margin-top: 0.75rem;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .hero-linha-pilulas-secundarias {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
 }
 
-.hero-btn-primario {
-  max-width: 330px;
-  justify-content: space-between;
-  padding: 0.85rem 1.65rem;
+/* Botão pílula — outline (filtro rápido) */
+.btn-pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  padding: 0.65rem 1.4rem;
+  height: 44px;
+  transition: background var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast);
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1;
 }
 
-/* Coluna Direita: O Corte Diagonal */
+.btn-pilula-outline {
+  background: transparent;
+  border-color: var(--line-hover);
+  color: var(--fg);
+}
+
+.btn-pilula-outline:hover {
+  background: var(--bg-alt);
+  border-color: var(--line-hover);
+  transform: translateY(-1px);
+}
+
+/* Botão pílula — dark executivo */
+.btn-pilula-dark {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--fg-invert);
+}
+
+.btn-pilula-dark:hover {
+  background: #18181B;
+  border-color: #18181B;
+  transform: translateY(-1px);
+}
+
+/* Botão pílula — accent esmeralda */
+.btn-pilula-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--fg-invert);
+}
+
+.btn-pilula-accent:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Botão pílula compacto (36px) */
+.btn-pilula-sm {
+  height: 36px;
+  padding: 0.4rem 1rem;
+  font-size: 0.8125rem;
+}
+
+/* Botão hero primário full-width relativo */
+.hero-btn-primario {
+  max-width: 320px;
+  justify-content: space-between;
+}
+
+/* Coluna Direita: Corte Diagonal */
 .hero-direita-diagonal-wrapper {
   position: relative;
   overflow: hidden;
-  background: #090D14;
-  min-height: 500px;
+  background: #0A0F1A;
+  min-height: 480px;
 }
 
 .hero-diagonal-slice {
   width: 100%;
   height: 100%;
-  clip-path: polygon(14% 0%, 100% 0%, 100% 100%, 0% 100%);
+  clip-path: polygon(12% 0%, 100% 0%, 100% 100%, 0% 100%);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -139,56 +221,67 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .hero-diagonal-slice:hover .hero-imagem-foco {
   transform: scale(1.04);
 }
 
+/* Overlay leve para escurecer levemente a imagem */
 .hero-diagonal-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.3) 100%);
   pointer-events: none;
 }
 
+/* Badge de status no canto da imagem */
 .hero-badge-diagonal {
   position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: rgba(9, 13, 20, 0.82);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  bottom: 1.25rem;
+  right: 1.25rem;
+  background: rgba(10, 15, 26, 0.80);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #ffffff;
-  padding: 0.45rem 1.1rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font);
+  font-size: 0.72rem;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
   z-index: 3;
+  letter-spacing: 0.01em;
 }
 
+/* Dot de status pulsante verde */
 .ponto-pulso-verde {
+  display: block;
   width: 7px;
   height: 7px;
-  background: #10B981;
+  background: var(--accent);
   border-radius: 50%;
-  box-shadow: 0 0 8px #10B981;
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.3); }
 }
 
 /* ============================================================
-   BARRA COMPACTA: PRÓXIMO AGENDAMENTO ATIVO
+   BARRA COMPACTA: PRÓXIMA RESERVA ATIVA
    ============================================================ */
 .editorial-reserva-aviso {
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-left: 4px solid var(--cor-cta);
-  border-radius: var(--raio-card);
-  padding: 1.15rem 1.75rem;
-  box-shadow: var(--sombra-card);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-card);
+  padding: 1rem 1.5rem;
 }
 
 .aviso-reserva-conteudo {
@@ -202,103 +295,107 @@
 .aviso-reserva-esq {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
+/* Tag de status com dot */
 .aviso-tag-status {
-  font-size: 0.75rem;
+  font-family: var(--font);
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--cor-cta);
-  background: var(--cor-cta-suave);
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
+  color: var(--accent-text);
+  background: var(--accent-subtle);
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.04em;
 }
 
 .aviso-titulo-item {
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--cor-texto-principal);
+  color: var(--fg);
 }
 
 .aviso-detalhes-item {
-  font-size: 0.85rem;
-  color: var(--cor-texto-mutado);
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
 }
 
 .aviso-reserva-dir {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .aviso-protocolo {
   font-size: 0.8125rem;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-muted);
 }
 
 .aviso-protocolo code {
-  font-family: var(--fonte-mono);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--cor-primaria);
-  background: var(--cor-fundo-alt);
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-}
-
-.btn-pilula-sm {
-  padding: 0.45rem 1.15rem;
-  font-size: 0.8125rem;
+  color: var(--accent-text);
+  background: var(--accent-subtle);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-sm);
 }
 
 /* ============================================================
-   2. SEÇÃO CENTRAL: 3 CARDS DE FOTOGRAFIA MONOCROMÁTICA
+   2. SEÇÃO CENTRAL: CARDS DE FOTOGRAFIA EDITORIAL
    ============================================================ */
 .editorial-secao-central {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
+/* Label de seção em caixa alta com tracking */
 .secao-label-central {
   text-align: center;
-  font-size: 0.725rem;
+  font-family: var(--font);
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-subtle);
 }
 
+/* Grid de 3 cards */
 .editorial-cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
+/* Card editorial com foto */
 .editorial-card-foto {
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-card);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: all var(--transicao-normal);
-  box-shadow: var(--sombra-card);
+  transition: border-color var(--transition-normal),
+              transform var(--transition-normal);
 }
 
 .editorial-card-foto:hover {
-  transform: translateY(-4px);
-  border-color: var(--cor-borda-hover);
-  box-shadow: var(--sombra-card-hover);
+  transform: translateY(-3px);
+  border-color: var(--line-hover);
 }
 
+/* Wrapper da foto com aspect ratio */
 .card-foto-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/10;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #090D14;
+  background: #0A0F1A;
 }
 
 .card-foto-img {
@@ -312,149 +409,160 @@
   transform: scale(1.05);
 }
 
+/* Tag da foto (pílula flutuante) */
 .card-foto-tag {
   position: absolute;
-  top: 0.85rem;
-  left: 0.85rem;
-  background: rgba(9, 13, 20, 0.75);
+  top: 0.75rem;
+  left: 0.75rem;
+  background: rgba(10, 15, 26, 0.76);
   backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: #ffffff;
-  font-size: 0.675rem;
-  font-weight: 600;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: var(--font);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
+/* Corpo do card */
 .card-foto-info {
-  padding: 1.5rem;
+  padding: 1.35rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
   flex: 1;
-  justify-content: space-between;
 }
 
 .card-foto-titulo {
-  font-size: 1.05rem;
+  font-family: var(--font);
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--cor-texto-principal);
-  letter-spacing: -0.01em;
+  color: var(--fg);
+  letter-spacing: -0.015em;
 }
 
 .card-foto-desc {
   font-size: 0.84rem;
-  color: var(--cor-texto-secundario);
-  line-height: 1.55;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  flex: 1;
 }
 
 .card-foto-link {
+  font-family: var(--font);
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--cor-texto-principal);
-  margin-top: 0.75rem;
+  color: var(--fg-muted);
+  margin-top: 0.65rem;
   display: inline-flex;
   align-items: center;
-  transition: color var(--transicao-rapida);
+  transition: color var(--transition-fast);
 }
 
 .editorial-card-foto:hover .card-foto-link {
-  color: var(--cor-primaria);
+  color: var(--accent);
 }
 
 /* ============================================================
-   3. SEÇÃO INFERIOR: 3 COLUNAS COM DIVISORES & BOTÕES SÓLIDOS
+   3. SEÇÃO INFERIOR: 3 COLUNAS COM DIVISORES
    ============================================================ */
 .editorial-secao-colunas {
   display: grid;
   grid-template-columns: 1fr auto 1fr auto 1fr;
   align-items: stretch;
-  background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda);
-  border-radius: var(--raio-card);
-  padding: 2.75rem 2.5rem;
-  box-shadow: var(--sombra-card);
-  gap: 2.25rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 2.5rem 2.25rem;
+  gap: 2rem;
 }
 
 .editorial-coluna-bloco {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1.15rem;
+  gap: 1rem;
 }
 
+/* Categoria tag */
 .coluna-categoria-tag {
-  font-size: 0.675rem;
+  font-family: var(--font);
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--cor-texto-mutado);
+  color: var(--fg-subtle);
 }
 
 .coluna-titulo {
-  font-size: 1.25rem;
+  font-family: var(--font);
+  font-size: 1.2rem;
   font-weight: 700;
-  color: var(--cor-texto-principal);
-  letter-spacing: -0.02em;
+  color: var(--fg);
+  letter-spacing: -0.025em;
 }
 
 .coluna-texto {
   font-size: 0.875rem;
-  color: var(--cor-texto-secundario);
+  color: var(--fg-muted);
   line-height: 1.65;
   flex: 1;
 }
 
 .coluna-btn {
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: auto;
+  justify-content: center;
 }
 
+/* Divisor vertical hairline */
 .coluna-divisor-vertical {
   width: 1px;
-  background: var(--cor-borda);
+  background: var(--line);
+  align-self: stretch;
 }
 
 /* ============================================================
-   4. BARRA DE RODAPÉ MINIMALISTA (Dock Monocromático)
+   4. DOCK DE RODAPÉ MINIMALISTA
    ============================================================ */
 .editorial-dock-rodape {
-  background: #090D14;
-  color: #94A3B8;
-  border-radius: var(--raio-card);
-  padding: 1.35rem 2.25rem;
+  background: var(--fg);
+  border-radius: var(--radius-card);
+  padding: 1.2rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
+  gap: 1rem;
+  font-family: var(--font);
   font-size: 0.8125rem;
   flex-wrap: wrap;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: var(--sombra-card);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .dock-item {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  color: #E2E8F0;
+  gap: 0.6rem;
+  color: rgba(255, 255, 255, 0.72);
   font-weight: 500;
 }
 
 .dock-item svg {
-  color: #10B981;
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .dock-divisor-ponto {
-  color: #334155;
-  font-weight: 700;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 1rem;
+  user-select: none;
 }
 
 /* ============================================================
-   RESPONSIVIDADE (Mobile & Tablet)
+   RESPONSIVIDADE — Tablet (≤ 1080px)
    ============================================================ */
 @media (max-width: 1080px) {
   .editorial-hero-grid {
@@ -462,34 +570,35 @@
   }
 
   .hero-direita-diagonal-wrapper {
-    min-height: 340px;
+    min-height: 320px;
   }
 
   .hero-diagonal-slice {
-    clip-path: polygon(0% 12%, 100% 0%, 100% 100%, 0% 100%);
+    clip-path: polygon(0% 10%, 100% 0%, 100% 100%, 0% 100%);
   }
 
   .editorial-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
 
   .editorial-secao-colunas {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.75rem;
     padding: 2rem 1.5rem;
   }
 
   .coluna-divisor-vertical {
     width: 100%;
     height: 1px;
+    align-self: auto;
   }
 
   .editorial-dock-rodape {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: 0.85rem;
+    padding: 1.35rem 1.5rem;
   }
 
   .dock-divisor-ponto {
@@ -497,22 +606,30 @@
   }
 }
 
+/* ============================================================
+   RESPONSIVIDADE — Mobile (≤ 640px)
+   ============================================================ */
 @media (max-width: 640px) {
-  .hero-esquerda-conteudo {
-    padding: 2rem 1.5rem;
+  .editorial-page-container {
+    gap: 1.75rem;
   }
 
-  .hero-titulo-editorial {
-    font-size: 2rem;
+  .hero-esquerda-conteudo {
+    padding: 1.75rem 1.5rem;
   }
 
   .hero-btn-primario {
     max-width: 100%;
   }
 
+  .editorial-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
   .aviso-reserva-conteudo {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
   }
 
   .aviso-reserva-dir {
