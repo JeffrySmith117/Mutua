@@ -123,7 +123,7 @@ const RESERVAS_MOCK_INICIAIS: ItemReservaCompleto[] = [
 export const reservaService = {
   async listar(): Promise<ItemReservaCompleto[]> {
     try {
-      const resposta = await api.get<ItemReservaApi[]>('/reservas')
+      const resposta = await api.get<ItemReservaApi[]>('/reservas/minhas')
       return resposta.data.map(paraItemReserva)
     } catch (erro) {
       falharSeNaoForMock(erro)
@@ -180,7 +180,7 @@ export const reservaService = {
 
   async cancelar(id: string): Promise<boolean> {
     try {
-      await api.delete(`/reservas/${id}`)
+      await api.patch(`/reservas/${id}/cancelar`, { motivo: 'Cancelado pelo associado' })
       return true
     } catch (erro) {
       falharSeNaoForMock(erro)

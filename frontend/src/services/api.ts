@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1',
+  baseURL: import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:8080/api/v1' : '/api/v1'),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -9,7 +9,7 @@ const api = axios.create({
 })
 
 // Login e cadastro: um 401 aqui significa "senha incorreta", não "sessão expirada".
-const ROTAS_DE_AUTENTICACAO = ['/auth/entrar', '/auth/cadastrar']
+const ROTAS_DE_AUTENTICACAO = ['/auth/login', '/auth/cadastro']
 
 // Interceptor: adiciona token de autenticação em todas as requisições
 api.interceptors.request.use((config) => {
@@ -25,7 +25,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const rotaDeAutenticacao = ROTAS_DE_AUTENTICACAO.some((rota) => error.config?.url?.endsWith(rota))
-    if (error.response?.status === 401 && !rotaDeAutenticacao) {
+    // Só encerra a sessão se o token da requisição que falhou ainda for o atual: um 401 atrasado de um
+    // token antigo não pode derrubar a sessão recém-iniciada.
+    const tokenAtual = localStorage.getItem('@mutua:token')
+    const autorizacaoEnviada = error.config?.headers?.Authorization
+    const tokenDaRequisicaoEhOAtual = !!tokenAtual && autorizacaoEnviada === `Bearer ${tokenAtual}`
+    if (error.response?.status === 401 && !rotaDeAutenticacao && tokenDaRequisicaoEhOAtual) {
       localStorage.removeItem('@mutua:token')
       localStorage.removeItem('@mutua:usuario')
       window.location.href = '/entrar'

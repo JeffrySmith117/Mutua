@@ -30,7 +30,7 @@ export default function EquipamentosPage() {
   const [horarioDevolucao, setHorarioDevolucao] = useState('17:00')
   const [finalidade, setFinalidade] = useState('')
   const [numeroArt, setNumeroArt] = useState('')
-  const [concordouTermo, setConcordouTermo] = useState(true)
+  const [concordouTermo, setConcordouTermo] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [solicitacaoConfirmada, setSolicitacaoConfirmada] = useState<{
     protocolo: string
@@ -116,6 +116,7 @@ export default function EquipamentosPage() {
   const fecharModal = () => {
     setEquipamentoSelecionado(null)
     setSolicitacaoConfirmada(null)
+    setConcordouTermo(false)
     setFinalidade('')
     setNumeroArt('')
   }
@@ -350,6 +351,7 @@ export default function EquipamentosPage() {
                     onClick={() => {
                       setEquipamentoSelecionado(item)
                       setSolicitacaoConfirmada(null)
+                      setConcordouTermo(false)
                     }}
                   >
                     {item.status === 'disponivel' ? (

@@ -58,7 +58,7 @@ const criarUsuarioMock = (
 export const authService = {
   async entrar(dados: LoginDTO): Promise<AuthResponse> {
     try {
-      const resposta = await api.post<AuthResponseApi>('/auth/entrar', dados)
+      const resposta = await api.post<AuthResponseApi>('/auth/login', dados)
       return paraAuthResponse(resposta.data)
     } catch (erro) {
       falharSeNaoForMock(erro)
@@ -78,7 +78,7 @@ export const authService = {
 
   async cadastrar(dados: CadastroDTO): Promise<AuthResponse> {
     try {
-      const resposta = await api.post<AuthResponseApi>('/auth/cadastrar', dados)
+      const resposta = await api.post<AuthResponseApi>('/auth/cadastro', dados)
       return paraAuthResponse(resposta.data)
     } catch (erro) {
       falharSeNaoForMock(erro)
@@ -97,7 +97,7 @@ export const authService = {
 
   async perfil(): Promise<Usuario> {
     try {
-      const resposta = await api.get<UsuarioApi>('/auth/perfil')
+      const resposta = await api.get<UsuarioApi>('/auth/me')
       return paraUsuario(resposta.data)
     } catch (erro) {
       falharSeNaoForMock(erro)
