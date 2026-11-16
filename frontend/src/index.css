@@ -571,3 +571,106 @@ select {
     transition-duration:       0.01ms !important;
   }
 }
+
+/* ============================================================
+   ETAPA 5 — MOBILE & ACESSIBILIDADE
+   ============================================================ */
+
+/* Breakpoint 375px: smartphones pequenos */
+@media (max-width: 400px) {
+  :root {
+    --pad-container: 12px;
+  }
+
+  /* Garantir que todos os botões e links interativos
+     tenham área mínima de toque de 44×44px (WCAG 2.5.5) */
+  .btn,
+  .btn-pilula,
+  .btn-pilula-dark,
+  .btn-pilula-outline,
+  .btn-pilula-accent,
+  .pilula-filtro,
+  .filtro-pill {
+    min-height: 44px;
+  }
+
+  /* Ajuste de padding do container de página */
+  .editorial-page-container {
+    gap: 1.25rem;
+  }
+}
+
+/* Alvos de toque mínimos globais (44px) para elementos interativos */
+button,
+[role="button"],
+a,
+input[type="checkbox"],
+input[type="radio"],
+select {
+  min-height: 0; /* Reset — só aplica onde importa */
+}
+
+/* Buttons que precisam de alvos de toque explícitos */
+.btn,
+.btn-pilula,
+.btn-pilula-dark,
+.btn-pilula-outline,
+.btn-pilula-accent {
+  min-height: 44px;
+}
+
+.btn-pilula-sm {
+  min-height: 36px; /* Versão compacta aceita 36px em contextos não críticos */
+}
+
+/* ============================================================
+   CONTRASTE — High Contrast Mode (forced-colors)
+   ============================================================ */
+@media (forced-colors: active) {
+  .btn-accent,
+  .btn-primario,
+  .btn-dark,
+  .btn-pilula-dark,
+  .btn-pilula-accent {
+    border: 2px solid ButtonText;
+  }
+
+  .editorial-card,
+  .editorial-card-foto,
+  .card-ambiente-detalhado,
+  .card-equipamento-detalhado {
+    border: 1px solid ButtonText;
+  }
+
+  .ponto-pulso-verde,
+  .ponto-status-sede,
+  .ponto-pulso-hub {
+    forced-color-adjust: none;
+  }
+}
+
+/* ============================================================
+   PRINT — Estilo para impressão
+   ============================================================ */
+@media print {
+  .painel-sidebar,
+  .painel-header,
+  .editorial-dock-rodape,
+  .hero-botoes-pilula-grupo,
+  .hero-theme-toggle-inline {
+    display: none !important;
+  }
+
+  .painel-corpo {
+    margin-left: 0 !important;
+  }
+
+  .painel-main {
+    padding: 0 !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

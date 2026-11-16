@@ -708,4 +708,25 @@
   }
 }
 
+/* Smartphones pequenos ≤ 400px */
+@media (max-width: 400px) {
+  .painel-header {
+    padding: 0 12px;
+  }
+
+  .painel-main {
+    padding: 16px 12px 48px 12px;
+  }
+
+  /* Itens da sidebar — alvos de toque mínimo 44px */
+  .sidebar-nav-item {
+    min-height: 44px;
+  }
+
+  .botao-menu-mobile {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
 /* Suporte a prefers-reduced-motion (via global em index.css) */

@@ -637,3 +637,29 @@
     justify-content: space-between;
   }
 }
+
+/* ============================================================
+   RESPONSIVIDADE — Smartphones pequenos (≤ 400px)
+   ============================================================ */
+@media (max-width: 400px) {
+  .hero-esquerda-conteudo {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .hero-linha-pilulas-secundarias {
+    flex-direction: column;
+  }
+
+  .hero-btn-primario {
+    padding: 0.85rem 1.25rem;
+  }
+
+  .editorial-secao-colunas {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .editorial-dock-rodape {
+    padding: 1rem 1.25rem;
+    font-size: 0.75rem;
+  }
+}
