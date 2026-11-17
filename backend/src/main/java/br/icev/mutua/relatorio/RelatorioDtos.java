@@ -78,7 +78,8 @@ public final class RelatorioDtos {
                                             String registroCrea, String cpfMascarado, LocalDateTime dataInicio,
                                             LocalDateTime dataFim, String status,
                                             String motivoCancelamentoOuRecusa, DadosBalcao dadosBalcao,
-                                            String finalidade, List<EventoLinhaTempo> linhaDoTempo) {
+                                            String finalidade, List<EventoLinhaTempo> linhaDoTempo,
+                                            LocalDateTime termoAceitoEm) {
         public static RegistroHistoricoResponse de(Reserva r, Emprestimo e, List<AuditoriaEvento> eventos) {
             boolean equipamento = r.getRecurso().isEquipamento();
             String motivo = r.getMotivoRecusaCancelamento();
@@ -91,7 +92,7 @@ public final class RelatorioDtos {
                     r.getUsuario().getNome(), r.getUsuario().getRegistroCrea(),
                     Lgpd.mascararCpf(r.getUsuario().getCpf()), r.getDataInicio(), r.getDataFim(),
                     status(r.getStatus()), motivo, e == null ? null : DadosBalcao.de(e), r.getFinalidade(),
-                    eventos.stream().map(EventoLinhaTempo::de).toList());
+                    eventos.stream().map(EventoLinhaTempo::de).toList(), r.getTermoAceitoEm());
         }
 
         private static String status(StatusReserva status) {

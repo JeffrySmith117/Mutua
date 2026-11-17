@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -56,6 +57,15 @@ public class GlobalExceptionHandler {
         }
         log.warn("Violação de integridade: {}", detalhe);
         return resposta(HttpStatus.CONFLICT, "A operação viola uma regra de integridade dos dados.", req, null);
+    }
+
+    /** Duas operações simultâneas sobre o mesmo registro (ex.: aprovar e recusar): só a primeira vale. */
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ErroResposta> aoPerderDisputa(OptimisticLockingFailureException ex,
+                                                        HttpServletRequest req) {
+        return resposta(HttpStatus.CONFLICT,
+                "O registro foi alterado por outra operação ao mesmo tempo. Atualize a tela e tente novamente.",
+                req, null);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

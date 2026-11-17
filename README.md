@@ -79,10 +79,11 @@ Do clone ao sistema integrado, em 3 passos. Pré-requisitos: **Docker** e **Node
 **1. Banco e API** (na raiz do projeto)
 
 ```bash
+cp .env.example .env
 docker compose up --build
 ```
 
-A API sobe em `http://localhost:8080/api/v1` (Swagger em `/swagger-ui.html`) e o PostgreSQL em `localhost:5432`.
+O `.env` guarda a senha do banco, o `JWT_SECRET` e a senha do administrador inicial; sem ele o `docker compose` não sobe. A API fica em `http://localhost:8080/api/v1` (Swagger em `/swagger-ui.html`). O PostgreSQL não é publicado fora do Docker: para consultar os dados use `docker compose exec db psql -U mutua mutua`.
 
 **2. Front-end** (em outro terminal)
 
@@ -99,10 +100,10 @@ O `.env.example` já aponta para a API local (`VITE_API_URL=http://localhost:808
 
 | Perfil | E-mail | Senha |
 |---|---|---|
-| Administrador (criado na primeira subida) | `admin@mutua-pi.com.br` | `admin123` |
+| Administrador (criado na primeira subida) | `ADMIN_EMAIL` do `.env` (`admin@mutua-pi.com.br`) | `ADMIN_SENHA` do `.env` (`admin123` no exemplo) |
 | Profissional | crie em "Criar uma conta" (senha de 8+ caracteres, CPF com 11 dígitos) | — |
 
-> ⚠️ A senha do admin, o `JWT_SECRET` e a senha do banco são **só para desenvolvimento**. Em produção use `SPRING_PROFILES_ACTIVE=prod` e as variáveis descritas em [`backend/README.md`](backend/README.md).
+> ⚠️ Os valores do `.env.example` (senha do admin, `JWT_SECRET` e senha do banco) são **só para desenvolvimento**: troque-os no seu `.env`. Em produção use `SPRING_PROFILES_ACTIVE=prod` e as variáveis descritas em [`backend/README.md`](backend/README.md).
 
 **Sem Docker:** com um PostgreSQL local (banco, usuário e senha `mutua`), rode `cd backend && mvn spring-boot:run`.
 

@@ -8,8 +8,12 @@ API REST em Java 21 + Spring Boot 3.4, PostgreSQL, JWT. Implementa o contrato em
 Com Docker (banco + API):
 
 ```bash
+cp .env.example .env   # na raiz do projeto: senha do banco, JWT_SECRET e senha do admin
 docker compose up --build
 ```
+
+O compose exige o `.env` (não há senhas padrão nele) e não publica a porta do banco. A imagem da API roda com
+usuário sem privilégios e tem `HEALTHCHECK` em `/api/v1/actuator/health`.
 
 Sem Docker, com um PostgreSQL local (banco, usuário e senha `mutua`):
 
@@ -20,8 +24,8 @@ mvn spring-boot:run
 
 Swagger: `http://localhost:8080/api/v1/swagger-ui.html`.
 
-Na primeira subida é criado o administrador `admin@mutua-pi.com.br` / `admin123`
-(`ADMIN_EMAIL` / `ADMIN_SENHA` mudam isso). **Troque a senha e o `JWT_SECRET` fora do desenvolvimento.**
+Na primeira subida é criado o administrador definido em `ADMIN_EMAIL` / `ADMIN_SENHA`
+(`admin@mutua-pi.com.br` / `admin123` no `.env.example` e no `mvn spring-boot:run` sem variáveis). **Troque a senha e o `JWT_SECRET` fora do desenvolvimento.**
 
 ## Produção
 

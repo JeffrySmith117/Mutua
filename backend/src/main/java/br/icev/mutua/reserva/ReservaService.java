@@ -69,13 +69,19 @@ public class ReservaService {
         reserva.setDocumentoVinculado(req.documento());
         reserva.setExclusivo(recurso.isExclusivo());
         reserva.setCriadoEm(agora);
+        if (recurso.isEquipamento()) {
+            // validarRequisitosDoEquipamento já garantiu termoAceito = true.
+            reserva.setTermoAceitoEm(agora);
+        }
         if (!recurso.isExigeAprovacao()) {
             reserva.mudarPara(StatusReserva.CONFIRMADA);
         }
         reservas.saveAndFlush(reserva);
 
         auditoria.registrar(reserva, "solicitacao", "Solicitação registrada", usuario.getNome(),
-                "Solicitação de " + recurso.getNome() + " registrada sob o protocolo " + reserva.getProtocolo() + ".");
+                "Solicitação de " + recurso.getNome() + " registrada sob o protocolo " + reserva.getProtocolo() + "."
+                        + (reserva.getTermoAceitoEm() == null ? ""
+                        : " Termo de Guarda e Responsabilidade aceito eletronicamente pelo solicitante."));
         String mensagem;
         if (reserva.getStatus() == StatusReserva.CONFIRMADA) {
             auditoria.registrar(reserva, "aprovacao", "Reserva confirmada", AuditoriaService.SISTEMA,
