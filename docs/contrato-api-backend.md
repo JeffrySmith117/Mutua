@@ -290,6 +290,8 @@ Cria uma solicitação de reserva de ambiente ou de empréstimo de equipamento.
 }
 ```
 
+**Termo de Guarda e Responsabilidade:** solicitações de equipamento exigem `termoAceito: true` (`400` no campo `termoAceito` caso contrário). O momento do aceite fica gravado na reserva e volta como `termoAceitoEm` em `GET /reservas/minhas`, `GET /admin/movimentacoes` e `GET /admin/historico`; o evento de solicitação da linha do tempo também o registra. Reservas de ambiente não têm o campo.
+
 #### `GET /api/v1/reservas/minhas` 🔒
 Lista o histórico de reservas do profissional autenticado.
 
@@ -358,6 +360,8 @@ Rejeita a solicitação informando o parecer formal.
   "motivo": "Incompatibilidade de horário com solenidade oficial da Mútua-PI."
 }
 ```
+
+**Despachos simultâneos:** se dois despachos chegam ao mesmo tempo para a mesma solicitação (aprovar e recusar, ou o mesmo botão duas vezes), só o primeiro vale; os demais recebem `409`. O mesmo vale para cancelamento, check-in, retirada e devolução concorrentes sobre a mesma reserva.
 
 #### `GET /api/v1/admin/movimentacoes` 🔒
 Lista as movimentações de balcão do Crea Tec HUB: todas as que estão aguardando retirada ou em campo (sem corte) e as 100 devoluções mais recentes. Cada item traz `emAtraso: true` quando o equipamento está em campo depois da `dataDevolucaoPrevista`.

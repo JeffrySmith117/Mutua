@@ -88,7 +88,7 @@ public final class ReservaDtos {
                                 boolean podeCancelar, boolean podeCheckin,
                                 String titulo, String subtitulo, String localOuPatrimonio,
                                 boolean permitirCancelamento, boolean permitirCheckin,
-                                List<String> detalhesTecnicos) {
+                                List<String> detalhesTecnicos, LocalDateTime termoAceitoEm) {
         public static ReservaResumo de(Reserva r, boolean podeCancelar, boolean podeCheckin) {
             Recurso rec = r.getRecurso();
             String local = rec.isEquipamento()
@@ -99,7 +99,8 @@ public final class ReservaDtos {
                     rec.isEquipamento() ? "equipamento" : "ambiente",
                     rec.isEquipamento() ? rec.getPatrimonio() : rec.getLocalizacao(), r.getDataInicio(),
                     r.getDataFim(), r.getStatus(), r.getFinalidade(), r.getCriadoEm(), podeCancelar,
-                    podeCheckin, rec.getNome(), rec.getDescricao(), local, podeCancelar, podeCheckin, detalhes);
+                    podeCheckin, rec.getNome(), rec.getDescricao(), local, podeCancelar, podeCheckin, detalhes,
+                    r.getTermoAceitoEm());
         }
     }
 }

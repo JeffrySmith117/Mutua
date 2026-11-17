@@ -38,7 +38,8 @@ public final class EmprestimoDtos {
                                              LocalDateTime dataRetirada, LocalDateTime dataDevolucaoPrevista,
                                              LocalDateTime dataDevolucaoEfetiva, String condicaoRetirada,
                                              String condicaoDevolucao, String statusMovimentacao,
-                                             String observacoes, boolean emAtraso) {
+                                             String observacoes, boolean emAtraso,
+                                             LocalDateTime termoAceitoEm) {
         public static MovimentacaoBalcaoResponse de(Reserva r, Emprestimo e) {
             String condicaoDevolucao = e == null ? null : e.getCondicaoDevolucao();
             String observacoes = null;
@@ -52,7 +53,8 @@ public final class EmprestimoDtos {
                     e == null ? null : e.getDataDevolucaoEfetiva(),
                     e == null || e.getCondicaoRetirada() == null ? "otimo" : e.getCondicaoRetirada(),
                     condicaoDevolucao, status(r.getStatus(), condicaoDevolucao), observacoes,
-                    r.getStatus() == StatusReserva.EM_USO && Relogio.agora().isAfter(r.getDataFim()));
+                    r.getStatus() == StatusReserva.EM_USO && Relogio.agora().isAfter(r.getDataFim()),
+                    r.getTermoAceitoEm());
         }
 
         private static String status(StatusReserva status, String condicaoDevolucao) {

@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "reserva")
@@ -59,6 +60,14 @@ public class Reserva {
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 
+    /** Momento do aceite eletrônico do Termo de Guarda e Responsabilidade (só equipamentos). */
+    @Column(name = "termo_aceito_em")
+    private LocalDateTime termoAceitoEm;
+
+    /** Versão otimista: impede que operações simultâneas sobre a mesma reserva se sobrescrevam. */
+    @Version
+    private long versao;
+
     public UUID getId() { return id; }
 
     public String getProtocolo() { return protocolo; }
@@ -92,6 +101,9 @@ public class Reserva {
 
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
+
+    public LocalDateTime getTermoAceitoEm() { return termoAceitoEm; }
+    public void setTermoAceitoEm(LocalDateTime termoAceitoEm) { this.termoAceitoEm = termoAceitoEm; }
 
     /** Único ponto de mudança de estado: recusa transições fora do ciclo de vida com 409. */
     public void mudarPara(StatusReserva novo) {
