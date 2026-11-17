@@ -7,6 +7,8 @@ RUN mvn -q -B -DskipTests package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
+# curl é usado pelo HEALTHCHECK; a instalação explícita não depende do que a imagem base traz.
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 # A API roda com um usuário sem privilégios, não como root.
 RUN groupadd --system mutua && useradd --system --gid mutua --no-create-home mutua
 COPY --from=build /app/target/*.jar app.jar

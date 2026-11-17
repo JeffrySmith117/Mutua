@@ -6,6 +6,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import br.icev.mutua.common.ApiException;
 import br.icev.mutua.common.Relogio;
@@ -20,8 +21,11 @@ import br.icev.mutua.usuario.Usuario;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ReservaService {
@@ -32,13 +36,15 @@ public class ReservaService {
     private final RecursoRepository recursos;
     private final AuditoriaService auditoria;
     private final ReservaProperties props;
+    private final TransactionTemplate transacoes;
 
     public ReservaService(ReservaRepository reservas, RecursoRepository recursos, AuditoriaService auditoria,
-                          ReservaProperties props) {
+                          ReservaProperties props, PlatformTransactionManager gerenciadorDeTransacoes) {
         this.reservas = reservas;
         this.recursos = recursos;
         this.auditoria = auditoria;
         this.props = props;
+        this.transacoes = new TransactionTemplate(gerenciadorDeTransacoes);
     }
 
     /**
@@ -165,48 +171,66 @@ public class ReservaService {
 
     /**
      * Rotina periódica: expira pendências sem despacho, marca não comparecimentos e conclui o uso de
-     * ambientes cujo horário acabou.
+     * ambientes cujo horário acabou. Cada reserva é tratada na própria transação: se uma delas for alterada
+     * por outra operação ao mesmo tempo, só ela fica para a próxima rodada, sem desfazer as demais.
      */
-    @Transactional
     public int processarVencimentos() {
         LocalDateTime agora = Relogio.agora();
         int alteradas = 0;
 
         for (Reserva r : reservas.findByStatusAndDataInicioBefore(StatusReserva.PENDENTE, agora)) {
-            r.mudarPara(StatusReserva.CANCELADA);
-            r.setMotivoRecusaCancelamento("Solicitação expirada sem despacho da gestão.");
-            auditoria.registrar(r, "cancelamento", "Solicitação expirada", AuditoriaService.SISTEMA,
-                    r.getMotivoRecusaCancelamento());
-            alteradas++;
+            alteradas += vencer(r.getId(), StatusReserva.PENDENTE, atual -> {
+                atual.mudarPara(StatusReserva.CANCELADA);
+                atual.setMotivoRecusaCancelamento("Solicitação expirada sem despacho da gestão.");
+                auditoria.registrar(atual, "cancelamento", "Solicitação expirada", AuditoriaService.SISTEMA,
+                        atual.getMotivoRecusaCancelamento());
+            });
         }
 
         LocalDateTime limiteCheckin = agora.minusMinutes(props.toleranciaCheckinMinutos());
         for (Reserva r : reservas.findByStatusAndDataInicioBefore(StatusReserva.CONFIRMADA, limiteCheckin)) {
             if (!r.getRecurso().isEquipamento()) {
-                naoCompareceu(r, "Sem check-in dentro da tolerância de " + props.toleranciaCheckinMinutos()
-                        + " minutos.");
-                alteradas++;
+                alteradas += vencer(r.getId(), StatusReserva.CONFIRMADA, atual -> naoCompareceu(atual,
+                        "Sem check-in dentro da tolerância de " + props.toleranciaCheckinMinutos() + " minutos."));
             }
         }
         for (Reserva r : reservas.findByStatusAndDataFimBefore(StatusReserva.CONFIRMADA, agora)) {
             if (r.getRecurso().isEquipamento()) {
-                naoCompareceu(r, "Equipamento não retirado dentro do período reservado.");
-                alteradas++;
+                alteradas += vencer(r.getId(), StatusReserva.CONFIRMADA, atual -> naoCompareceu(atual,
+                        "Equipamento não retirado dentro do período reservado."));
             }
         }
 
         for (Reserva r : reservas.findByStatusAndDataFimBefore(StatusReserva.EM_USO, agora)) {
             if (!r.getRecurso().isEquipamento()) {
-                r.mudarPara(StatusReserva.CONCLUIDA);
-                auditoria.registrar(r, "devolucao", "Uso concluído", AuditoriaService.SISTEMA,
-                        "Horário da reserva encerrado.");
-                alteradas++;
+                alteradas += vencer(r.getId(), StatusReserva.EM_USO, atual -> {
+                    atual.mudarPara(StatusReserva.CONCLUIDA);
+                    auditoria.registrar(atual, "devolucao", "Uso concluído", AuditoriaService.SISTEMA,
+                            "Horário da reserva encerrado.");
+                });
             }
         }
         if (alteradas > 0) {
             log.info("Vencimentos processados: {} reserva(s) atualizada(s).", alteradas);
         }
         return alteradas;
+    }
+
+    /** Aplica o vencimento em transação própria, se a reserva ainda estiver no status esperado. */
+    private int vencer(UUID id, StatusReserva esperado, Consumer<Reserva> acao) {
+        try {
+            Integer feitas = transacoes.execute(status -> reservas.findById(id)
+                    .filter(atual -> atual.getStatus() == esperado)
+                    .map(atual -> {
+                        acao.accept(atual);
+                        return 1;
+                    })
+                    .orElse(0));
+            return feitas == null ? 0 : feitas;
+        } catch (OptimisticLockingFailureException e) {
+            log.info("Reserva {} alterada por outra operação durante os vencimentos; fica para a próxima rodada.", id);
+            return 0;
+        }
     }
 
     public Reserva buscar(UUID id) {

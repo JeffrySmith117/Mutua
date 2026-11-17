@@ -39,6 +39,14 @@ variável, e recusa os valores de desenvolvimento.
 | `CORS_ORIGENS` | Endereços do front, separados por vírgula (ex.: `https://reservas.mutua-pi.com.br`). |
 | `ADMIN_EMAIL`, `ADMIN_SENHA` | Administrador inicial, criado só se ainda não existir nenhum. A senha precisa de 12+ caracteres. |
 
+**Atualização de versão:** pare a versão anterior da API antes de subir a nova (não rode as duas gravando ao
+mesmo tempo). A proteção contra operações simultâneas na reserva depende da coluna `versao` (migração V3), que
+versões antigas da API não atualizam. Com o `docker compose up --build` isso já acontece: o container é recriado.
+
+**Troca da senha do banco:** o PostgreSQL só lê `DB_PASSWORD` na criação do volume. Com o volume já criado, rode
+`ALTER USER mutua PASSWORD '...'` no banco e só depois atualize `DB_PASSWORD` da API (passo a passo no
+`.env.example`).
+
 Em produção o Swagger fica desligado. O `GET /api/v1/actuator/health` é público, para o deploy checar se a API
 está de pé. Rode atrás de um proxy reverso com HTTPS: o perfil `prod` confia no `X-Forwarded-For` dele para
 saber o IP do cliente.

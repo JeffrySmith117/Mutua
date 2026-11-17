@@ -1,6 +1,7 @@
 package br.icev.mutua;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -10,6 +11,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,15 +19,23 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import br.icev.mutua.common.Relogio;
+import br.icev.mutua.reserva.Reserva;
+import br.icev.mutua.reserva.ReservaRepository;
+import br.icev.mutua.reserva.StatusReserva;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 
 /** Despachos simultâneos sobre a mesma solicitação e registro do aceite do Termo de Guarda. */
 class ReservaConcorrenciaTermoTest extends IntegracaoBase {
 
     private static final int DESPACHOS_SIMULTANEOS = 8;
+
+    @Autowired
+    private ReservaRepository reservas;
 
     @Test
     void aprovarERecusarAoMesmoTempoSoUmDespachoVale() throws Exception {
@@ -75,6 +85,27 @@ class ReservaConcorrenciaTermoTest extends IntegracaoBase {
             }
         }
         assertThat(despachos).isEqualTo(1);
+    }
+
+    /**
+     * Versão determinística da disputa: duas operações carregam a mesma versão da reserva antes de qualquer
+     * gravação; a primeira grava e a segunda, que partiu de um estado já ultrapassado, é recusada.
+     */
+    @Test
+    void gravacaoAPartirDeVersaoUltrapassadaERecusada() throws Exception {
+        String token = token(novoProfissional());
+        UUID reservaId = UUID.fromString(json.readTree(solicitarDrone(token, diaUtil(64), true)
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).get("id").asText());
+
+        Reserva aprovacao = reservas.findById(reservaId).orElseThrow();
+        Reserva recusa = reservas.findById(reservaId).orElseThrow();
+        aprovacao.mudarPara(StatusReserva.CONFIRMADA);
+        recusa.mudarPara(StatusReserva.RECUSADA);
+
+        reservas.saveAndFlush(aprovacao);
+        assertThatThrownBy(() -> reservas.saveAndFlush(recusa))
+                .isInstanceOf(OptimisticLockingFailureException.class);
+        assertThat(reservas.findById(reservaId).orElseThrow().getStatus()).isEqualTo(StatusReserva.CONFIRMADA);
     }
 
     @Test
