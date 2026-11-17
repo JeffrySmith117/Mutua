@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { cpfValido } from '../../utils/cpf'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -37,8 +38,8 @@ export default function CadastroPage() {
       setErro('Informe um e-mail válido.')
       return false
     }
-    if (cpf.replace(/\D/g, '').length !== 11) {
-      setErro('Informe um CPF válido com 11 dígitos.')
+    if (!cpfValido(cpf)) {
+      setErro('Informe um CPF válido.')
       return false
     }
     return true

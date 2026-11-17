@@ -66,14 +66,36 @@ public class UsuarioService {
         usuario.setSenhaHash(encoder.encode(novaSenha));
     }
 
-    /** Normaliza para 000.000.000-00. Valida só o formato (11 dígitos), não os dígitos verificadores. */
+    /** Normaliza para 000.000.000-00, validando o tamanho e os dígitos verificadores. */
     public static String formatarCpf(String bruto) {
         String digitos = bruto == null ? "" : bruto.replaceAll("\\D", "");
         if (digitos.length() != 11) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "CPF inválido.",
                     List.of(new CampoInvalido("cpf", "O CPF deve ter 11 dígitos.")));
         }
+        if (!cpfValido(digitos)) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "CPF inválido.",
+                    List.of(new CampoInvalido("cpf", "CPF inválido: confira os números digitados.")));
+        }
         return digitos.substring(0, 3) + "." + digitos.substring(3, 6) + "." + digitos.substring(6, 9)
                 + "-" + digitos.substring(9);
+    }
+
+    /** Confere os dois dígitos verificadores; sequências de um único dígito (111.111.111-11) são inválidas. */
+    static boolean cpfValido(String digitos) {
+        if (digitos.chars().distinct().count() == 1) {
+            return false;
+        }
+        return digitoVerificador(digitos, 9) == digitos.charAt(9) - '0'
+                && digitoVerificador(digitos, 10) == digitos.charAt(10) - '0';
+    }
+
+    private static int digitoVerificador(String digitos, int quantidade) {
+        int soma = 0;
+        for (int i = 0; i < quantidade; i++) {
+            soma += (digitos.charAt(i) - '0') * (quantidade + 1 - i);
+        }
+        int resto = (soma * 10) % 11;
+        return resto == 10 ? 0 : resto;
     }
 }

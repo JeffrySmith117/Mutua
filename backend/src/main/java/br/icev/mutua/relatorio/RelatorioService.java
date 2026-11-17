@@ -35,6 +35,7 @@ import br.icev.mutua.usuario.UsuarioRepository;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -45,11 +46,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RelatorioService {
 
-    private static final int LIMITE_HISTORICO = 200;
+    public static final int LIMITE_HISTORICO = 200;
+
+    /** Uma página do histórico e o total de registros que atendem ao filtro. */
+    public record PaginaHistorico(List<RegistroHistoricoResponse> registros, long total) {
+    }
 
     private static final Map<String, Set<StatusReserva>> GRUPOS_HISTORICO = Map.of(
             "concluida", EnumSet.of(StatusReserva.CONCLUIDA),
-            "cancelada", EnumSet.of(StatusReserva.CANCELADA, StatusReserva.NAO_COMPARECEU),
+            "cancelada", EnumSet.of(StatusReserva.CANCELADA),
+            "nao_compareceu", EnumSet.of(StatusReserva.NAO_COMPARECEU),
             "recusada", EnumSet.of(StatusReserva.RECUSADA),
             "em_uso", EnumSet.of(StatusReserva.EM_USO));
 
@@ -90,8 +96,15 @@ public class RelatorioService {
                 .map(SolicitacaoPendenteResponse::de).toList();
     }
 
-    public List<RegistroHistoricoResponse> historico(String busca, String tipo, String status,
-                                                     LocalDate dataInicio, LocalDate dataFim) {
+    public PaginaHistorico historico(String busca, String tipo, String status, LocalDate dataInicio,
+                                     LocalDate dataFim, int pagina, int tamanho) {
+        if (pagina < 0) {
+            throw ApiException.campoInvalido("pagina", "A página não pode ser negativa.");
+        }
+        if (tamanho < 1 || tamanho > LIMITE_HISTORICO) {
+            throw ApiException.campoInvalido("tamanho", "O tamanho da página deve ficar entre 1 e "
+                    + LIMITE_HISTORICO + ".");
+        }
         Set<StatusReserva> statusAlvo = interpretarStatus(status);
         TipoRecurso tipoAlvo = interpretarTipo(tipo);
 
@@ -123,9 +136,9 @@ public class RelatorioService {
             return cb.and(condicoes.toArray(new Predicate[0]));
         };
 
-        List<Reserva> encontradas = reservas.findAll(filtro,
-                PageRequest.of(0, LIMITE_HISTORICO, Sort.by(Sort.Direction.DESC, "dataInicio"))).getContent();
-        return montarRegistros(encontradas);
+        Page<Reserva> encontradas = reservas.findAll(filtro,
+                PageRequest.of(pagina, tamanho, Sort.by(Sort.Direction.DESC, "dataInicio")));
+        return new PaginaHistorico(montarRegistros(encontradas.getContent()), encontradas.getTotalElements());
     }
 
     public RegistroHistoricoResponse historicoPorId(UUID id) {

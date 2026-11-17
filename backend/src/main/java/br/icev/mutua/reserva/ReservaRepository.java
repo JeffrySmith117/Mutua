@@ -36,6 +36,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID>, JpaSpec
 
     long countByStatus(StatusReserva status);
 
+    long countByUsuarioIdAndStatusInAndDataFimAfter(UUID usuarioId, Collection<StatusReserva> status,
+                                                    LocalDateTime limite);
+
     long countByStatusAndRecursoTipo(StatusReserva status, TipoRecurso tipo);
 
     long countByStatusAndRecursoTipoAndDataFimBefore(StatusReserva status, TipoRecurso tipo, LocalDateTime limite);

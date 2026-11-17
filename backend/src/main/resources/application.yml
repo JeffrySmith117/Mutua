@@ -35,6 +35,12 @@ mutua:
     # O check-in abre este tempo antes do início e fecha após a tolerância acima.
     antecedencia-checkin-minutos: 15
     intervalo-vencimentos-ms: 60000
+    # Limites da solicitação: até quando dá para reservar, duração de cada reserva e quantas reservas
+    # ativas (pendentes, confirmadas ou em uso) um mesmo profissional pode manter.
+    antecedencia-maxima-dias: 90
+    duracao-minima-minutos: 30
+    duracao-maxima-ambiente-horas: 10
+    max-reservas-ativas-por-usuario: 10
   login:
     # Falhas de login toleradas por janela de tempo, por e-mail+IP e por IP.
     max-tentativas-conta: 5

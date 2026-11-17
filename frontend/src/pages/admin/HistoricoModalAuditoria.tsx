@@ -24,6 +24,8 @@ export const HistoricoModalAuditoria: React.FC<Props> = ({ registro, aoFechar })
         return <span className="badge-auditoria status-em-uso">● Em Uso / Em Campo</span>
       case 'cancelada':
         return <span className="badge-auditoria status-cancelada">✕ Cancelada pelo Associado</span>
+      case 'nao_compareceu':
+        return <span className="badge-auditoria status-nao_compareceu">⚠ Não compareceu</span>
       case 'recusada':
         return <span className="badge-auditoria status-recusada">✕ Recusada pela Gestão</span>
       default:

@@ -98,7 +98,8 @@ public final class RelatorioDtos {
         private static String status(StatusReserva status) {
             return switch (status) {
                 case CONCLUIDA -> "concluida";
-                case CANCELADA, NAO_COMPARECEU -> "cancelada";
+                case CANCELADA -> "cancelada";
+                case NAO_COMPARECEU -> "nao_compareceu";
                 case RECUSADA -> "recusada";
                 default -> "em_uso";
             };

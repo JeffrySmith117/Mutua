@@ -24,6 +24,7 @@ export default function AdminPage() {
   const [pendencias, setPendencias] = useState<SolicitacaoPendente[]>([])
   const [movimentacoes, setMovimentacoes] = useState<MovimentacaoBalcao[]>([])
   const [historico, setHistorico] = useState<RegistroHistorico[]>([])
+  const [totalHistorico, setTotalHistorico] = useState(0)
   const [carregando, setCarregando] = useState(true)
 
   // Filtros do Histórico
@@ -54,12 +55,13 @@ export default function AdminPage() {
           adminService.obterMetricas(),
           adminService.listarPendencias(),
           adminService.listarMovimentacoes(),
-          adminService.listarHistorico(),
+          adminService.listarHistoricoComTotal(),
         ])
         setMetricas(dadosMetricas)
         setPendencias(dadosPendencias)
         setMovimentacoes(dadosMov)
-        setHistorico(dadosHist)
+        setHistorico(dadosHist.registros)
+        setTotalHistorico(dadosHist.total)
       } catch (erro) {
         alert(mensagemDeErro(erro))
       } finally {
@@ -587,6 +589,13 @@ export default function AdminPage() {
             ============================================================ */}
         {abaAtiva === 'historico' && (
           <div className="admin-conteudo-aba">
+            {totalHistorico > historico.length && (
+              <p className="historico-aviso-limite" role="status">
+                Exibindo os {historico.length} registros mais recentes de {totalHistorico}. Os filtros
+                abaixo valem só para os registros carregados.
+              </p>
+            )}
+
             {/* Barra de Filtros do Histórico */}
             <div className="historico-filtros-card">
               <div className="historico-filtros-grid">
@@ -643,6 +652,7 @@ export default function AdminPage() {
                     <option value="concluida">✓ Concluídas</option>
                     <option value="em_uso">● Em Uso</option>
                     <option value="cancelada">✕ Canceladas</option>
+                    <option value="nao_compareceu">⚠ Não compareceu</option>
                     <option value="recusada">✕ Recusadas</option>
                   </select>
                 </div>
@@ -764,6 +774,7 @@ export default function AdminPage() {
                               {item.status === 'concluida' && '✓ Concluída'}
                               {item.status === 'em_uso' && '● Em Uso'}
                               {item.status === 'cancelada' && '✕ Cancelada'}
+                              {item.status === 'nao_compareceu' && '⚠ Não compareceu'}
                               {item.status === 'recusada' && '✕ Recusada'}
                             </span>
                           </td>
