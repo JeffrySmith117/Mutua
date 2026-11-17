@@ -70,6 +70,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(Arrays.stream(origens.split(",")).map(String::trim).toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        // Total de registros do histórico paginado, lido pelo painel admin.
+        config.setExposedHeaders(List.of("X-Total-Count"));
         config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource fonte = new UrlBasedCorsConfigurationSource();
         fonte.registerCorsConfiguration("/**", config);

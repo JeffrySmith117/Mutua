@@ -45,7 +45,13 @@ export interface MetricasAdmin {
   profissionaisAtivos: number
 }
 
-export type StatusHistorico = 'concluida' | 'cancelada' | 'recusada' | 'em_uso'
+export type StatusHistorico = 'concluida' | 'cancelada' | 'recusada' | 'em_uso' | 'nao_compareceu'
+
+/** Registros carregados e o total existente no servidor (o histórico vem em páginas de até 200). */
+export interface PaginaHistorico {
+  registros: RegistroHistorico[]
+  total: number
+}
 export type TipoRecursoHistorico = 'todos' | 'ambiente' | 'equipamento'
 
 export interface EventoLinhaTempo {
@@ -514,6 +520,22 @@ export const adminService = {
         totalReservasMes: 47,
         profissionaisAtivos: 312,
       }
+    }
+  },
+
+  /** Como listarHistorico, mas informa também quantos registros existem ao todo no servidor. */
+  async listarHistoricoComTotal(filtros?: FiltrosHistorico): Promise<PaginaHistorico> {
+    try {
+      const resposta = await api.get<RegistroHistorico[]>('/admin/historico', { params: filtros })
+      const total = Number(resposta.headers['x-total-count'])
+      return {
+        registros: resposta.data,
+        total: Number.isFinite(total) ? total : resposta.data.length,
+      }
+    } catch (erro) {
+      falharSeNaoForMock(erro)
+      const registros = await this.listarHistorico(filtros)
+      return { registros, total: registros.length }
     }
   },
 

@@ -161,6 +161,11 @@ já emitidos continuam válidos até expirarem.
 
 ---
 
+**Regras do cadastro e do login:**
+- O CPF é validado pelos dígitos verificadores (`400` no campo `cpf`; `111.111.111-11` é recusado).
+- E-mail ou CPF já cadastrado retorna `409` com mensagem genérica, sem `validationErrors` e sem dizer qual dos dois já existe. A criação de usuários pelo admin (`/admin/usuarios`) continua indicando o campo.
+- O login responde no mesmo tempo para conta existente e inexistente.
+
 ### 4.2 Módulo de Ambientes (`/api/v1/ambientes`)
 
 #### `GET /api/v1/ambientes` (Público ou 🔒)
@@ -292,6 +297,8 @@ Cria uma solicitação de reserva de ambiente ou de empréstimo de equipamento.
 
 **Termo de Guarda e Responsabilidade:** solicitações de equipamento exigem `termoAceito: true` (`400` no campo `termoAceito` caso contrário). O momento do aceite fica gravado na reserva e volta como `termoAceitoEm` em `GET /reservas/minhas`, `GET /admin/movimentacoes` e `GET /admin/historico`; o evento de solicitação da linha do tempo também o registra. Reservas de ambiente não têm o campo.
 
+**Limites da solicitação** (configuráveis em `mutua.reserva.*`): início em até 90 dias (`400` em `dataInicio`), duração mínima de 30 minutos e, para ambientes, máxima de 10 horas (`400` em `dataFim`). Cada profissional pode manter até 10 reservas ativas (pendentes, confirmadas ou em uso); acima disso a solicitação retorna `409`.
+
 #### `GET /api/v1/reservas/minhas` 🔒
 Lista o histórico de reservas do profissional autenticado.
 
@@ -389,7 +396,8 @@ Consulta com filtros de auditoria para fiscalização.
 **Query Parameters Suportados:**
 - `busca`: termo textual (nome do associado, CREA, patrimônio ou protocolo)
 - `tipo`: `todos`, `ambiente` ou `equipamento`
-- `status`: `todos`, `concluida`, `em_uso`, `cancelada`, `recusada`
+- `status`: `todos`, `concluida`, `em_uso`, `cancelada`, `recusada`, `nao_compareceu`
+- `pagina` (padrão 0) e `tamanho` (padrão e máximo 200)
 - `dataInicio`: `YYYY-MM-DD`
 - `dataFim`: `YYYY-MM-DD`
 
@@ -397,6 +405,8 @@ Consulta com filtros de auditoria para fiscalização.
 Lista paginada de objetos com a linha do tempo cronológica (`linhaDoTempo`), dados de vistoria e mascaramento de CPF em conformidade com a LGPD.
 
 ---
+
+**Status e paginação do histórico:** o filtro `status` aceita `concluida`, `em_uso`, `cancelada`, `recusada` e `nao_compareceu` (não comparecimento é um grupo próprio, não entra em `cancelada`). A resposta é uma lista com até `tamanho` registros (padrão e máximo: 200) da página `pagina` (começa em 0); o total de registros que atendem ao filtro vai no cabeçalho `X-Total-Count`.
 
 ### 4.6 Cadastro de Recursos (`/api/v1/admin/recursos`) — Apenas perfil `ADMIN`
 

@@ -14,12 +14,14 @@ import br.icev.mutua.relatorio.RelatorioDtos.MetricasAdmin;
 import br.icev.mutua.relatorio.RelatorioDtos.RegistroHistoricoResponse;
 import br.icev.mutua.relatorio.RelatorioDtos.SolicitacaoPendenteResponse;
 import br.icev.mutua.relatorio.RelatorioService;
+import br.icev.mutua.relatorio.RelatorioService.PaginaHistorico;
 import br.icev.mutua.reserva.ReservaService;
 import br.icev.mutua.usuario.Usuario;
 
 import jakarta.validation.Valid;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +35,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
+
+    public static final String CABECALHO_TOTAL = "X-Total-Count";
 
     private final ReservaService reservas;
     private final EmprestimoService emprestimos;
@@ -85,13 +89,18 @@ public class AdminController {
     }
 
     @GetMapping("/historico")
-    public List<RegistroHistoricoResponse> historico(
+    public ResponseEntity<List<RegistroHistoricoResponse>> historico(
             @RequestParam(required = false) String busca,
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
-        return relatorios.historico(busca, tipo, status, dataInicio, dataFim);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "" + RelatorioService.LIMITE_HISTORICO) int tamanho) {
+        PaginaHistorico resultado = relatorios.historico(busca, tipo, status, dataInicio, dataFim, pagina, tamanho);
+        // O corpo continua sendo a lista; o total (para a tela avisar que há mais páginas) vai no cabeçalho.
+        return ResponseEntity.ok().header(CABECALHO_TOTAL, String.valueOf(resultado.total()))
+                .body(resultado.registros());
     }
 
     @GetMapping("/historico/{id}")
