@@ -396,7 +396,8 @@ Consulta com filtros de auditoria para fiscalização.
 **Query Parameters Suportados:**
 - `busca`: termo textual (nome do associado, CREA, patrimônio ou protocolo)
 - `tipo`: `todos`, `ambiente` ou `equipamento`
-- `status`: `todos`, `concluida`, `em_uso`, `cancelada`, `recusada`
+- `status`: `todos`, `concluida`, `em_uso`, `cancelada`, `recusada`, `nao_compareceu`
+- `pagina` (padrão 0) e `tamanho` (padrão e máximo 200)
 - `dataInicio`: `YYYY-MM-DD`
 - `dataFim`: `YYYY-MM-DD`
 
