@@ -37,8 +37,7 @@ class CadastroLimitesHistoricoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.validationErrors[0].field").value("cpf")); // CT09
         cadastrar(novoEmail(), "123.456.789-00").andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.validationErrors[0].field").value("cpf"));
-        cadastrar(novoEmail(), "529.982.247-25").andExpect(status().is(
-                org.hamcrest.Matchers.anyOf(org.hamcrest.Matchers.is(201), org.hamcrest.Matchers.is(409))));
+        cadastrar(novoEmail(), cpfAleatorio()).andExpect(status().isCreated());
     }
 
     @Test
@@ -66,6 +65,11 @@ class CadastroLimitesHistoricoTest extends IntegracaoBase {
 
         reservar(token, sala, diaUtil(120), "09:00", "10:00").andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.validationErrors[0].field").value("dataInicio"));
+        // O limite conta a partir do instante atual, não só da data: 90 dias e algumas horas à frente é recusado.
+        Relogio.fixar(diaUtil(10).atTime(8, 0));
+        reservar(token, sala, diaUtil(10).plusDays(90), "09:00", "10:00").andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors[0].field").value("dataInicio"));
+        Relogio.restaurar();
         reservar(token, sala, diaUtil(75), "09:00", "09:10").andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.validationErrors[0].field").value("dataFim"));
     }

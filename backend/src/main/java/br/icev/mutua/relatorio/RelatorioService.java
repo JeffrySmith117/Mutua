@@ -137,7 +137,9 @@ public class RelatorioService {
         };
 
         Page<Reserva> encontradas = reservas.findAll(filtro,
-                PageRequest.of(pagina, tamanho, Sort.by(Sort.Direction.DESC, "dataInicio")));
+                PageRequest.of(pagina, tamanho,
+                        // O id desempata reservas com o mesmo início, para a ordem ser estável entre páginas.
+                        Sort.by(Sort.Order.desc("dataInicio"), Sort.Order.asc("id"))));
         return new PaginaHistorico(montarRegistros(encontradas.getContent()), encontradas.getTotalElements());
     }
 

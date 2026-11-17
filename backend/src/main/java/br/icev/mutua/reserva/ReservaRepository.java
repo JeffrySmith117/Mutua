@@ -36,8 +36,14 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID>, JpaSpec
 
     long countByStatus(StatusReserva status);
 
-    long countByUsuarioIdAndStatusInAndDataFimAfter(UUID usuarioId, Collection<StatusReserva> status,
-                                                    LocalDateTime limite);
+    long countByUsuarioIdAndStatusIn(UUID usuarioId, Collection<StatusReserva> status);
+
+    /**
+     * Trava a linha do usuário até o fim da transação: solicitações simultâneas do mesmo profissional, mesmo
+     * para recursos diferentes, passam uma de cada vez pela contagem do limite de reservas ativas.
+     */
+    @Query(value = "select id from usuario where id = :usuarioId for update", nativeQuery = true)
+    UUID travarUsuario(@Param("usuarioId") UUID usuarioId);
 
     long countByStatusAndRecursoTipo(StatusReserva status, TipoRecurso tipo);
 

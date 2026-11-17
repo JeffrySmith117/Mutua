@@ -62,7 +62,7 @@ public class ReservaService {
         }
         LocalDateTime agora = Relogio.agora();
         validarJanela(recurso, periodo, agora);
-        validarLimiteDoUsuario(usuario, agora);
+        validarLimiteDoUsuario(usuario);
         validarRequisitosDoEquipamento(recurso, req);
         verificarConflito(recurso, periodo);
 
@@ -271,7 +271,7 @@ public class ReservaService {
         if (p.inicio().isBefore(agora.minusMinutes(1))) {
             throw ApiException.campoInvalido("dataInicio", "Não é possível reservar um horário no passado.");
         }
-        if (p.inicio().toLocalDate().isAfter(agora.toLocalDate().plusDays(props.antecedenciaMaximaDias()))) {
+        if (p.inicio().isAfter(agora.plusDays(props.antecedenciaMaximaDias()))) {
             throw ApiException.campoInvalido("dataInicio", "As reservas podem ser feitas com até "
                     + props.antecedenciaMaximaDias() + " dias de antecedência.");
         }
@@ -311,12 +311,13 @@ public class ReservaService {
     }
 
     /** Impede que um mesmo profissional acumule reservas ativas e bloqueie a agenda dos demais. */
-    private void validarLimiteDoUsuario(Usuario usuario, LocalDateTime agora) {
+    private void validarLimiteDoUsuario(Usuario usuario) {
         if (usuario.isAdmin()) {
             return;
         }
-        long ativas = reservas.countByUsuarioIdAndStatusInAndDataFimAfter(usuario.getId(), StatusReserva.ATIVAS,
-                agora);
+        reservas.travarUsuario(usuario.getId());
+        // Conta pelo status, sem olhar a data: empréstimo em atraso (EM_USO após o fim) continua ocupando o limite.
+        long ativas = reservas.countByUsuarioIdAndStatusIn(usuario.getId(), StatusReserva.ATIVAS);
         if (ativas >= props.maxReservasAtivasPorUsuario()) {
             throw ApiException.conflito("Você já tem " + ativas + " reservas ativas, o máximo permitido é "
                     + props.maxReservasAtivasPorUsuario() + ". Conclua ou cancele alguma antes de solicitar outra.");
