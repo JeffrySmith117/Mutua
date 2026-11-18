@@ -42,6 +42,10 @@ public class Usuario {
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 
+    /** Sobe quando a senha muda ou o usuário sai: tokens emitidos com outra versão deixam de valer. */
+    @Column(name = "sessao_versao")
+    private long sessaoVersao;
+
     public UUID getId() { return id; }
 
     public String getNome() { return nome; }
@@ -70,6 +74,11 @@ public class Usuario {
 
     public LocalDateTime getCriadoEm() { return criadoEm; }
     public void setCriadoEm(LocalDateTime criadoEm) { this.criadoEm = criadoEm; }
+
+    public long getSessaoVersao() { return sessaoVersao; }
+
+    /** Invalida todos os tokens já emitidos para este usuário. */
+    public void encerrarSessoes() { this.sessaoVersao++; }
 
     public boolean isAdmin() { return perfil == Perfil.ADMIN; }
 }

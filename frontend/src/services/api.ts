@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { tokenExpirado } from '../utils/jwt'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:8080/api/v1' : '/api/v1'),
@@ -14,6 +15,15 @@ const ROTAS_DE_AUTENTICACAO = ['/auth/login', '/auth/cadastro']
 // Interceptor: adiciona token de autenticação em todas as requisições
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('@mutua:token')
+  if (token && tokenExpirado(token)) {
+    // Token vencido: nem chega ao servidor, a sessão termina aqui.
+    localStorage.removeItem('@mutua:token')
+    localStorage.removeItem('@mutua:usuario')
+    if (window.location.pathname !== '/entrar') {
+      window.location.href = '/entrar'
+    }
+    throw new axios.CanceledError('Sessão expirada. Entre novamente.')
+  }
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

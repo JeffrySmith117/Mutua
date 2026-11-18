@@ -24,6 +24,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, UUID>, JpaSpec
 
     List<Reserva> findByUsuarioIdOrderByDataInicioDesc(UUID usuarioId);
 
+    List<Reserva> findByRecursoIdAndStatusInAndDataFimAfter(UUID recursoId, Collection<StatusReserva> status,
+                                                            LocalDateTime limite);
+
     List<Reserva> findByStatusOrderByCriadoEmAsc(StatusReserva status);
 
     List<Reserva> findByStatusAndDataInicioBefore(StatusReserva status, LocalDateTime limite);

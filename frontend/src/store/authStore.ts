@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Usuario } from '../types'
+import { tokenExpirado } from '../utils/jwt'
 
 interface AuthState {
   usuario: Usuario | null
@@ -22,8 +23,15 @@ const obterUsuarioSalvo = (): Usuario | null => {
   }
 }
 
-const tokenSalvo = localStorage.getItem('@mutua:token')
-const usuarioInicial = obterUsuarioSalvo()
+// Sessão salva com token vencido não conta como logado: limpa e começa deslogado.
+let tokenSalvo = localStorage.getItem('@mutua:token')
+let usuarioInicial = obterUsuarioSalvo()
+if (tokenSalvo && tokenExpirado(tokenSalvo)) {
+  localStorage.removeItem('@mutua:token')
+  localStorage.removeItem('@mutua:usuario')
+  tokenSalvo = null
+  usuarioInicial = null
+}
 
 export const useAuthStore = create<AuthState>((set) => ({
   usuario: usuarioInicial,

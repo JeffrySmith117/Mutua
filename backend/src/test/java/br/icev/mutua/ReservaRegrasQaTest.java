@@ -75,7 +75,11 @@ class ReservaRegrasQaTest extends IntegracaoBase {
         String token = token(novoProfissional());
         String admin = tokenAdmin();
         String drone = idPorNome(token, "/equipamentos", "Drone DJI Phantom 4 RTK");
+        // Retirada de segunda a quarta, para a devolução (dois dias depois) também cair em dia útil.
         LocalDate retirada = diaUtil(50);
+        while (retirada.getDayOfWeek().getValue() > DayOfWeek.WEDNESDAY.getValue()) {
+            retirada = retirada.plusDays(1);
+        }
         String id = json.readTree(solicitar(token, drone, retirada, retirada.plusDays(2), "Levantamento", "ART: 99")
                 .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString()).get("id").asText();
         mvc.perform(post("/admin/pendencias/" + id + "/aprovar").header("Authorization", "Bearer " + admin)

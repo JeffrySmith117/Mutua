@@ -50,8 +50,8 @@ public class UsuarioService {
 
     /**
      * Troca a senha do próprio usuário. A senha atual errada é 400 (e não 401) de propósito: o front trata
-     * qualquer 401 como sessão expirada e desloga. O JWT é stateless, então tokens já emitidos continuam
-     * válidos até expirar.
+     * qualquer 401 como sessão expirada e desloga. Ao trocar a senha, os tokens já emitidos deixam de valer
+     * (o usuário entra de novo com a senha nova).
      */
     @Transactional
     public void alterarSenha(UUID usuarioId, String senhaAtual, String novaSenha) {
@@ -64,6 +64,13 @@ public class UsuarioService {
             throw ApiException.campoInvalido("novaSenha", "A nova senha deve ser diferente da atual.");
         }
         usuario.setSenhaHash(encoder.encode(novaSenha));
+        usuario.encerrarSessoes(); // tokens emitidos com a senha antiga deixam de valer
+    }
+
+    /** Encerra as sessões do usuário: os tokens emitidos até agora, em qualquer dispositivo, deixam de valer. */
+    @Transactional
+    public void encerrarSessoes(UUID usuarioId) {
+        usuarios.findById(usuarioId).ifPresent(Usuario::encerrarSessoes);
     }
 
     /** Normaliza para 000.000.000-00, validando o tamanho e os dígitos verificadores. */

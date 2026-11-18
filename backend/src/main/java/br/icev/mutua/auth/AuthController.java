@@ -58,9 +58,10 @@ public class AuthController {
         usuarios.alterarSenha(usuario.getId(), req.senhaAtual(), req.novaSenha());
     }
 
-    /** O JWT é stateless: o logout acontece no cliente descartando o token. */
+    /** Encerra as sessões do usuário: o token enviado e os demais já emitidos deixam de valer. */
     @PostMapping("/sair")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void sair() {
+    public void sair(@AuthenticationPrincipal Usuario usuario) {
+        usuarios.encerrarSessoes(usuario.getId());
     }
 }

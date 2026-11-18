@@ -156,8 +156,14 @@ Troca a senha do próprio usuário. Responde `204 No Content`.
 }
 ```
 Senha atual incorreta, nova senha igual à atual ou fora de 8 a 72 caracteres retornam `400` (com o campo em
-`validationErrors`). A senha atual errada **não** é `401`, para o front não tratá-la como sessão expirada. Tokens
-já emitidos continuam válidos até expirarem.
+`validationErrors`). A senha atual errada **não** é `401`, para o front não tratá-la como sessão expirada. Ao
+trocar a senha, **todos os tokens já emitidos deixam de valer** (`401` no uso seguinte, inclusive o token que fez a
+troca): o usuário entra de novo com a senha nova.
+
+#### `POST /api/v1/auth/sair` 🔒
+Encerra as sessões do usuário: o token enviado e os demais já emitidos para ele, em qualquer dispositivo, passam a
+responder `401`. Responde `204`. O front também descarta o token localmente e trata como deslogado um token cujo
+`exp` já passou.
 
 ---
 
@@ -417,7 +423,7 @@ Cadastro de ambientes e equipamentos. Um novo espaço ou equipamento é só um r
 | `GET` | `/admin/recursos` | Lista todos os recursos, inclusive os inativos. |
 | `GET` | `/admin/recursos/{id}` | Detalha um recurso. |
 | `POST` | `/admin/recursos` | Cadastra (`201 Created`). |
-| `PUT` | `/admin/recursos/{id}` | Atualiza os dados. O `tipo` não pode ser alterado (`400`). |
+| `PUT` | `/admin/recursos/{id}` | Atualiza os dados. O `tipo` não pode ser alterado (`400`). Mudar horário, dias da semana, capacidade ou prazo máximo é recusado com `409` se alguma reserva pendente ou confirmada ficaria fora do novo funcionamento (ou, no coworking, acima da nova capacidade); a mensagem lista os protocolos afetados. Reservas em uso não entram na conferência. |
 | `PATCH` | `/admin/recursos/{id}/ativo` | Ativa ou desativa (`{"ativo": false}`). |
 
 **Request Body (`POST` e `PUT`)** — só `nome` e `tipo` são obrigatórios; o restante tem padrão
