@@ -28,6 +28,12 @@ public class JwtService {
     /** Prefixo do segredo de desenvolvimento do application.yml, proibido no perfil prod. */
     static final String SEGREDO_DE_DESENVOLVIMENTO = "troque-este-segredo";
 
+    private static final String CLAIM_SESSAO = "sv";
+
+    /** Usuário dono do token e a versão de sessão com que ele foi emitido (tokens antigos, sem versão, valem 0). */
+    public record TokenValido(UUID usuarioId, long sessaoVersao) {
+    }
+
     public JwtService(@Value("${mutua.jwt.secret}") String segredo,
                       @Value("${mutua.jwt.expiracao-horas}") long horas, Environment ambiente) {
         byte[] bytes = segredo.getBytes(StandardCharsets.UTF_8);
@@ -46,19 +52,21 @@ public class JwtService {
         return Jwts.builder()
                 .subject(usuario.getId().toString())
                 .claim("perfil", usuario.getPerfil().name())
+                .claim(CLAIM_SESSAO, usuario.getSessaoVersao())
                 .issuedAt(Date.from(agora))
                 .expiration(Date.from(agora.plus(expiracao)))
                 .signWith(chave)
                 .compact();
     }
 
-    /** Devolve o id do usuário dono do token, ou vazio se o token for inválido ou estiver expirado. */
-    public Optional<UUID> validar(String token) {
+    /** Devolve o dono e a versão de sessão do token, ou vazio se ele for inválido ou estiver expirado. */
+    public Optional<TokenValido> validar(String token) {
         try {
-            String sujeito = Jwts.parser().verifyWith(chave).build()
-                    .parseSignedClaims(token).getPayload().getSubject();
-            return Optional.of(UUID.fromString(sujeito));
-        } catch (JwtException | IllegalArgumentException e) {
+            var carga = Jwts.parser().verifyWith(chave).build().parseSignedClaims(token).getPayload();
+            Object versao = carga.get(CLAIM_SESSAO);
+            return Optional.of(new TokenValido(UUID.fromString(carga.getSubject()),
+                    versao instanceof Number n ? n.longValue() : 0L));
+        } catch (JwtException | IllegalArgumentException | ClassCastException e) {
             return Optional.empty();
         }
     }
