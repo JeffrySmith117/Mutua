@@ -1,6 +1,6 @@
 # Back-end — Mútua-PI Reservas
 
-API REST em Java 21 + Spring Boot 3.4, PostgreSQL, JWT. Implementa o contrato em
+API REST em Java 25 + Spring Boot 3.4, PostgreSQL, JWT. Implementa o contrato em
 [`docs/contrato-api-backend.md`](../docs/contrato-api-backend.md). Base: `http://localhost:8080/api/v1`.
 
 ## Como rodar
