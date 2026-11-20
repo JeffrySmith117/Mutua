@@ -1,6 +1,8 @@
 package br.icev.mutua.emprestimo;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,14 +23,17 @@ import br.icev.mutua.reserva.StatusReserva;
 import br.icev.mutua.usuario.Usuario;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EmprestimoService {
 
-    private static final Set<StatusReserva> NO_BALCAO =
-            Set.of(StatusReserva.CONFIRMADA, StatusReserva.EM_USO, StatusReserva.CONCLUIDA);
+    private static final Set<StatusReserva> EM_ABERTO = Set.of(StatusReserva.CONFIRMADA, StatusReserva.EM_USO);
+    private static final int LIMITE_ENCERRADAS = 100;
+
+    private static final DateTimeFormatter FORMATO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final ReservaRepository reservas;
     private final EmprestimoRepository emprestimos;
@@ -43,7 +48,11 @@ public class EmprestimoService {
 
     @Transactional(readOnly = true)
     public List<MovimentacaoBalcaoResponse> listar() {
-        List<Reserva> lista = reservas.buscarPorTipoEStatus(TipoRecurso.EQUIPAMENTO, NO_BALCAO, PageRequest.of(0, 100));
+        // Pendências do balcão (aguardando retirada e em campo, inclusive em atraso) nunca ficam de fora do corte.
+        List<Reserva> lista = new ArrayList<>(reservas.buscarPorTipoEStatus(TipoRecurso.EQUIPAMENTO, EM_ABERTO,
+                Pageable.unpaged()));
+        lista.addAll(reservas.buscarPorTipoEStatus(TipoRecurso.EQUIPAMENTO, Set.of(StatusReserva.CONCLUIDA),
+                PageRequest.of(0, LIMITE_ENCERRADAS)));
         Map<UUID, Emprestimo> porReserva = lista.isEmpty() ? Map.of()
                 : emprestimos.findByReservaIdIn(lista.stream().map(Reserva::getId).toList()).stream()
                 .collect(Collectors.toMap(e -> e.getReserva().getId(), Function.identity()));
@@ -53,11 +62,19 @@ public class EmprestimoService {
     @Transactional
     public MovimentacaoBalcaoResponse retirar(Usuario admin, UUID reservaId, RetiradaRequest req) {
         Reserva reserva = equipamento(reservaId);
+        LocalDateTime agora = Relogio.agora();
+        if (agora.isBefore(reserva.getDataInicio())) {
+            throw ApiException.conflito("A retirada só é permitida a partir do início do período reservado ("
+                    + reserva.getDataInicio().format(FORMATO) + ").");
+        }
+        if (agora.isAfter(reserva.getDataFim())) {
+            throw ApiException.conflito("O período reservado terminou em " + reserva.getDataFim().format(FORMATO)
+                    + "; a retirada não pode mais ser registrada.");
+        }
         reserva.mudarPara(StatusReserva.EM_USO);
 
         String condicao = req == null || req.condicao() == null ? "otimo" : req.condicao();
         String observacao = req == null ? null : req.observacao();
-        LocalDateTime agora = Relogio.agora();
 
         Emprestimo emprestimo = new Emprestimo();
         emprestimo.setReserva(reserva);

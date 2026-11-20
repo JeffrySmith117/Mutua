@@ -1,5 +1,5 @@
-import api from './api'
-import type { Usuario } from '../types'
+import api, { falharSeNaoForMock } from './api'
+import type { PerfilUsuario, Usuario } from '../types'
 
 export interface LoginDTO {
   email: string
@@ -20,6 +20,24 @@ export interface AuthResponse {
   token: string
 }
 
+// A API devolve o perfil em maiúsculas (PROFISSIONAL, ADMIN); as telas comparam em minúsculas.
+type UsuarioApi = Omit<Usuario, 'perfil'> & { perfil: string }
+
+interface AuthResponseApi {
+  usuario: UsuarioApi
+  token: string
+}
+
+const paraUsuario = (usuario: UsuarioApi): Usuario => ({
+  ...usuario,
+  perfil: usuario.perfil.toLowerCase() as PerfilUsuario,
+})
+
+const paraAuthResponse = (resposta: AuthResponseApi): AuthResponse => ({
+  token: resposta.token,
+  usuario: paraUsuario(resposta.usuario),
+})
+
 // Mock institucional de contingência para desenvolvimento do frontend sem backend ativo
 const criarUsuarioMock = (
   email: string,
@@ -28,7 +46,7 @@ const criarUsuarioMock = (
   registroCrea?: string
 ): Usuario => ({
   id: 'usr-' + Math.random().toString(36).substring(2, 9),
-  nome: nome || (email.toLowerCase().includes('elias') ? 'Elias Pio Mendes' : 'Associado Mútua-PI'),
+  nome: nome || 'Associado Mútua-PI',
   email: email,
   cpf: cpf || '123.456.789-00',
   registroCrea: registroCrea || 'CREA-PI 32415/D',
@@ -40,9 +58,10 @@ const criarUsuarioMock = (
 export const authService = {
   async entrar(dados: LoginDTO): Promise<AuthResponse> {
     try {
-      const resposta = await api.post<AuthResponse>('/auth/entrar', dados)
-      return resposta.data
+      const resposta = await api.post<AuthResponseApi>('/auth/login', dados)
+      return paraAuthResponse(resposta.data)
     } catch (erro) {
+      falharSeNaoForMock(erro)
       console.warn(
         '[Mútua-PI] Backend não detectado. Iniciando sessão com dados simulados para desenvolvimento frontend:',
         erro
@@ -59,9 +78,10 @@ export const authService = {
 
   async cadastrar(dados: CadastroDTO): Promise<AuthResponse> {
     try {
-      const resposta = await api.post<AuthResponse>('/auth/cadastrar', dados)
-      return resposta.data
+      const resposta = await api.post<AuthResponseApi>('/auth/cadastro', dados)
+      return paraAuthResponse(resposta.data)
     } catch (erro) {
+      falharSeNaoForMock(erro)
       console.warn(
         '[Mútua-PI] Backend não detectado. Concluindo cadastro simulado para desenvolvimento frontend:',
         erro
@@ -77,9 +97,10 @@ export const authService = {
 
   async perfil(): Promise<Usuario> {
     try {
-      const resposta = await api.get<Usuario>('/auth/perfil')
-      return resposta.data
-    } catch {
+      const resposta = await api.get<UsuarioApi>('/auth/me')
+      return paraUsuario(resposta.data)
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return criarUsuarioMock('elias.mendes@creapi.org.br')
     }
   },

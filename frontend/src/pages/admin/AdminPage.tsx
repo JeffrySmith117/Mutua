@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   adminService,
   type SolicitacaoPendente,
@@ -8,16 +9,22 @@ import {
   type StatusHistorico,
   type TipoRecursoHistorico,
 } from '../../services/adminService'
+import { mensagemDeErro } from '../../services/api'
 import type { CondicaoEquipamento } from '../../types'
 import HistoricoModalAuditoria from './HistoricoModalAuditoria'
 import './Admin.css'
 
 export default function AdminPage() {
+  const queryClient = useQueryClient()
+  // Evita disparar duas ações administrativas ao mesmo tempo (clique duplo, aprovar e recusar em seguida).
+  const acaoEmAndamento = useRef(false)
+  const atualizarCatalogoDeEquipamentos = () => queryClient.invalidateQueries({ queryKey: ['equipamentos'] })
   const [abaAtiva, setAbaAtiva] = useState<'pendencias' | 'balcao' | 'inventario' | 'historico'>('pendencias')
   const [metricas, setMetricas] = useState<MetricasAdmin | null>(null)
   const [pendencias, setPendencias] = useState<SolicitacaoPendente[]>([])
   const [movimentacoes, setMovimentacoes] = useState<MovimentacaoBalcao[]>([])
   const [historico, setHistorico] = useState<RegistroHistorico[]>([])
+  const [totalHistorico, setTotalHistorico] = useState(0)
   const [carregando, setCarregando] = useState(true)
 
   // Filtros do Histórico
@@ -48,12 +55,15 @@ export default function AdminPage() {
           adminService.obterMetricas(),
           adminService.listarPendencias(),
           adminService.listarMovimentacoes(),
-          adminService.listarHistorico(),
+          adminService.listarHistoricoComTotal(),
         ])
         setMetricas(dadosMetricas)
         setPendencias(dadosPendencias)
         setMovimentacoes(dadosMov)
-        setHistorico(dadosHist)
+        setHistorico(dadosHist.registros)
+        setTotalHistorico(dadosHist.total)
+      } catch (erro) {
+        alert(mensagemDeErro(erro))
       } finally {
         setCarregando(false)
       }
@@ -118,7 +128,17 @@ export default function AdminPage() {
 
   // Aprovação
   const handleAprovar = async (sol: SolicitacaoPendente) => {
-    await adminService.aprovarSolicitacao(sol.id)
+    if (acaoEmAndamento.current) return
+    acaoEmAndamento.current = true
+    try {
+      await adminService.aprovarSolicitacao(sol.id)
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    } finally {
+      acaoEmAndamento.current = false
+    }
+    atualizarCatalogoDeEquipamentos()
     setPendencias((prev) => prev.filter((p) => p.id !== sol.id))
     if (metricas) {
       setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
@@ -128,11 +148,20 @@ export default function AdminPage() {
 
   // Recusa
   const handleConfirmarRecusa = async () => {
-    if (!solicitacaoParaRecusa) return
-    await adminService.recusarSolicitacao(
-      solicitacaoParaRecusa.id,
-      motivoRecusa || 'Incompatibilidade com o regulamento de uso'
-    )
+    if (!solicitacaoParaRecusa || acaoEmAndamento.current) return
+    acaoEmAndamento.current = true
+    try {
+      await adminService.recusarSolicitacao(
+        solicitacaoParaRecusa.id,
+        motivoRecusa || 'Incompatibilidade com o regulamento de uso'
+      )
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    } finally {
+      acaoEmAndamento.current = false
+    }
+    atualizarCatalogoDeEquipamentos()
     setPendencias((prev) => prev.filter((p) => p.id !== solicitacaoParaRecusa.id))
     if (metricas) {
       setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
@@ -144,12 +173,21 @@ export default function AdminPage() {
 
   // Devolução no Balcão
   const handleConfirmarDevolucao = async () => {
-    if (!movimentacaoParaDevolucao) return
-    await adminService.registrarDevolucao(
-      movimentacaoParaDevolucao.id,
-      condicaoDevolucao,
-      obsDevolucao
-    )
+    if (!movimentacaoParaDevolucao || acaoEmAndamento.current) return
+    acaoEmAndamento.current = true
+    try {
+      await adminService.registrarDevolucao(
+        movimentacaoParaDevolucao.id,
+        condicaoDevolucao,
+        obsDevolucao
+      )
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
+      return
+    } finally {
+      acaoEmAndamento.current = false
+    }
+    atualizarCatalogoDeEquipamentos()
 
     setMovimentacoes((prev) =>
       prev.map((m) =>
@@ -241,7 +279,11 @@ export default function AdminPage() {
           <div className="kpi-info-bloco">
             <span className="kpi-valor-grande">{metricas?.equipamentosEmCampo ?? 1}</span>
             <span className="kpi-rotulo-texto">Equipamentos em Campo</span>
-            <span className="kpi-descricao-texto">Com termo de guarda ativo</span>
+            <span className="kpi-descricao-texto">
+              {metricas?.equipamentosEmAtraso
+                ? `⚠ ${metricas.equipamentosEmAtraso} em atraso na devolução`
+                : 'Com termo de guarda ativo'}
+            </span>
           </div>
         </div>
 
@@ -431,8 +473,8 @@ export default function AdminPage() {
                       </td>
                       <td>{formatarDataHora(mov.dataDevolucaoPrevista)}</td>
                       <td>
-                        <span className={`badge-balcao-status status-${mov.statusMovimentacao}`}>
-                          {mov.statusMovimentacao === 'em_campo' && '● Em Campo'}
+                        <span className={`badge-balcao-status status-${mov.statusMovimentacao}${mov.emAtraso ? ' status-em_atraso' : ''}`}>
+                          {mov.statusMovimentacao === 'em_campo' && (mov.emAtraso ? '⚠ Em Atraso' : '● Em Campo')}
                           {mov.statusMovimentacao === 'devolvido' && '✓ Devolvido'}
                           {mov.statusMovimentacao === 'aguardando_retirada' && '⏳ Aguarda Retirada'}
                         </span>
@@ -547,6 +589,13 @@ export default function AdminPage() {
             ============================================================ */}
         {abaAtiva === 'historico' && (
           <div className="admin-conteudo-aba">
+            {totalHistorico > historico.length && (
+              <p className="historico-aviso-limite" role="status">
+                Exibindo os {historico.length} registros mais recentes de {totalHistorico}. Os filtros
+                abaixo valem só para os registros carregados.
+              </p>
+            )}
+
             {/* Barra de Filtros do Histórico */}
             <div className="historico-filtros-card">
               <div className="historico-filtros-grid">
@@ -603,6 +652,7 @@ export default function AdminPage() {
                     <option value="concluida">✓ Concluídas</option>
                     <option value="em_uso">● Em Uso</option>
                     <option value="cancelada">✕ Canceladas</option>
+                    <option value="nao_compareceu">⚠ Não compareceu</option>
                     <option value="recusada">✕ Recusadas</option>
                   </select>
                 </div>
@@ -724,6 +774,7 @@ export default function AdminPage() {
                               {item.status === 'concluida' && '✓ Concluída'}
                               {item.status === 'em_uso' && '● Em Uso'}
                               {item.status === 'cancelada' && '✕ Cancelada'}
+                              {item.status === 'nao_compareceu' && '⚠ Não compareceu'}
                               {item.status === 'recusada' && '✕ Recusada'}
                             </span>
                           </td>

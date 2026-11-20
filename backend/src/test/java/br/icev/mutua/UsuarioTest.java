@@ -102,8 +102,4 @@ class UsuarioTest extends IntegracaoBase {
                 + "\"}";
     }
 
-    private String cpfAleatorio() {
-        long cpf = Math.abs(UUID.randomUUID().getMostSignificantBits() % 100_000_000_000L);
-        return String.format("%011d", cpf);
-    }
 }

@@ -48,7 +48,7 @@ public class ReservaController {
 
     @PatchMapping("/{id}/cancelar")
     public ReservaResumo cancelar(@AuthenticationPrincipal Usuario usuario, @PathVariable UUID id,
-                                  @RequestBody(required = false) CancelarRequest req) {
+                                  @Valid @RequestBody(required = false) CancelarRequest req) {
         return reservas.cancelar(usuario, id, req == null ? null : req.motivo());
     }
 

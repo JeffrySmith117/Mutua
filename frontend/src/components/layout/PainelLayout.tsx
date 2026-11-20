@@ -11,16 +11,12 @@ export default function PainelLayout() {
   const { usuario, sair } = useAuthStore()
   const navigate = useNavigate()
 
-  // Usuário padrão de exibição caso não haja login persistido ainda
-  const usuarioExibicao = usuario || {
-    id: 'mock-1',
-    nome: 'Elias Pio Mendes',
-    email: 'elias.mendes@creapi.org.br',
-    cpf: '123.456.789-00',
-    registroCrea: 'CREA-PI 32415/D',
+  // A RotaProtegida garante usuário logado; sem ele não há o que exibir.
+  const usuarioExibicao = usuario ?? {
+    nome: '',
+    email: '',
+    registroCrea: '',
     perfil: 'profissional' as const,
-    ativo: true,
-    criadoEm: new Date().toISOString(),
   }
 
   const obterIniciais = (nome: string) => {
@@ -164,6 +160,7 @@ export default function PainelLayout() {
               <span className="nav-texto">Minhas Reservas</span>
             </NavLink>
 
+            {usuario?.perfil === 'admin' && (
             <NavLink
               to="/admin"
               className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
@@ -177,6 +174,7 @@ export default function PainelLayout() {
               <span className="nav-texto">Painel Gestor (Admin)</span>
               <span className="nav-tag-destaque" style={{ background: '#f59e0b' }}>3</span>
             </NavLink>
+            )}
           </div>
 
           <div className="nav-grupo">

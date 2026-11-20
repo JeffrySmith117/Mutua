@@ -161,6 +161,11 @@ já emitidos continuam válidos até expirarem.
 
 ---
 
+**Regras do cadastro e do login:**
+- O CPF é validado pelos dígitos verificadores (`400` no campo `cpf`; `111.111.111-11` é recusado).
+- E-mail ou CPF já cadastrado retorna `409` com mensagem genérica, sem `validationErrors` e sem dizer qual dos dois já existe. A criação de usuários pelo admin (`/admin/usuarios`) continua indicando o campo.
+- O login responde no mesmo tempo para conta existente e inexistente.
+
 ### 4.2 Módulo de Ambientes (`/api/v1/ambientes`)
 
 #### `GET /api/v1/ambientes` (Público ou 🔒)
@@ -290,6 +295,10 @@ Cria uma solicitação de reserva de ambiente ou de empréstimo de equipamento.
 }
 ```
 
+**Termo de Guarda e Responsabilidade:** solicitações de equipamento exigem `termoAceito: true` (`400` no campo `termoAceito` caso contrário). O momento do aceite fica gravado na reserva e volta como `termoAceitoEm` em `GET /reservas/minhas`, `GET /admin/movimentacoes` e `GET /admin/historico`; o evento de solicitação da linha do tempo também o registra. Reservas de ambiente não têm o campo.
+
+**Limites da solicitação** (configuráveis em `mutua.reserva.*`): início em até 90 dias (`400` em `dataInicio`), duração mínima de 30 minutos e, para ambientes, máxima de 10 horas (`400` em `dataFim`). Cada profissional pode manter até 10 reservas ativas (pendentes, confirmadas ou em uso); acima disso a solicitação retorna `409`.
+
 #### `GET /api/v1/reservas/minhas` 🔒
 Lista o histórico de reservas do profissional autenticado.
 
@@ -324,6 +333,7 @@ Cancela a reserva solicitada (libera o horário para outros profissionais).
 
 #### `POST /api/v1/reservas/{id}/checkin` 🔒
 Realiza o check-in presencial em salas ou mesas de coworking.
+**Janela:** abre 15 minutos antes do início e fecha 30 minutos depois dele (`mutua.reserva.antecedencia-checkin-minutos` e `tolerancia-checkin-minutos`). Fora dela responde `409`. Depois da tolerância a reserva passa a `NAO_COMPARECEU`.
 
 ---
 
@@ -358,11 +368,17 @@ Rejeita a solicitação informando o parecer formal.
 }
 ```
 
+**Despachos simultâneos:** se dois despachos chegam ao mesmo tempo para a mesma solicitação (aprovar e recusar, ou o mesmo botão duas vezes), só o primeiro vale; os demais recebem `409`. O mesmo vale para cancelamento, check-in, retirada e devolução concorrentes sobre a mesma reserva.
+
 #### `GET /api/v1/admin/movimentacoes` 🔒
-Lista as movimentações ativas de balcão do Crea Tec HUB (equipamentos aguardando retirada e equipamentos em campo).
+Lista as movimentações de balcão do Crea Tec HUB: todas as que estão aguardando retirada ou em campo (sem corte) e as 100 devoluções mais recentes. Cada item traz `emAtraso: true` quando o equipamento está em campo depois da `dataDevolucaoPrevista`.
 
 #### `POST /api/v1/admin/movimentacoes/{id}/retirar` 🔒
-Registra a retirada no balcão físico, emitindo o termo e marcando como `EM_USO`.
+Registra a retirada no balcão físico, emitindo o termo e marcando como `EM_USO`. Só é aceita dentro do período reservado (`409` antes do início ou depois do fim).
+
+**Solicitações de equipamento:** retirada e devolução precisam cair nos dias da semana e no horário de funcionamento do balcão (`400` caso contrário).
+
+**Limites de tamanho** (`400` com o campo indicado): `finalidade` até 1000 caracteres, `documentoVinculado` até 180, `numeroArt` até 150, e motivo, observação e parecer até 500.
 
 #### `POST /api/v1/admin/movimentacoes/{id}/devolver` 🔒
 Registra a devolução do equipamento e sua conferência física.
@@ -380,7 +396,8 @@ Consulta com filtros de auditoria para fiscalização.
 **Query Parameters Suportados:**
 - `busca`: termo textual (nome do associado, CREA, patrimônio ou protocolo)
 - `tipo`: `todos`, `ambiente` ou `equipamento`
-- `status`: `todos`, `concluida`, `em_uso`, `cancelada`, `recusada`
+- `status`: `todos`, `concluida`, `em_uso`, `cancelada`, `recusada`, `nao_compareceu`
+- `pagina` (padrão 0) e `tamanho` (padrão e máximo 200)
 - `dataInicio`: `YYYY-MM-DD`
 - `dataFim`: `YYYY-MM-DD`
 
@@ -388,6 +405,8 @@ Consulta com filtros de auditoria para fiscalização.
 Lista paginada de objetos com a linha do tempo cronológica (`linhaDoTempo`), dados de vistoria e mascaramento de CPF em conformidade com a LGPD.
 
 ---
+
+**Status e paginação do histórico:** o filtro `status` aceita `concluida`, `em_uso`, `cancelada`, `recusada` e `nao_compareceu` (não comparecimento é um grupo próprio, não entra em `cancelada`). A resposta é uma lista com até `tamanho` registros (padrão e máximo: 200) da página `pagina` (começa em 0); o total de registros que atendem ao filtro vai no cabeçalho `X-Total-Count`.
 
 ### 4.6 Cadastro de Recursos (`/api/v1/admin/recursos`) — Apenas perfil `ADMIN`
 

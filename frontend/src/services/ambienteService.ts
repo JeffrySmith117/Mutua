@@ -1,5 +1,5 @@
-import api from './api'
-import type { Ambiente, Reserva } from '../types'
+import api, { falharSeNaoForMock } from './api'
+import type { Ambiente, Reserva, ReservaCriada, TipoAmbiente } from '../types'
 
 export interface FiltrosAmbientes {
   tipo?: string
@@ -141,12 +141,49 @@ export const AMBIENTES_INICIAIS: (Ambiente & {
   },
 ]
 
+export type AmbienteCompleto = (typeof AMBIENTES_INICIAIS)[number]
+
+// Formato devolvido por GET /ambientes (ver docs/contrato-api-backend.md).
+interface AmbienteApi {
+  id: string
+  nome: string
+  tipo: string
+  capacidade: number
+  localizacao?: string
+  descricao?: string
+  recursosDisponiveis?: string[]
+  horarioFuncionamento: string
+  exigeAprovacao: boolean
+  ativo: boolean
+}
+
+// A API só distingue COWORKING, SALA e AUDITORIO; toda sala aparece como sala de reunião.
+const TIPO_DA_API: Record<string, TipoAmbiente> = {
+  COWORKING: 'coworking',
+  SALA: 'sala_reuniao',
+  AUDITORIO: 'auditorio',
+}
+
+const paraAmbiente = (ambiente: AmbienteApi): AmbienteCompleto => ({
+  id: ambiente.id,
+  nome: ambiente.nome,
+  tipo: TIPO_DA_API[ambiente.tipo] ?? 'sala_reuniao',
+  capacidade: ambiente.capacidade,
+  descricao: ambiente.descricao ?? '',
+  recursos: ambiente.recursosDisponiveis ?? [],
+  horarioFuncionamento: ambiente.horarioFuncionamento,
+  localizacao: ambiente.localizacao ?? '',
+  regrasUso: ambiente.exigeAprovacao ? ['A reserva depende de aprovação da gestão da Mútua-PI'] : [],
+  ativo: ambiente.ativo,
+})
+
 export const ambienteService = {
   async listar(filtros?: FiltrosAmbientes): Promise<typeof AMBIENTES_INICIAIS> {
     try {
-      const resposta = await api.get('/ambientes', { params: filtros })
-      return resposta.data
-    } catch {
+      const resposta = await api.get<AmbienteApi[]>('/ambientes', { params: filtros })
+      return resposta.data.map(paraAmbiente)
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       // Fallback autônomo com filtros em memória
       let filtrados = [...AMBIENTES_INICIAIS]
 
@@ -174,21 +211,23 @@ export const ambienteService = {
 
   async buscarPorId(id: string) {
     try {
-      const resposta = await api.get(`/ambientes/${id}`)
-      return resposta.data
-    } catch {
+      const resposta = await api.get<AmbienteApi>(`/ambientes/${id}`)
+      return paraAmbiente(resposta.data)
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return AMBIENTES_INICIAIS.find((a) => a.id === id) || null
     }
   },
 
-  async reservar(dados: CriarReservaAmbienteDTO): Promise<Reserva> {
+  async reservar(dados: CriarReservaAmbienteDTO): Promise<ReservaCriada> {
     try {
-      const resposta = await api.post<Reserva>('/reservas', {
+      const resposta = await api.post<ReservaCriada>('/reservas', {
         tipo: 'ambiente',
         ...dados,
       })
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       // Simulação autônoma de reserva persistida localmente
       const ambiente = AMBIENTES_INICIAIS.find((a) => a.id === dados.ambienteId)
       const novaReserva: Reserva = {
@@ -216,7 +255,11 @@ export const ambienteService = {
         // Ignora erro de storage se indisponível
       }
 
-      return novaReserva
+      return {
+        id: novaReserva.id,
+        protocolo: 'MUT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000),
+        status: 'CONFIRMADA',
+      }
     }
   },
 }

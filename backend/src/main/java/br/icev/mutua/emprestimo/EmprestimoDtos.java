@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import br.icev.mutua.common.Relogio;
 import br.icev.mutua.reserva.Reserva;
 import br.icev.mutua.reserva.StatusReserva;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public final class EmprestimoDtos {
 
@@ -19,13 +21,15 @@ public final class EmprestimoDtos {
     }
 
     public record RetiradaRequest(@Pattern(regexp = CONDICOES, message = MENSAGEM_CONDICAO) String condicao,
+                                  @Size(max = 500, message = "A observação deve ter no máximo 500 caracteres.")
                                   String observacao) {
     }
 
     public record DevolucaoRequest(
             @NotBlank(message = "Informe a condição do equipamento.")
             @Pattern(regexp = CONDICOES, message = MENSAGEM_CONDICAO) String condicao,
-            String observacao, List<String> itensConferidos) {
+            @Size(max = 500, message = "A observação deve ter no máximo 500 caracteres.") String observacao,
+            @Size(max = 50, message = "Informe no máximo 50 itens conferidos.") List<String> itensConferidos) {
     }
 
     /** Forma consumida pelo balcão do painel admin (o id é o da reserva). */
@@ -34,7 +38,8 @@ public final class EmprestimoDtos {
                                              LocalDateTime dataRetirada, LocalDateTime dataDevolucaoPrevista,
                                              LocalDateTime dataDevolucaoEfetiva, String condicaoRetirada,
                                              String condicaoDevolucao, String statusMovimentacao,
-                                             String observacoes) {
+                                             String observacoes, boolean emAtraso,
+                                             LocalDateTime termoAceitoEm) {
         public static MovimentacaoBalcaoResponse de(Reserva r, Emprestimo e) {
             String condicaoDevolucao = e == null ? null : e.getCondicaoDevolucao();
             String observacoes = null;
@@ -47,7 +52,9 @@ public final class EmprestimoDtos {
                     e == null ? null : e.getDataRetirada(), r.getDataFim(),
                     e == null ? null : e.getDataDevolucaoEfetiva(),
                     e == null || e.getCondicaoRetirada() == null ? "otimo" : e.getCondicaoRetirada(),
-                    condicaoDevolucao, status(r.getStatus(), condicaoDevolucao), observacoes);
+                    condicaoDevolucao, status(r.getStatus(), condicaoDevolucao), observacoes,
+                    r.getStatus() == StatusReserva.EM_USO && Relogio.agora().isAfter(r.getDataFim()),
+                    r.getTermoAceitoEm());
         }
 
         private static String status(StatusReserva status, String condicaoDevolucao) {

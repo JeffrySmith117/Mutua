@@ -1,4 +1,4 @@
-import api from './api'
+import api, { falharSeNaoForMock } from './api'
 import type { CondicaoEquipamento } from '../types'
 
 export interface SolicitacaoPendente {
@@ -32,17 +32,26 @@ export interface MovimentacaoBalcao {
   condicaoDevolucao?: CondicaoEquipamento
   statusMovimentacao: 'aguardando_retirada' | 'em_campo' | 'devolvido' | 'avaria_registrada'
   observacoes?: string
+  /** Em campo depois da devolução prevista. */
+  emAtraso?: boolean
 }
 
 export interface MetricasAdmin {
   solicitacoesPendentes: number
   equipamentosEmCampo: number
+  equipamentosEmAtraso?: number
   taxaOcupacaoSalas: string
   totalReservasMes: number
   profissionaisAtivos: number
 }
 
-export type StatusHistorico = 'concluida' | 'cancelada' | 'recusada' | 'em_uso'
+export type StatusHistorico = 'concluida' | 'cancelada' | 'recusada' | 'em_uso' | 'nao_compareceu'
+
+/** Registros carregados e o total existente no servidor (o histórico vem em páginas de até 200). */
+export interface PaginaHistorico {
+  registros: RegistroHistorico[]
+  total: number
+}
 export type TipoRecursoHistorico = 'todos' | 'ambiente' | 'equipamento'
 
 export interface EventoLinhaTempo {
@@ -434,7 +443,8 @@ export const adminService = {
     try {
       const resposta = await api.get<SolicitacaoPendente[]>('/admin/pendencias')
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return SOLICITACOES_MOCK
     }
   },
@@ -443,7 +453,8 @@ export const adminService = {
     try {
       const resposta = await api.get<MovimentacaoBalcao[]>('/admin/movimentacoes')
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return MOVIMENTACOES_MOCK
     }
   },
@@ -452,7 +463,8 @@ export const adminService = {
     try {
       await api.post(`/admin/pendencias/${id}/aprovar`, { observacao })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -461,7 +473,8 @@ export const adminService = {
     try {
       await api.post(`/admin/pendencias/${id}/recusar`, { motivo })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -474,7 +487,8 @@ export const adminService = {
     try {
       await api.post(`/admin/movimentacoes/${id}/retirar`, { condicao, observacao })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -487,7 +501,8 @@ export const adminService = {
     try {
       await api.post(`/admin/movimentacoes/${id}/devolver`, { condicao, observacao })
       return true
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return true
     }
   },
@@ -496,7 +511,8 @@ export const adminService = {
     try {
       const resposta = await api.get<MetricasAdmin>('/admin/metricas')
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return {
         solicitacoesPendentes: 3,
         equipamentosEmCampo: 1,
@@ -507,11 +523,28 @@ export const adminService = {
     }
   },
 
+  /** Como listarHistorico, mas informa também quantos registros existem ao todo no servidor. */
+  async listarHistoricoComTotal(filtros?: FiltrosHistorico): Promise<PaginaHistorico> {
+    try {
+      const resposta = await api.get<RegistroHistorico[]>('/admin/historico', { params: filtros })
+      const total = Number(resposta.headers['x-total-count'])
+      return {
+        registros: resposta.data,
+        total: Number.isFinite(total) ? total : resposta.data.length,
+      }
+    } catch (erro) {
+      falharSeNaoForMock(erro)
+      const registros = await this.listarHistorico(filtros)
+      return { registros, total: registros.length }
+    }
+  },
+
   async listarHistorico(filtros?: FiltrosHistorico): Promise<RegistroHistorico[]> {
     try {
       const resposta = await api.get<RegistroHistorico[]>('/admin/historico', { params: filtros })
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       let resultado = [...HISTORICO_MOCK]
       if (!filtros) return resultado
 
@@ -551,7 +584,8 @@ export const adminService = {
     try {
       const resposta = await api.get<RegistroHistorico>(`/admin/historico/${id}`)
       return resposta.data
-    } catch {
+    } catch (erro) {
+      falharSeNaoForMock(erro)
       return HISTORICO_MOCK.find((r) => r.id === id) || null
     }
   },

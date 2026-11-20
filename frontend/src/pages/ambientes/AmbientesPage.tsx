@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AMBIENTES_INICIAIS, ambienteService } from '../../services/ambienteService'
+import { useQuery } from '@tanstack/react-query'
+import { ambienteService, type AmbienteCompleto } from '../../services/ambienteService'
+import { mensagemDeErro } from '../../services/api'
 import './Ambientes.css'
+import { dataLocal } from '../../utils/data'
 
-type AmbienteCompleto = (typeof AMBIENTES_INICIAIS)[0]
+const SEM_AMBIENTES: AmbienteCompleto[] = []
 
 export default function AmbientesPage() {
   const navigate = useNavigate()
@@ -16,7 +19,7 @@ export default function AmbientesPage() {
   // Estados do modal de reserva
   const [ambienteSelecionado, setAmbienteSelecionado] = useState<AmbienteCompleto | null>(null)
   const [dataReserva, setDataReserva] = useState(
-    new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    dataLocal(1)
   )
   const [horarioInicio, setHorarioInicio] = useState('14:00')
   const [horarioFim, setHorarioFim] = useState('16:00')
@@ -26,14 +29,24 @@ export default function AmbientesPage() {
   const [enviando, setEnviando] = useState(false)
   const [reservaConfirmada, setReservaConfirmada] = useState<{
     protocolo: string
+    /** Recursos que exigem aprovação ficam pendentes até o despacho da gestão. */
+    pendente: boolean
     ambienteNome: string
     data: string
     horario: string
   } | null>(null)
 
+  // Catálogo vindo da API
+  const {
+    data: ambientes = SEM_AMBIENTES,
+    isLoading: carregando,
+    error: erroAoCarregar,
+    refetch: recarregar,
+  } = useQuery({ queryKey: ['ambientes'], queryFn: () => ambienteService.listar() })
+
   // Filtragem dos ambientes em tempo real
   const ambientesFiltrados = useMemo(() => {
-    return AMBIENTES_INICIAIS.filter((item) => {
+    return ambientes.filter((item) => {
       // Filtro de tipo
       if (tipoFiltro !== 'todos' && item.tipo !== tipoFiltro) return false
 
@@ -52,7 +65,7 @@ export default function AmbientesPage() {
 
       return true
     })
-  }, [tipoFiltro, capacidadeFiltro, termoBusca])
+  }, [ambientes, tipoFiltro, capacidadeFiltro, termoBusca])
 
   // Submissão da reserva
   const handleConfirmarReserva = async (e: React.FormEvent) => {
@@ -62,7 +75,7 @@ export default function AmbientesPage() {
     setEnviando(true)
 
     try {
-      await ambienteService.reservar({
+      const criada = await ambienteService.reservar({
         ambienteId: ambienteSelecionado.id,
         data: dataReserva,
         horarioInicio,
@@ -71,14 +84,9 @@ export default function AmbientesPage() {
         quantidadePessoas,
       })
 
-      const protocoloGerado =
-        'MUT-' +
-        new Date().getFullYear() +
-        '-' +
-        Math.floor(1000 + Math.random() * 9000)
-
       setReservaConfirmada({
-        protocolo: protocoloGerado,
+        protocolo: criada.protocolo,
+        pendente: criada.status === 'PENDENTE',
         ambienteNome: ambienteSelecionado.nome,
         data: new Date(dataReserva + 'T12:00:00').toLocaleDateString('pt-BR', {
           day: '2-digit',
@@ -87,8 +95,8 @@ export default function AmbientesPage() {
         }),
         horario: `${horarioInicio} às ${horarioFim}`,
       })
-    } catch {
-      alert('Não foi possível registrar a reserva no momento.')
+    } catch (erro) {
+      alert(mensagemDeErro(erro))
     } finally {
       setEnviando(false)
     }
@@ -120,13 +128,13 @@ export default function AmbientesPage() {
 
         <div className="resumo-ocupacao-bloco">
           <div className="bloco-dado">
-            <span className="bloco-valor">{AMBIENTES_INICIAIS.length}</span>
+            <span className="bloco-valor">{ambientes.length}</span>
             <span className="bloco-rotulo">Espaços Totais</span>
           </div>
           <div className="bloco-divisor" />
           <div className="bloco-dado">
-            <span className="bloco-valor destaque-verde">4 Livres</span>
-            <span className="bloco-rotulo">Hoje</span>
+            <span className="bloco-valor destaque-verde">{ambientes.length} Ativos</span>
+            <span className="bloco-rotulo">Para Reserva</span>
           </div>
         </div>
       </header>
@@ -170,7 +178,7 @@ export default function AmbientesPage() {
               className={`pilula-filtro ${tipoFiltro === 'todos' ? 'pilula-ativa' : ''}`}
               onClick={() => setTipoFiltro('todos')}
             >
-              Todos os Espaços ({AMBIENTES_INICIAIS.length})
+              Todos os Espaços ({ambientes.length})
             </button>
             <button
               type="button"
@@ -227,7 +235,21 @@ export default function AmbientesPage() {
           CATÁLOGO DE CARDS DOS AMBIENTES
           ============================================================ */}
       <section className="grid-ambientes-cards">
-        {ambientesFiltrados.length === 0 ? (
+        {carregando ? (
+          <div className="empty-state-ambientes">
+            <span className="empty-icone">⏳</span>
+            <h3 className="empty-titulo">Carregando espaços...</h3>
+          </div>
+        ) : erroAoCarregar ? (
+          <div className="empty-state-ambientes">
+            <span className="empty-icone">⚠️</span>
+            <h3 className="empty-titulo">Não foi possível carregar os espaços</h3>
+            <p className="empty-desc">{mensagemDeErro(erroAoCarregar)}</p>
+            <button type="button" className="btn btn-primario" onClick={() => recarregar()}>
+              Tentar novamente
+            </button>
+          </div>
+        ) : ambientesFiltrados.length === 0 ? (
           <div className="empty-state-ambientes">
             <span className="empty-icone">🔍</span>
             <h3 className="empty-titulo">Nenhum espaço encontrado</h3>
@@ -364,9 +386,15 @@ export default function AmbientesPage() {
             {reservaConfirmada ? (
               <div className="modal-sucesso-bloco">
                 <div className="icone-sucesso-animado">✓</div>
-                <h4 className="sucesso-titulo">Reserva Confirmada com Sucesso!</h4>
+                <h4 className="sucesso-titulo">
+                  {reservaConfirmada.pendente
+                    ? 'Solicitação Enviada com Sucesso!'
+                    : 'Reserva Confirmada com Sucesso!'}
+                </h4>
                 <p className="sucesso-mensagem">
-                  Seu espaço foi agendado e reservado na sede da Mútua-PI.
+                  {reservaConfirmada.pendente
+                    ? 'O horário está reservado para você e aguarda a aprovação da gestão da Mútua-PI.'
+                    : 'Seu espaço foi agendado e reservado na sede da Mútua-PI.'}
                 </p>
 
                 <div className="card-resumo-confirmacao">
@@ -433,7 +461,7 @@ export default function AmbientesPage() {
                     id="data-reserva"
                     type="date"
                     required
-                    min={new Date().toISOString().split('T')[0]}
+                    min={dataLocal()}
                     value={dataReserva}
                     onChange={(e) => setDataReserva(e.target.value)}
                     className="input-modal-padrao"
@@ -442,7 +470,7 @@ export default function AmbientesPage() {
                     <button
                       type="button"
                       className="btn-atalho-data"
-                      onClick={() => setDataReserva(new Date().toISOString().split('T')[0])}
+                      onClick={() => setDataReserva(dataLocal())}
                     >
                       Hoje
                     </button>
@@ -451,7 +479,7 @@ export default function AmbientesPage() {
                       className="btn-atalho-data"
                       onClick={() =>
                         setDataReserva(
-                          new Date(Date.now() + 86400000).toISOString().split('T')[0]
+                          dataLocal(1)
                         )
                       }
                     >

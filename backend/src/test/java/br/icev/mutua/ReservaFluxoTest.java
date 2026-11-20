@@ -215,6 +215,7 @@ class ReservaFluxoTest extends IntegracaoBase {
                         .contentType(MediaType.APPLICATION_JSON).content("{\"observacao\":\"Aprovado.\"}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("aprovada"));
 
+        Relogio.fixar(retirada.atTime(9, 0)); // dentro do período reservado (08:30 do primeiro dia)
         mvc.perform(post("/admin/movimentacoes/" + id + "/retirar").header("Authorization", "Bearer " + admin)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"condicao\":\"otimo\",\"observacao\":\"Retirado.\"}"))

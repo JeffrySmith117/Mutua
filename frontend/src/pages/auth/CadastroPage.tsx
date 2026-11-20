@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { cpfValido } from '../../utils/cpf'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { authService } from '../../services/authService'
+import { mensagemDeErro } from '../../services/api'
 import './Auth.css'
 
 export default function CadastroPage() {
@@ -36,16 +38,16 @@ export default function CadastroPage() {
       setErro('Informe um e-mail válido.')
       return false
     }
-    if (cpf.replace(/\D/g, '').length !== 11) {
-      setErro('Informe um CPF válido com 11 dígitos.')
+    if (!cpfValido(cpf)) {
+      setErro('Informe um CPF válido.')
       return false
     }
     return true
   }
 
   function validarEtapa2(): boolean {
-    if (senha.length < 6) {
-      setErro('A senha deve ter no mínimo 6 caracteres.')
+    if (senha.length < 8) {
+      setErro('A senha deve ter no mínimo 8 caracteres.')
       return false
     }
     if (senha !== confirmarSenha) {
@@ -81,8 +83,8 @@ export default function CadastroPage() {
       })
       definirUsuario(resposta.usuario, resposta.token)
       navigate('/')
-    } catch {
-      setErro('Não foi possível criar a conta. Verifique os dados e tente novamente.')
+    } catch (erro) {
+      setErro(mensagemDeErro(erro))
       definirCarregando(false)
     }
   }
@@ -309,11 +311,11 @@ export default function CadastroPage() {
                       id="cadastro-senha"
                       type={mostrarSenha ? 'text' : 'password'}
                       className="auth-input"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                       autoComplete="new-password"
                     />
                     <button
@@ -343,7 +345,7 @@ export default function CadastroPage() {
                         className={`auth-forca-progresso ${
                           senha.length === 0
                             ? ''
-                            : senha.length < 6
+                            : senha.length < 8
                             ? 'fraca'
                             : senha.length < 10
                             ? 'media'
@@ -354,7 +356,7 @@ export default function CadastroPage() {
                     <span className="auth-forca-texto">
                       {senha.length === 0
                         ? ''
-                        : senha.length < 6
+                        : senha.length < 8
                         ? 'Fraca'
                         : senha.length < 10
                         ? 'Média'

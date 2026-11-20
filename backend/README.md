@@ -8,8 +8,12 @@ API REST em Java 21 + Spring Boot 3.4, PostgreSQL, JWT. Implementa o contrato em
 Com Docker (banco + API):
 
 ```bash
+cp .env.example .env   # na raiz do projeto: senha do banco, JWT_SECRET e senha do admin
 docker compose up --build
 ```
+
+O compose exige o `.env` (não há senhas padrão nele) e não publica a porta do banco. A imagem da API roda com
+usuário sem privilégios e tem `HEALTHCHECK` em `/api/v1/actuator/health`.
 
 Sem Docker, com um PostgreSQL local (banco, usuário e senha `mutua`):
 
@@ -20,8 +24,8 @@ mvn spring-boot:run
 
 Swagger: `http://localhost:8080/api/v1/swagger-ui.html`.
 
-Na primeira subida é criado o administrador `admin@mutua-pi.com.br` / `admin123`
-(`ADMIN_EMAIL` / `ADMIN_SENHA` mudam isso). **Troque a senha e o `JWT_SECRET` fora do desenvolvimento.**
+Na primeira subida é criado o administrador definido em `ADMIN_EMAIL` / `ADMIN_SENHA`
+(`admin@mutua-pi.com.br` / `admin123` no `.env.example` e no `mvn spring-boot:run` sem variáveis). **Troque a senha e o `JWT_SECRET` fora do desenvolvimento.**
 
 ## Produção
 
@@ -34,6 +38,14 @@ variável, e recusa os valores de desenvolvimento.
 | `JWT_SECRET` | Segredo de assinatura do token. Mínimo de 32 caracteres, e não pode ser o de desenvolvimento. |
 | `CORS_ORIGENS` | Endereços do front, separados por vírgula (ex.: `https://reservas.mutua-pi.com.br`). |
 | `ADMIN_EMAIL`, `ADMIN_SENHA` | Administrador inicial, criado só se ainda não existir nenhum. A senha precisa de 12+ caracteres. |
+
+**Atualização de versão:** pare a versão anterior da API antes de subir a nova (não rode as duas gravando ao
+mesmo tempo). A proteção contra operações simultâneas na reserva depende da coluna `versao` (migração V3), que
+versões antigas da API não atualizam. Com o `docker compose up --build` isso já acontece: o container é recriado.
+
+**Troca da senha do banco:** o PostgreSQL só lê `DB_PASSWORD` na criação do volume. Com o volume já criado, rode
+`ALTER USER mutua PASSWORD '...'` no banco e só depois atualize `DB_PASSWORD` da API (passo a passo no
+`.env.example`).
 
 Em produção o Swagger fica desligado. O `GET /api/v1/actuator/health` é público, para o deploy checar se a API
 está de pé. Rode atrás de um proxy reverso com HTTPS: o perfil `prod` confia no `X-Forwarded-For` dele para

@@ -12,7 +12,7 @@ public final class AdminDtos {
     private AdminDtos() {
     }
 
-    public record AprovarRequest(String observacao) {
+    public record AprovarRequest(@Size(max = 500, message = "A observação deve ter no máximo 500 caracteres.") String observacao) {
     }
 
     /** Criação de usuário pelo admin, com o perfil escolhido (inclusive outro ADMIN). */
@@ -27,6 +27,7 @@ public final class AdminDtos {
             @NotNull(message = "Informe o perfil.") Perfil perfil) {
     }
 
-    public record RecusarRequest(@NotBlank(message = "Informe o parecer da recusa.") String motivo) {
+    public record RecusarRequest(@NotBlank(message = "Informe o parecer da recusa.")
+                                 @Size(max = 500, message = "O parecer deve ter no máximo 500 caracteres.") String motivo) {
     }
 }

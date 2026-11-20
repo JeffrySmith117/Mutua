@@ -16,6 +16,7 @@ import br.icev.mutua.usuario.UsuarioRepository;
 import br.icev.mutua.usuario.UsuarioService;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,8 @@ public class AuthService {
     private final JwtService jwt;
     private final LimitadorDeTentativas falhasPorConta;
     private final LimitadorDeTentativas falhasPorIp;
+    /** Hash usado quando a conta não existe, para o login levar o mesmo tempo nos dois casos. */
+    private final String hashFicticio;
 
     public AuthService(UsuarioRepository usuarios, UsuarioService usuarioService, PasswordEncoder encoder,
                        JwtService jwt,
@@ -39,6 +42,7 @@ public class AuthService {
         this.usuarioService = usuarioService;
         this.encoder = encoder;
         this.jwt = jwt;
+        this.hashFicticio = encoder.encode("senha-ficticia-" + java.util.UUID.randomUUID());
         Duration janela = Duration.ofMinutes(janelaMinutos);
         this.falhasPorConta = new LimitadorDeTentativas(maxPorConta, janela, Clock.systemUTC());
         this.falhasPorIp = new LimitadorDeTentativas(maxPorIp, janela, Clock.systemUTC());
@@ -57,9 +61,10 @@ public class AuthService {
             throw ApiException.muitasTentativas("Muitas tentativas de login. Aguarde alguns minutos e tente de novo.");
         }
 
-        Optional<Usuario> usuario = usuarios.findByEmailIgnoreCase(email)
-                .filter(Usuario::isAtivo)
-                .filter(u -> encoder.matches(req.senha(), u.getSenhaHash()));
+        // O BCrypt roda sempre, exista a conta ou não: sem isso o tempo de resposta revelaria quem é cadastrado.
+        Optional<Usuario> conta = usuarios.findByEmailIgnoreCase(email).filter(Usuario::isAtivo);
+        boolean senhaConfere = encoder.matches(req.senha(), conta.map(Usuario::getSenhaHash).orElse(hashFicticio));
+        Optional<Usuario> usuario = conta.filter(u -> senhaConfere);
         if (usuario.isEmpty()) {
             falhasPorIp.registrarFalha(ip);
             falhasPorConta.registrarFalha(chaveConta);
@@ -75,8 +80,18 @@ public class AuthService {
         if (req.confirmarSenha() != null && !req.confirmarSenha().equals(req.senha())) {
             throw ApiException.campoInvalido("confirmarSenha", "A confirmação de senha não confere.");
         }
-        Usuario usuario = usuarioService.criar(req.nome(), req.email(), req.senha(), req.cpf(),
-                req.registroCrea(), req.telefone(), Perfil.PROFISSIONAL);
+        Usuario usuario;
+        try {
+            usuario = usuarioService.criar(req.nome(), req.email(), req.senha(), req.cpf(),
+                    req.registroCrea(), req.telefone(), Perfil.PROFISSIONAL);
+        } catch (ApiException e) {
+            if (e.getStatus() != HttpStatus.CONFLICT) {
+                throw e;
+            }
+            // Rota pública: não diz se foi o e-mail ou o CPF que já existe (LGPD: revelaria quem é cadastrado).
+            throw ApiException.conflito("Não foi possível concluir o cadastro com os dados informados. "
+                    + "Se você já tem uma conta, entre com seu e-mail e senha.");
+        }
 
         return new CadastroResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(),
                 usuario.getRegistroCrea(), usuario.getPerfil(), "Cadastro realizado com sucesso.",

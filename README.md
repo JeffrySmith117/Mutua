@@ -18,7 +18,7 @@ Plataforma web que permite aos profissionais vinculados ao Sistema Confea/CREA c
 ```
 Mutua/
 ├── frontend/          # React + TypeScript + Vite
-├── backend/           # (a definir)
+├── backend/           # Java 21 + Spring Boot 3.4 + PostgreSQL (API REST com JWT)
 └── docs/              # Documentação do projeto
 ```
 
@@ -74,12 +74,42 @@ chore: instala dependências do projeto frontend
 
 ## 🚀 Como Rodar Localmente
 
+Do clone ao sistema integrado, em 3 passos. Pré-requisitos: **Docker** e **Node.js 20+**.
+
+**1. Banco e API** (na raiz do projeto)
+
 ```bash
-# Frontend
+cp .env.example .env
+docker compose up --build
+```
+
+O `.env` guarda a senha do banco, o `JWT_SECRET` e a senha do administrador inicial; sem ele o `docker compose` não sobe. A API fica em `http://localhost:8080/api/v1` (Swagger em `/swagger-ui.html`). O PostgreSQL não é publicado fora do Docker: para consultar os dados use `docker compose exec db psql -U mutua mutua`.
+
+**2. Front-end** (em outro terminal)
+
+```bash
 cd frontend
+cp .env.example .env
 npm install
 npm run dev
 ```
+
+O `.env.example` já aponta para a API local (`VITE_API_URL=http://localhost:8080/api/v1`) e deixa o modo de demonstração desligado (`VITE_USE_MOCK=false`), para os erros reais da API aparecerem na tela.
+
+**3. Acessar:** abra `http://localhost:5173`.
+
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador (criado na primeira subida) | `ADMIN_EMAIL` do `.env` (`admin@mutua-pi.com.br`) | `ADMIN_SENHA` do `.env` (`admin123` no exemplo) |
+| Profissional | crie em "Criar uma conta" (senha de 8+ caracteres, CPF com 11 dígitos) | — |
+
+> ⚠️ Os valores do `.env.example` (senha do admin, `JWT_SECRET` e senha do banco) são **só para desenvolvimento**: troque-os no seu `.env`. Em produção use `SPRING_PROFILES_ACTIVE=prod` e as variáveis descritas em [`backend/README.md`](backend/README.md).
+
+**Sem Docker:** com um PostgreSQL local (banco, usuário e senha `mutua`), rode `cd backend && mvn spring-boot:run`.
+
+**Sem back-end (apenas demonstração do front):** defina `VITE_USE_MOCK=true` no `.env`. Os dados passam a ser simulados no navegador.
+
+**Testes do back-end:** `cd backend && mvn verify` (sobem um PostgreSQL embutido, sem Docker).
 
 ---
 
@@ -115,6 +145,6 @@ A documentação detalhada para desenvolvedores e equipe de gestão está centra
 - [x] Painel administrativo com fila de despacho de solicitações da diretoria
 - [x] Balcão de fiscalização com registro de retirada, devolução e vistoria de conservação
 - [x] Histórico de utilização e auditoria com linha do tempo e filtros LGPD
-- [ ] Integração com Back-end Spring Boot (API em desenvolvimento)
+- [x] Integração do front com o back-end Spring Boot (API real, erros e perfis tratados na interface)
 - [ ] Notificações e lembretes por e-mail/WhatsApp (Fase 2)
 - [ ] Relatórios analíticos e indicadores gráficos de ocupação (Fase 2)
