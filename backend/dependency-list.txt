@@ -1,0 +1,18 @@
+
+The following files have been resolved:
+   org.springframework.boot:spring-boot-starter-web:jar:3.4.1:compile -- module spring.boot.starter.web [auto]
+   org.springframework.boot:spring-boot-starter-data-jpa:jar:3.4.1:compile -- module spring.boot.starter.data.jpa [auto]
+   org.springframework.boot:spring-boot-starter-security:jar:3.4.1:compile -- module spring.boot.starter.security [auto]
+   org.springframework.boot:spring-boot-starter-validation:jar:3.4.1:compile -- module spring.boot.starter.validation [auto]
+   org.springframework.boot:spring-boot-starter-actuator:jar:3.4.1:compile -- module spring.boot.starter.actuator [auto]
+   org.postgresql:postgresql:jar:42.7.4:runtime -- module org.postgresql.jdbc [auto]
+   org.flywaydb:flyway-core:jar:10.20.1:compile -- module flyway.core (auto)
+   org.flywaydb:flyway-database-postgresql:jar:10.20.1:compile -- module flyway.database.postgresql (auto)
+   io.jsonwebtoken:jjwt-api:jar:0.12.6:compile -- module jjwt.api (auto)
+   io.jsonwebtoken:jjwt-impl:jar:0.12.6:runtime -- module jjwt.impl (auto)
+   io.jsonwebtoken:jjwt-jackson:jar:0.12.6:runtime -- module jjwt.jackson (auto)
+   org.springdoc:springdoc-openapi-starter-webmvc-ui:jar:2.7.0:compile -- module org.springdoc.openapi.ui [auto]
+   org.springframework.boot:spring-boot-starter-test:jar:3.4.1:test -- module spring.boot.starter.test [auto]
+   org.springframework.security:spring-security-test:jar:6.4.2:test -- module spring.security.test [auto]
+   io.zonky.test:embedded-postgres:jar:2.0.7:test -- module embedded.postgres (auto)
+
