@@ -8,23 +8,23 @@ import type { ErroResposta } from '../types'
  */
 export function extrairMensagemErro(erro: unknown, fallback = 'Ocorreu um erro ao processar a solicitação.'): string {
   if (axios.isAxiosError(erro)) {
-    const data = erro.response?.data as ErroResposta | undefined
+    const data = erro.response?.data as (ErroResposta & {
+      message?: string
+      validationErrors?: { field: string; message: string }[]
+    }) | undefined
 
     if (data && typeof data === 'object') {
-      if (typeof data.mensagem === 'string') {
-        if (Array.isArray(data.erros) && data.erros.length > 0) {
-          const detalhes = data.erros
-            .map((item) => (item.campo ? `${item.campo}: ${item.mensagem}` : item.mensagem))
-            .join(' | ')
-          return `${data.mensagem} (${detalhes})`
-        }
-        return data.mensagem
-      }
+      const mensagem = data.message ?? data.mensagem
+      const detalhes = Array.isArray(data.validationErrors)
+        ? data.validationErrors.map(item => item.message)
+        : Array.isArray(data.erros) ? data.erros.map(item => item.mensagem) : []
+      const explicacoes = [...new Set(detalhes.filter(texto => texto && texto !== mensagem))]
+      if (explicacoes.length) return explicacoes.join(' ')
+      if (typeof mensagem === 'string' && mensagem.trim()) return mensagem
+    }
 
-      // Outras estruturas comuns de erro
-      if (typeof (data as unknown as { error?: string }).error === 'string') {
-        return (data as unknown as { error: string }).error
-      }
+    if (erro.response?.status === 400) {
+      return fallback
     }
 
     if (erro.response?.status === 401) {

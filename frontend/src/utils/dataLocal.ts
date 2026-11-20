@@ -27,3 +27,19 @@ export function obterDataFuturaLocal(dias: number): string {
   return formatarDataLocal(futura)
 }
 
+
+export function diaDaSemana(data: string): number {
+  return new Date(data + 'T12:00:00Z').getUTCDay() || 7
+}
+
+export function proximaDataDeFuncionamento(diasSemana?: number[], agora = new Date()): string {
+  const hoje = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Fortaleza' }).format(agora)
+  const data = new Date(hoje + 'T12:00:00Z')
+  const dias = diasSemana?.length ? diasSemana : [1, 2, 3, 4, 5]
+  for (let i = 0; i < 7; i++) {
+    data.setUTCDate(data.getUTCDate() + 1)
+    const candidata = data.toISOString().slice(0, 10)
+    if (dias.includes(diaDaSemana(candidata))) return candidata
+  }
+  return hoje
+}

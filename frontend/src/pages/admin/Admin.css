@@ -123,7 +123,7 @@
 
 .icone-laranja {
   background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
+  color: var(--warning);
 }
 
 .icone-azul {
@@ -133,12 +133,12 @@
 
 .icone-verde {
   background: rgba(46, 175, 125, 0.12);
-  color: #1a7452;
+  color: var(--accent-text);
 }
 
 .icone-roxo {
   background: rgba(139, 92, 246, 0.12);
-  color: #6d28d9;
+  color: var(--info);
 }
 
 .kpi-info-bloco {
@@ -207,25 +207,16 @@
   background: var(--bg-alt);
 }
 
-.admin-aba-btn.aba-ativa {
-  color: var(--fg) !important;
-  font-weight: 700 !important;
-}
-
-.admin-aba-btn.aba-ativa::after {
-  content: '';
-  position: absolute;
-  bottom: -0.2rem;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--fg);
-  border-radius: 3px 3px 0 0;
+.admin-aba-btn[aria-pressed="true"] {
+  background: var(--accent-subtle);
+  color: var(--accent-text);
+  box-shadow: inset 0 -3px var(--focus-ring);
+  font-weight: 700;
 }
 
 .badge-contagem-alerta {
-  background: #f59e0b;
-  color: #ffffff;
+  background: var(--warning-bg);
+  color: var(--warning);
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.15rem 0.45rem;
@@ -354,7 +345,7 @@
 .btn-recusar-admin {
   background: var(--card);
   border: 1px solid rgba(220, 38, 38, 0.3);
-  color: #dc2626;
+  color: var(--error);
   padding: 0.55rem 1rem;
   border-radius: var(--radius-element);
   font-size: 0.8rem;
@@ -468,12 +459,12 @@
 
 .status-em_campo {
   background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
+  color: var(--warning);
 }
 
 .status-devolvido {
   background: rgba(16, 185, 129, 0.12);
-  color: #065f46;
+  color: var(--accent-text);
 }
 
 .status-aguardando_retirada {
@@ -538,7 +529,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   background: rgba(46, 175, 125, 0.12);
-  color: #1a7452;
+  color: var(--accent-text);
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-pill);
 }
@@ -547,7 +538,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
+  color: var(--warning);
   padding: 0.15rem 0.5rem;
   border-radius: var(--radius-pill);
 }
@@ -642,7 +633,7 @@
 
 .textarea-recusa-admin:focus {
   outline: none;
-  border-color: #dc2626;
+  border-color: var(--error);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
@@ -720,8 +711,8 @@
 }
 
 .btn-confirmar-recusa {
-  background: #dc2626 !important;
-  color: #ffffff !important;
+  background: var(--danger-action) !important;
+  color: var(--on-danger) !important;
 }
 
 /* ============================================================
@@ -887,8 +878,8 @@
   font-weight: 700;
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-sm);
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--card-subtle);
+  color: var(--fg-muted);
   margin-bottom: 0.25rem;
 }
 
@@ -918,11 +909,11 @@
 .tag-lgpd-cpf {
   display: inline-block;
   font-size: 0.7rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--card-subtle);
+  border: 1px solid var(--line-hover);
   padding: 0.1rem 0.35rem;
   border-radius: var(--radius-sm);
-  color: #64748b;
+  color: var(--fg-muted);
   font-family: monospace;
 }
 
@@ -937,27 +928,27 @@
 }
 
 .badge-status-tabela.status-concluida {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: var(--accent-subtle);
+  color: var(--accent-text);
+  border: 1px solid var(--line-hover);
 }
 
 .badge-status-tabela.status-em_uso {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--line-hover);
 }
 
 .badge-status-tabela.status-cancelada {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid var(--line-hover);
 }
 
 .badge-status-tabela.status-recusada {
-  background: #fff7ed;
-  color: #c2410c;
-  border: 1px solid #ffedd5;
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid var(--line-hover);
 }
 
 .btn-inspecionar-auditoria {
@@ -1031,8 +1022,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.75rem;
-  background: #09090B;
-  color: #ffffff;
+  background: var(--card-subtle);
+  color: var(--fg);
   border-top-left-radius: var(--radius-card);
   border-top-right-radius: var(--radius-card);
 }
@@ -1054,14 +1045,14 @@
   font-size: 1.15rem;
   font-weight: 900;
   letter-spacing: 0.08em;
-  color: #38bdf8;
+  color: var(--info);
 }
 
 .timbre-orgao {
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #cbd5e1;
+  color: var(--fg-muted);
 }
 
 .timbre-doc-tipo {
@@ -1069,14 +1060,14 @@
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #94a3b8;
+  color: var(--fg-muted);
   text-transform: uppercase;
 }
 
 .auditoria-doc-titulo {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--fg);
   margin: 0.15rem 0 0 0;
 }
 
@@ -1130,8 +1121,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--card-subtle);
+  border: 1px solid var(--line-hover);
   border-radius: var(--radius-element);
   padding: 1.25rem;
 }
@@ -1147,9 +1138,9 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #1e293b;
+  color: var(--fg);
   margin: 0 0 0.85rem 0;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--line-hover);
   padding-bottom: 0.35rem;
 }
 
@@ -1161,25 +1152,25 @@
 }
 
 .rotulo-aud {
-  color: #64748b;
+  color: var(--fg-muted);
   font-weight: 500;
 }
 
 .valor-aud {
-  color: #0f172a;
+  color: var(--fg);
   text-align: right;
 }
 
 .auditoria-box-finalidade {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--card);
+  border: 1px solid var(--line-hover);
   border-radius: var(--radius-element);
   padding: 1rem;
 }
 
 .texto-finalidade-aud {
   font-size: 0.825rem;
-  color: #334155;
+  color: var(--fg-muted);
   margin: 0.35rem 0 0 0;
   line-height: 1.5;
 }
@@ -1187,18 +1178,18 @@
 .auditoria-box-alerta-motivo {
   display: flex;
   gap: 0.75rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--error-bg);
+  border: 1px solid var(--line-hover);
   border-radius: var(--radius-element);
   padding: 1rem;
   font-size: 0.825rem;
-  color: #991b1b;
+  color: var(--error);
 }
 
 /* Vistoria Balcão */
 .auditoria-secao-balcao {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: var(--accent-subtle);
+  border: 1px solid var(--line-hover);
   border-radius: var(--radius-element);
   padding: 1.25rem;
 }
@@ -1210,8 +1201,8 @@
 }
 
 .card-vistoria-item {
-  background: #ffffff;
-  border: 1px solid #dcfce7;
+  background: var(--card);
+  border: 1px solid var(--line-hover);
   border-radius: var(--radius-element);
   padding: 0.85rem;
   font-size: 0.8rem;
@@ -1237,29 +1228,29 @@
 }
 
 .badge-condicao-mini.cond-otimo {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--accent-subtle);
+  color: var(--accent-text);
 }
 
 .badge-condicao-mini.cond-bom {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--info-bg);
+  color: var(--info);
 }
 
 .badge-condicao-mini.cond-regular {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 .badge-condicao-mini.cond-danificado {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--error-bg);
+  color: var(--error);
 }
 
 .obs-balcao-auditoria {
   margin: 0.35rem 0 0 0;
   font-style: italic;
-  color: #475569;
+  color: var(--fg-muted);
   font-size: 0.78rem;
 }
 
@@ -1275,14 +1266,14 @@
   margin: 0.35rem 0 0 0;
   padding-left: 0;
   list-style: none;
-  color: #166534;
+  color: var(--accent-text);
   font-weight: 600;
 }
 
 /* Timeline Vertical */
 .auditoria-secao-timeline {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--card);
+  border: 1px solid var(--line-hover);
   border-radius: var(--radius-element);
   padding: 1.25rem;
 }
@@ -1365,17 +1356,17 @@
 .evento-titulo {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--fg);
 }
 
 .evento-data {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--fg-muted);
 }
 
 .evento-responsavel {
   font-size: 0.75rem;
-  color: #475569;
+  color: var(--fg-muted);
   margin-top: 0.15rem;
 }
 
@@ -1385,7 +1376,7 @@
 
 .evento-descricao {
   font-size: 0.8rem;
-  color: #334155;
+  color: var(--fg-muted);
   margin: 0.35rem 0 0 0;
   line-height: 1.4;
 }
@@ -1397,13 +1388,13 @@
   gap: 3rem;
   padding-top: 2rem;
   margin-top: 1rem;
-  border-top: 1px dashed #cbd5e1;
+  border-top: 1px dashed var(--line-hover);
 }
 
 .chancela-bloco {
   text-align: center;
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--fg-muted);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -1427,14 +1418,14 @@
    REGRAS DE IMPRESSÃO (FICHA OFICIAL TIMBRADA A4)
    ============================================================ */
 @media print {
-  body * {
+  body:has(.modal-auditoria-container[open]) * {
     visibility: hidden;
   }
 
   .modal-admin-overlay,
   .modal-auditoria-container,
   .modal-auditoria-container * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
   .modal-admin-overlay {
@@ -1462,4 +1453,39 @@
     overflow: visible !important;
     padding: 0 !important;
   }
+}
+
+.inventario-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-block: 12px;
+}
+
+.inventario-card .inventario-acoes {
+  margin-bottom: 8px;
+}
+
+.inventario-horarios {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
+.inventario-dias {
+  min-width: 0;
+  padding: 8px 12px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-element);
+}
+
+.inventario-dias > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.inventario-mensagem {
+  color: var(--accent-text);
+  margin-bottom: 12px;
 }

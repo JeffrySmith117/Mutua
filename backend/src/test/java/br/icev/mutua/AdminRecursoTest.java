@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.UUID;
 
 import br.icev.mutua.common.Relogio;
@@ -47,7 +48,13 @@ class AdminRecursoTest extends IntegracaoBase {
 
         mvc.perform(get("/ambientes").param("termoBusca", nome).header("Authorization", "Bearer " + profissional))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].diasSemana", hasSize(5)))
+                .andExpect(jsonPath("$[0].diasSemana[0]").value(1));
+
+        LocalDate sabado = LocalDate.now(Relogio.FUSO).with(TemporalAdjusters.next(DayOfWeek.SATURDAY));
+        reservar(profissional, recursoId, sabado).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validationErrors[0].field").value("dataInicio"));
 
         reservar(profissional, recursoId, proximoDiaUtil(30)).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("confirmada"));
@@ -77,7 +84,9 @@ class AdminRecursoTest extends IntegracaoBase {
                         .header("Authorization", "Bearer " + admin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DISPONIVEL"))
-                .andExpect(jsonPath("$.prazoMaximoDias").value(2));
+                .andExpect(jsonPath("$.prazoMaximoDias").value(2))
+                .andExpect(jsonPath("$.diasSemana", hasSize(5)))
+                .andExpect(jsonPath("$.horarioAbertura").value("08:00:00"));
 
         criar(admin, "{\"nome\":\"Sala " + sufixo() + "\",\"tipo\":\"SALA\",\"patrimonio\":\"HUB-X" + sufixo() + "\"}")
                 .andExpect(status().isBadRequest());

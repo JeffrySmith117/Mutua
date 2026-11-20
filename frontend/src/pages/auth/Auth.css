@@ -1,204 +1,10 @@
-/* ============================================================
-   Auth Pages — Design System Mútua-PI
-   Login e Cadastro — Paleta esmeralda / minimalista
-   ============================================================ */
-
-/* --- Container principal --- */
-.auth-container {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-}
-
-/* --- Painel esquerdo (decorativo) --- */
-.auth-painel-esquerdo {
-  position: relative;
-  flex: 0 0 48%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--fg);
-  overflow: hidden;
-  padding: 48px;
-}
-
-.auth-painel-conteudo {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  max-width: 420px;
-}
-
-.auth-logo-grande {
-  margin-bottom: 32px;
-  display: flex;
-  justify-content: center;
-}
-
-.auth-logo-icone {
-  width: 72px;
-  height: 72px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border-radius: var(--radius-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  color: #FFFFFF;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  animation: flutuar 4s ease-in-out infinite;
-}
-
-.auth-titulo-painel {
-  font-family: var(--font);
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: -0.045em;
-  margin-bottom: 12px;
-  line-height: 1.1;
-}
-
-.auth-subtitulo-painel {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 400;
-  line-height: 1.6;
-  margin-bottom: 40px;
-}
-
-/* --- Cards flutuantes --- */
-.auth-cards-flutuantes {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-}
-
-.auth-card-flutuante {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-element);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all var(--transition);
-  width: fit-content;
-}
-
-.auth-card-flutuante:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateX(6px);
-}
-
-.card-flutuante-icone {
-  width: 32px;
-  height: 32px;
-  background: rgba(5, 150, 105, 0.25);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  flex-shrink: 0;
-}
-
-.card-flutuante-icone svg {
-  width: 100%;
-  height: 100%;
-}
-
-.card-1 { animation: fadeInUp 0.6s ease both; animation-delay: 0.2s; }
-.card-2 { animation: fadeInUp 0.6s ease both; animation-delay: 0.4s; margin-left: 30px; }
-.card-3 { animation: fadeInUp 0.6s ease both; animation-delay: 0.6s; }
-
-/* --- Decorações de fundo --- */
-.auth-decoracao {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.06;
-  pointer-events: none;
-}
-
-.auth-decoracao-1 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, var(--accent), transparent 70%);
-  top: -100px;
-  right: -100px;
-  animation: flutuar 6s ease-in-out infinite;
-}
-
-.auth-decoracao-2 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, #FFFFFF, transparent 70%);
-  bottom: -80px;
-  left: -80px;
-  animation: flutuar 8s ease-in-out infinite;
-  animation-delay: 2s;
-}
-
-.auth-decoracao-3 {
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, #FFFFFF, transparent 70%);
-  top: 50%;
-  left: 10%;
-  animation: flutuar 5s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-/* --- Painel do formulário --- */
-.auth-painel-formulario {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  background: var(--bg);
-}
-
 .auth-formulario-wrapper {
   width: 100%;
   max-width: 440px;
-  animation: fadeIn 0.5s ease;
 }
 
-/* --- Header do formulário --- */
 .auth-formulario-header {
-  margin-bottom: 32px;
-}
-
-.auth-logo-mobile {
-  display: none;
-  align-items: center;
-  gap: 8px;
   margin-bottom: 24px;
-}
-
-.auth-logo-icone-sm {
-  width: 36px;
-  height: 36px;
-  background: var(--fg);
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  color: #FFFFFF;
-}
-
-.auth-logo-mobile span {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--fg);
 }
 
 .auth-titulo-formulario {
@@ -228,12 +34,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  opacity: 0.4;
   transition: all var(--transition);
-}
-
-.auth-etapa.ativa {
-  opacity: 1;
 }
 
 .auth-etapa-numero {
@@ -347,6 +148,7 @@
 }
 
 .auth-input::placeholder {
+  opacity: 1;
   color: var(--fg-subtle);
 }
 
@@ -483,7 +285,8 @@
 }
 
 .auth-botao-principal:hover:not(:disabled) {
-  background: #18181B;
+  background: var(--fg);
+  opacity: .88;
   transform: translateY(-1px);
 }
 
@@ -621,34 +424,13 @@
    Responsivo
    ============================================================ */
 @media (max-width: 1024px) {
-  .auth-painel-esquerdo {
-    flex: 0 0 42%;
-    padding: 32px;
-  }
 
-  .auth-titulo-painel {
-    font-size: 2rem;
-  }
 }
 
 @media (max-width: 768px) {
-  .auth-container {
-    flex-direction: column;
-  }
 
-  .auth-painel-esquerdo {
-    display: none;
-  }
 
-  .auth-painel-formulario {
-    padding: 24px 20px;
-    align-items: flex-start;
-    padding-top: 48px;
-  }
 
-  .auth-logo-mobile {
-    display: flex;
-  }
 
   .auth-titulo-formulario {
     font-size: 1.5rem;
@@ -656,10 +438,6 @@
 }
 
 @media (max-width: 480px) {
-  .auth-painel-formulario {
-    padding: 20px 16px;
-    padding-top: 40px;
-  }
 
   .auth-formulario-wrapper {
     max-width: 100%;

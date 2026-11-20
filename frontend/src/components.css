@@ -112,7 +112,7 @@
 /* Variante accent */
 .filtro-pill-accent-ativo {
   background:   var(--accent);
-  color:        #FFFFFF !important;
+  color:        var(--on-accent) !important;
   border-color: var(--accent);
   font-weight:  500;
 }
@@ -138,9 +138,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-.badge-accent   { background: var(--accent);   color: #FFFFFF; }
-.badge-warning  { background: var(--warning);  color: #FFFFFF; }
-.badge-error    { background: var(--error);    color: #FFFFFF; }
+.badge-accent   { background: var(--accent);   color: var(--on-accent); }
+.badge-warning  { background: var(--warning-bg);  color: var(--warning); }
+.badge-error    { background: var(--error-bg);    color: var(--error); }
 .badge-neutral  { background: var(--bg-alt);   color: var(--fg-muted); border: 1px solid var(--line); }
 
 /* ============================================================

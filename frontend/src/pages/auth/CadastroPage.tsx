@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { authService } from '../../services/authService'
 import { extrairMensagemErro } from '../../utils/erroApi'
+import AcessoLayout from './AcessoLayout'
 import './Auth.css'
 
 export default function CadastroPage() {
@@ -93,83 +94,10 @@ export default function CadastroPage() {
   }
 
   return (
-    <div className="auth-container">
-      {/* Painel decorativo esquerdo */}
-      <div className="auth-painel-esquerdo">
-        <div className="auth-painel-conteudo">
-          <div className="auth-logo-grande">
-            <div className="auth-logo-icone">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" strokeWidth="2.5" fill="none"/>
-                <path d="M4 16H44" stroke="currentColor" strokeWidth="2.5"/>
-                <rect x="10" y="22" width="12" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
-                <line x1="28" y1="22" x2="38" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="28" y1="27" x2="35" y2="27" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="28" y1="32" x2="38" y2="32" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="10" cy="12" r="1.5" fill="currentColor"/>
-                <circle cx="15" cy="12" r="1.5" fill="currentColor"/>
-                <circle cx="20" cy="12" r="1.5" fill="currentColor"/>
-              </svg>
-            </div>
-          </div>
-          <h1 className="auth-titulo-painel">Mútua-PI</h1>
-          <p className="auth-subtitulo-painel">
-            Junte-se à comunidade de profissionais do CREA-PI
-          </p>
-
-          <div className="auth-cards-flutuantes">
-            <div className="auth-card-flutuante card-1">
-              <div className="card-flutuante-icone">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-              </div>
-              <span>Reservas Simples</span>
-            </div>
-            <div className="auth-card-flutuante card-2">
-              <div className="card-flutuante-icone">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                  <line x1="8" y1="21" x2="16" y2="21"/>
-                  <line x1="12" y1="17" x2="12" y2="21"/>
-                </svg>
-              </div>
-              <span>Salas e Auditórios</span>
-            </div>
-            <div className="auth-card-flutuante card-3">
-              <div className="card-flutuante-icone">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-              </div>
-              <span>Acesso Seguro</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="auth-decoracao auth-decoracao-1"></div>
-        <div className="auth-decoracao auth-decoracao-2"></div>
-        <div className="auth-decoracao auth-decoracao-3"></div>
-      </div>
-
-      {/* Painel do formulário */}
-      <div className="auth-painel-formulario">
+    <AcessoLayout tituloId="titulo-cadastro">
         <div className="auth-formulario-wrapper">
           <div className="auth-formulario-header">
-            <div className="auth-logo-mobile">
-              <div className="auth-logo-icone-sm">
-                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" strokeWidth="2.5" fill="none"/>
-                  <path d="M4 16H44" stroke="currentColor" strokeWidth="2.5"/>
-                  <rect x="10" y="22" width="12" height="8" rx="2" stroke="currentColor" strokeWidth="2"/>
-                  <line x1="28" y1="22" x2="38" y2="22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="28" y1="27" x2="35" y2="27" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span>Mútua-PI</span>
-            </div>
-            <h2 className="auth-titulo-formulario">Crie sua conta</h2>
+            <h1 id="titulo-cadastro" className="auth-titulo-formulario">Crie sua conta</h1>
             <p className="auth-subtitulo-formulario">
               Preencha seus dados para começar a utilizar o sistema
             </p>
@@ -457,7 +385,6 @@ export default function CadastroPage() {
             Mútua — Caixa de Assistência dos Profissionais do CREA-PI
           </p>
         </div>
-      </div>
-    </div>
+    </AcessoLayout>
   )
 }

@@ -35,16 +35,16 @@ function normalizarItemReserva(r: any): ItemReservaCompleto {
   const statusNormalizado = normalizarStatus(r.status)
   return {
     id: String(r.id),
-    tipo: r.tipo === 'equipamento' ? 'equipamento' : 'ambiente',
-    protocolo: r.protocolo || 'MUT-2026-0000',
+    tipo: String(r.tipo).toLowerCase() === 'equipamento' ? 'equipamento' : 'ambiente',
+    protocolo: r.protocolo || String(r.id),
     titulo: r.titulo || r.recursoNome || 'Reserva Mútua-PI',
-    subtitulo: r.subtitulo || (r.tipo === 'equipamento' ? 'Crea Tec HUB' : 'Espaço Sede'),
+    subtitulo: r.subtitulo || (String(r.tipo).toLowerCase() === 'equipamento' ? 'Crea Tec HUB' : 'Espaço Sede'),
     localOuPatrimonio: r.localOuPatrimonio || r.patrimonioOuLocal || 'Sede Mútua-PI',
     dataInicio: r.dataInicio,
     dataFim: r.dataFim,
     status: statusNormalizado,
-    finalidade: r.finalidade || r.observacoes || 'Finalidade profissional de engenharia',
-    criadoEm: r.criadoEm || new Date().toISOString(),
+    finalidade: r.finalidade || r.observacoes || '',
+    criadoEm: r.criadoEm || '',
     permitirCancelamento: Boolean(r.permitirCancelamento ?? r.podeCancelar ?? (statusNormalizado === 'confirmada' || statusNormalizado === 'pendente')),
     permitirCheckin: Boolean(r.permitirCheckin ?? r.podeCheckin ?? (statusNormalizado === 'confirmada')),
     motivoCancelamentoOuRecusa: r.motivoCancelamentoOuRecusa || r.motivoRecusaCancelamento,
@@ -53,8 +53,8 @@ function normalizarItemReserva(r: any): ItemReservaCompleto {
 }
 
 export const reservaService = {
-  async listar(): Promise<ItemReservaCompleto[]> {
-    const resposta = await api.get<any[]>('/reservas')
+  async listar(signal?: AbortSignal): Promise<ItemReservaCompleto[]> {
+    const resposta = await api.get<any[]>('/reservas', { signal })
     if (Array.isArray(resposta.data)) {
       return resposta.data.map(normalizarItemReserva)
     }

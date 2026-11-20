@@ -1,5 +1,9 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { corresponde } from '../../utils/corresponde'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { consultarReservas, statusReserva } from '../../services/consultas'
+import Janela from '../../components/Janela'
+import { useState, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { reservaService, type ItemReservaCompleto } from '../../services/reservaService'
 import { useAuthStore } from '../../store/authStore'
 import { extrairMensagemErro } from '../../utils/erroApi'
@@ -9,8 +13,18 @@ export default function MinhasReservasPage() {
   const navigate = useNavigate()
   const { usuario } = useAuthStore()
 
-  const [reservas, setReservas] = useState<ItemReservaCompleto[]>([])
-  const [carregando, setCarregando] = useState(true)
+  const [parametros, setParametros] = useSearchParams()
+  const id = parametros.get('id')
+  const queryClient = useQueryClient()
+  const opcoes = consultarReservas(usuario?.id ?? '')
+  const consulta = useQuery({ ...opcoes, staleTime: 0 })
+  const reservas = consulta.data
+  const [agora] = useState(Date.now)
+  const atualizarReservas = () => {
+    void queryClient.invalidateQueries({ queryKey: opcoes.queryKey })
+    void queryClient.invalidateQueries({ queryKey: ['disponibilidade'] })
+    void queryClient.invalidateQueries({ queryKey: ['equipamentos'] })
+  }
   const [abaStatus, setAbaStatus] = useState<string>('todas')
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
   const [termoBusca, setTermoBusca] = useState('')
@@ -26,25 +40,14 @@ export default function MinhasReservasPage() {
     useState<ItemReservaCompleto | null>(null)
   const [checkinConcluido, setCheckinConcluido] = useState(false)
 
-  // Carregar reservas
-  useEffect(() => {
-    async function carregar() {
-      setCarregando(true)
-      try {
-        const dados = await reservaService.listar()
-        setReservas(dados)
-      } catch (err) {
-        setErroAcao(extrairMensagemErro(err))
-      } finally {
-        setCarregando(false)
-      }
-    }
-    carregar()
-  }, [])
-
   // Filtragem
   const reservasFiltradas = useMemo(() => {
-    return reservas.filter((item) => {
+    const prioridade = (item: ItemReservaCompleto) => {
+      if (item.status === 'pendente' || item.status === 'em_uso') return 0
+      return item.status === 'confirmada' && Date.parse(item.dataFim) >= agora ? 1 : 2
+    }
+    return (reservas ?? []).filter((item) => {
+      if (id) return item.id === id
       // Filtro de Aba / Status
       if (abaStatus === 'ativas' && item.status !== 'confirmada' && item.status !== 'em_uso') return false
       if (abaStatus === 'pendentes' && item.status !== 'pendente') return false
@@ -61,19 +64,12 @@ export default function MinhasReservasPage() {
       // Filtro de Tipo
       if (filtroTipo !== 'todos' && item.tipo !== filtroTipo) return false
 
-      // Busca por texto
-      if (termoBusca.trim()) {
-        const termo = termoBusca.toLowerCase()
-        const bateuTitulo = item.titulo.toLowerCase().includes(termo)
-        const bateuProtocolo = item.protocolo.toLowerCase().includes(termo)
-        const bateuLocal = item.localOuPatrimonio.toLowerCase().includes(termo)
-        const bateuFinalidade = item.finalidade.toLowerCase().includes(termo)
-        if (!bateuTitulo && !bateuProtocolo && !bateuLocal && !bateuFinalidade) return false
-      }
-
-      return true
+      return corresponde(termoBusca, item.titulo, item.protocolo, item.localOuPatrimonio, item.finalidade)
+    }).sort((a, b) => {
+      const ordem = prioridade(a) - prioridade(b)
+      return ordem || (prioridade(a) < 2 ? a.dataInicio.localeCompare(b.dataInicio) : b.dataInicio.localeCompare(a.dataInicio))
     })
-  }, [reservas, abaStatus, filtroTipo, termoBusca])
+  }, [reservas, abaStatus, filtroTipo, termoBusca, id, agora])
 
   // Ações
   const handleConfirmarCancelamento = async () => {
@@ -83,13 +79,7 @@ export default function MinhasReservasPage() {
 
     try {
       await reservaService.cancelar(reservaParaCancelar.id)
-      setReservas((prev) =>
-        prev.map((r) =>
-          r.id === reservaParaCancelar.id
-            ? { ...r, status: 'cancelada', permitirCancelamento: false, permitirCheckin: false }
-            : r
-        )
-      )
+      atualizarReservas()
       setReservaParaCancelar(null)
     } catch (err) {
       setErroAcao(extrairMensagemErro(err))
@@ -107,16 +97,7 @@ export default function MinhasReservasPage() {
       await reservaService.realizarCheckin(reservaParaCheckin.id)
       setCheckinConcluido(true)
 
-      setReservas((prev) =>
-        prev.map((r) =>
-          r.id === reservaParaCheckin.id ? { ...r, status: 'em_uso', permitirCheckin: false } : r
-        )
-      )
-
-      setTimeout(() => {
-        setCheckinConcluido(false)
-        setReservaParaCheckin(null)
-      }, 1800)
+      atualizarReservas()
     } catch (err) {
       setErroAcao(extrairMensagemErro(err))
     } finally {
@@ -153,15 +134,15 @@ export default function MinhasReservasPage() {
       {/* Banner de erro geral da página */}
       {erroAcao && (
         <div className="banner-erro-reservas" role="alert" style={{
-          background: '#FEF2F2',
-          border: '1px solid #FCA5A5',
+          background: 'var(--error-bg)',
+          border: '1px solid var(--line-hover)',
           borderRadius: '12px',
           padding: '1rem 1.25rem',
           marginBottom: '1.5rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          color: '#991B1B'
+          color: 'var(--error)'
         }}>
           <div>
             <strong>Atenção:</strong> {erroAcao}
@@ -174,7 +155,7 @@ export default function MinhasReservasPage() {
               border: 'none',
               cursor: 'pointer',
               fontWeight: 600,
-              color: '#991B1B',
+              color: 'var(--error)',
               fontSize: '1rem'
             }}
           >
@@ -186,87 +167,59 @@ export default function MinhasReservasPage() {
       {/* ============================================================
           CABEÇALHO DA CENTRAL DE RESERVAS
           ============================================================ */}
-      <header className="reservas-cabecalho">
-        <div>
-          <div className="badge-modulo-reservas">
-            <span className="ponto-status-reservas" />
-            <span>Gestão Integrada • Espaços & HUB</span>
-          </div>
-          <h1 className="reservas-titulo">Minhas Reservas e Solicitações</h1>
-          <p className="reservas-subtitulo">
-            Acompanhe o status dos seus agendamentos de salas de reuniões, coworking e empréstimos
-            do Crea Tec HUB.
-          </p>
-        </div>
-
-        <div className="reservas-acoes-rapidas">
-          <button
-            type="button"
-            className="btn btn-primario"
-            onClick={() => navigate('/ambientes')}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-              <line x1="12" y1="10" x2="12" y2="14" />
-              <line x1="10" y1="12" x2="14" y2="12" />
-            </svg>
-            <span>Reservar Sala</span>
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-secundario"
-            onClick={() => navigate('/equipamentos')}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <span>Solicitar Equipamento</span>
-          </button>
-        </div>
+      <header className="titulo-pagina">
+        <h1>Minhas reservas</h1>
+        <p>Acompanhe suas reservas de ambientes e solicitações de equipamentos.</p>
       </header>
 
       {/* ============================================================
           ABAS DE STATUS E FILTROS
           ============================================================ */}
-      <section className="painel-filtros-reservas">
+      {id && <p className="reserva-selecionada">
+        <button type="button" className="btn btn-secundario" onClick={() => setParametros({}, { replace: true })}>Ver todas as reservas</button>
+      </p>}
+      {!id && <section className="painel-filtros-reservas" aria-label="Filtros de reservas">
         {/* Abas Superiores de Status */}
         <div className="abas-status-grupo">
           <button
             type="button"
             className={`aba-status-btn ${abaStatus === 'todas' ? 'aba-ativa' : ''}`}
+            aria-pressed={abaStatus === 'todas'}
             onClick={() => setAbaStatus('todas')}
           >
-            Todas ({reservas.length})
+            Todas ({reservas?.length ?? 0})
           </button>
           <button
             type="button"
             className={`aba-status-btn ${abaStatus === 'ativas' ? 'aba-ativa' : ''}`}
+            aria-pressed={abaStatus === 'ativas'}
             onClick={() => setAbaStatus('ativas')}
           >
-            ● Confirmadas / Em Uso ({reservas.filter((r) => r.status === 'confirmada' || r.status === 'em_uso').length})
+            Confirmadas / Em Uso ({(reservas ?? []).filter((r) => r.status === 'confirmada' || r.status === 'em_uso').length})
           </button>
           <button
             type="button"
             className={`aba-status-btn ${abaStatus === 'pendentes' ? 'aba-ativa' : ''}`}
+            aria-pressed={abaStatus === 'pendentes'}
             onClick={() => setAbaStatus('pendentes')}
           >
-            ⏳ Em Análise ({reservas.filter((r) => r.status === 'pendente').length})
+            Em Análise ({(reservas ?? []).filter((r) => r.status === 'pendente').length})
           </button>
           <button
             type="button"
             className={`aba-status-btn ${abaStatus === 'concluidas' ? 'aba-ativa' : ''}`}
+            aria-pressed={abaStatus === 'concluidas'}
             onClick={() => setAbaStatus('concluidas')}
           >
-            ✓ Concluídas ({reservas.filter((r) => r.status === 'concluida').length})
+            Concluídas ({(reservas ?? []).filter((r) => r.status === 'concluida').length})
           </button>
           <button
             type="button"
             className={`aba-status-btn ${abaStatus === 'canceladas' ? 'aba-ativa' : ''}`}
+            aria-pressed={abaStatus === 'canceladas'}
             onClick={() => setAbaStatus('canceladas')}
           >
-            Canceladas / Recusadas ({reservas.filter((r) => r.status === 'cancelada' || r.status === 'recusada' || r.status === 'nao_compareceu').length})
+            Canceladas / Recusadas ({(reservas ?? []).filter((r) => r.status === 'cancelada' || r.status === 'recusada' || r.status === 'nao_compareceu').length})
           </button>
         </div>
 
@@ -280,8 +233,9 @@ export default function MinhasReservasPage() {
               </svg>
             </span>
             <input
-              type="text"
-              placeholder="Buscar por protocolo, nome do espaço, equipamento ou patrimônio..."
+              type="search"
+              aria-label="Buscar nas minhas reservas"
+              placeholder="Protocolo, nome ou patrimônio"
               value={termoBusca}
               onChange={(e) => setTermoBusca(e.target.value)}
               className="input-busca-reservas"
@@ -292,6 +246,7 @@ export default function MinhasReservasPage() {
             <button
               type="button"
               className={`pilula-tipo-btn ${filtroTipo === 'todos' ? 'pilula-tipo-ativa' : ''}`}
+              aria-pressed={filtroTipo === 'todos'}
               onClick={() => setFiltroTipo('todos')}
             >
               Todos os Tipos
@@ -299,6 +254,7 @@ export default function MinhasReservasPage() {
             <button
               type="button"
               className={`pilula-tipo-btn ${filtroTipo === 'ambiente' ? 'pilula-tipo-ativa' : ''}`}
+              aria-pressed={filtroTipo === 'ambiente'}
               onClick={() => setFiltroTipo('ambiente')}
             >
               🏢 Salas & Espaços
@@ -306,30 +262,34 @@ export default function MinhasReservasPage() {
             <button
               type="button"
               className={`pilula-tipo-btn ${filtroTipo === 'equipamento' ? 'pilula-tipo-ativa' : ''}`}
+              aria-pressed={filtroTipo === 'equipamento'}
               onClick={() => setFiltroTipo('equipamento')}
             >
               🛰️ Equipamentos HUB
             </button>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ============================================================
           LISTA DE RESERVAS
           ============================================================ */}
       <section className="lista-reservas-bloco">
-        {carregando ? (
-          <div className="carregando-reservas-bloco">
+        {consulta.isError ? <div className="bloco-sigra" role="alert">
+          <p>Não foi possível carregar suas reservas.</p>
+          <button className="btn btn-secundario" type="button" onClick={() => void consulta.refetch()}>Tentar novamente</button>
+        </div> : consulta.isPending ? (
+          <div className="carregando-reservas-bloco" role="status">
             <div className="spinner-carregando" />
             <p>Carregando histórico de reservas...</p>
           </div>
         ) : reservasFiltradas.length === 0 ? (
           <div className="empty-state-reservas">
-            <span className="empty-icone-reservas">📋</span>
             <h3 className="empty-titulo-reservas">Nenhuma reserva encontrada</h3>
             <p className="empty-desc-reservas">
-              Você não possui reservas com os filtros selecionados. Agende uma sala de reuniões ou
-              solicite um equipamento tecnológico para começar.
+              {id ? 'O registro selecionado não está disponível na sua lista.' :
+                reservas?.length ? 'Ajuste os filtros para encontrar outros registros.' :
+                  'Reserve um ambiente ou solicite um equipamento para começar.'}
             </p>
             <div className="empty-botoes-reservas">
               <button
@@ -372,7 +332,7 @@ export default function MinhasReservasPage() {
                     <span className={`badge-status-reserva status-reserva-${reserva.status}`}>
                       {reserva.status === 'confirmada' && '● Confirmada'}
                       {reserva.status === 'em_uso' && '▶ Em Uso'}
-                      {reserva.status === 'pendente' && '⏳ Em Análise'}
+                      {reserva.status === 'pendente' && 'Em Análise'}
                       {reserva.status === 'concluida' && '✓ Concluída'}
                       {reserva.status === 'cancelada' && '✕ Cancelada'}
                       {reserva.status === 'recusada' && '✕ Recusada'}
@@ -395,6 +355,7 @@ export default function MinhasReservasPage() {
                       </svg>
                       <span>
                         <strong>Data:</strong> {formatarData(reserva.dataInicio)}
+                        {reserva.dataInicio.slice(0, 10) !== reserva.dataFim.slice(0, 10) && ` até ${formatarData(reserva.dataFim)}`}
                       </span>
                     </div>
 
@@ -429,11 +390,11 @@ export default function MinhasReservasPage() {
                     <div style={{
                       marginTop: '0.75rem',
                       padding: '0.625rem 0.875rem',
-                      background: '#FEF2F2',
-                      border: '1px solid #FCA5A5',
+                      background: 'var(--error-bg)',
+                      border: '1px solid var(--line-hover)',
                       borderRadius: '8px',
                       fontSize: '0.8125rem',
-                      color: '#991B1B'
+                      color: 'var(--error)'
                     }}>
                       <strong>Motivo informado:</strong> {reserva.motivoCancelamentoOuRecusa}
                     </div>
@@ -497,16 +458,7 @@ export default function MinhasReservasPage() {
           MODAL DE COMPROVANTE OFICIAL DA MÚTUA-PI
           ============================================================ */}
       {reservaSelecionadaComprovante && (
-        <div
-          className="modal-comprovante-overlay"
-          onClick={() => setReservaSelecionadaComprovante(null)}
-        >
-          <div
-            className="modal-comprovante-container"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
+        <Janela className="modal-comprovante-container" fechar={() => { setReservaSelecionadaComprovante(null) }} titulo="Comprovante da reserva">
             <div className="comprovante-papel-timbrado">
               {/* Cabeçalho do Comprovante */}
               <div className="comprovante-topo">
@@ -515,7 +467,7 @@ export default function MinhasReservasPage() {
                   <span className="marca-sub">Caixa de Assistência dos Profissionais do CREA</span>
                 </div>
                 <div className="comprovante-protocolo-bloco">
-                  <span className="comprovante-protocolo-rotulo">PROTOCOLO OFICIAL</span>
+                  <span className="comprovante-protocolo-rotulo">PROTOCOLO</span>
                   <strong className="comprovante-protocolo-numero">
                     {reservaSelecionadaComprovante.protocolo}
                   </strong>
@@ -525,7 +477,7 @@ export default function MinhasReservasPage() {
               <div className="comprovante-divisor" />
 
               <h2 className="comprovante-titulo-documento">
-                COMPROVANTE DE AGENDAMENTO DE{' '}
+                REGISTRO DE SOLICITAÇÃO DE{' '}
                 {reservaSelecionadaComprovante.tipo === 'ambiente'
                   ? 'ESPAÇO FÍSICO'
                   : 'EQUIPAMENTO TECNOLÓGICO'}
@@ -541,7 +493,7 @@ export default function MinhasReservasPage() {
                   </div>
                   <div>
                     <span className="rotulo-dado">Registro CREA-PI:</span>
-                    <strong>{usuario?.registroCrea || 'CREA-PI'}</strong>
+                    <strong>{usuario?.registroCrea || 'Não informado'}</strong>
                   </div>
                   <div>
                     <span className="rotulo-dado">CPF:</span>
@@ -549,7 +501,7 @@ export default function MinhasReservasPage() {
                   </div>
                   <div>
                     <span className="rotulo-dado">E-mail Cadastrado:</span>
-                    <strong>{usuario?.email || 'associado@mutua-pi.com.br'}</strong>
+                    <strong>{usuario?.email || 'Não informado'}</strong>
                   </div>
                 </div>
               </div>
@@ -573,7 +525,11 @@ export default function MinhasReservasPage() {
                     <strong>{formatarData(reservaSelecionadaComprovante.dataInicio)}</strong>
                   </div>
                   <div>
-                    <span className="rotulo-dado">Horário Reservado:</span>
+                    <span className="rotulo-dado">Data de término:</span>
+                    <strong>{formatarData(reservaSelecionadaComprovante.dataFim)}</strong>
+                  </div>
+                  <div>
+                    <span className="rotulo-dado">Horário:</span>
                     <strong>
                       {formatarHora(reservaSelecionadaComprovante.dataInicio)} às{' '}
                       {formatarHora(reservaSelecionadaComprovante.dataFim)}
@@ -583,23 +539,13 @@ export default function MinhasReservasPage() {
                     <span className="rotulo-dado">Finalidade Registrada:</span>
                     <span>{reservaSelecionadaComprovante.finalidade}</span>
                   </div>
+                  <div>
+                    <span className="rotulo-dado">Status:</span>
+                    <strong>{statusReserva[reservaSelecionadaComprovante.status]}</strong>
+                  </div>
                 </div>
               </div>
 
-              {/* Autenticidade Digital */}
-              <div className="comprovante-autenticidade">
-                <div className="codigo-autenticidade">
-                  <span>Código de Autenticação Digital:</span>
-                  <code>
-                    MUT-AUTH-
-                    {btoa(reservaSelecionadaComprovante.protocolo + '-MUTUAPI').substring(0, 18)}
-                  </code>
-                </div>
-                <div className="aviso-apresentacao">
-                  Apresente este comprovante impresso ou digital na recepção da Mútua-PI para liberação
-                  de acesso ou retirada do equipamento.
-                </div>
-              </div>
             </div>
 
             {/* Ações do Comprovante */}
@@ -624,21 +570,14 @@ export default function MinhasReservasPage() {
                 <span>Imprimir Comprovante</span>
               </button>
             </div>
-          </div>
-        </div>
+        </Janela>
       )}
 
       {/* ============================================================
           MODAL DE CONFIRMAÇÃO DE CANCELAMENTO
           ============================================================ */}
       {reservaParaCancelar && (
-        <div className="modal-perigo-overlay" onClick={() => !processandoAcao && setReservaParaCancelar(null)}>
-          <div
-            className="modal-perigo-container"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
+        <Janela className="modal-perigo-container" fechar={() => { if (!processandoAcao) setReservaParaCancelar(null) }} titulo="Cancelar reserva">
             <div className="perigo-icone-circulo">⚠️</div>
             <h3 className="perigo-titulo">Deseja cancelar esta reserva?</h3>
             <p className="perigo-descricao">
@@ -651,10 +590,10 @@ export default function MinhasReservasPage() {
               <div style={{
                 margin: '1rem 0',
                 padding: '0.75rem',
-                background: '#FEF2F2',
-                border: '1px solid #FCA5A5',
+                background: 'var(--error-bg)',
+                border: '1px solid var(--line-hover)',
                 borderRadius: '8px',
-                color: '#991B1B',
+                color: 'var(--error)',
                 fontSize: '0.875rem'
               }}>
                 {erroAcao}
@@ -679,28 +618,25 @@ export default function MinhasReservasPage() {
                 {processandoAcao ? 'Cancelando...' : 'Confirmar Cancelamento'}
               </button>
             </div>
-          </div>
-        </div>
+        </Janela>
       )}
 
       {/* ============================================================
           MODAL DE CHECK-IN PRESENCIAL
           ============================================================ */}
       {reservaParaCheckin && (
-        <div className="modal-checkin-overlay" onClick={() => !processandoAcao && setReservaParaCheckin(null)}>
-          <div
-            className="modal-checkin-container"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
+        <Janela className="modal-checkin-container" fechar={() => { if (!processandoAcao) { setCheckinConcluido(false); setReservaParaCheckin(null) } }} titulo="Check-in da reserva">
             {checkinConcluido ? (
               <div className="checkin-sucesso-bloco">
                 <div className="icone-checkin-sucesso">✓</div>
                 <h3 className="checkin-sucesso-titulo">Check-in Realizado com Sucesso!</h3>
-                <p className="checkin-sucesso-desc">
+                <p className="checkin-sucesso-desc" role="status">
                   Sua presença foi confirmada e a chave/acesso ao espaço já está liberada na recepção.
                 </p>
+                <button type="button" className="btn btn-primario" onClick={() => {
+                  setCheckinConcluido(false)
+                  setReservaParaCheckin(null)
+                }}>Concluir</button>
               </div>
             ) : (
               <div className="checkin-formulario-bloco">
@@ -715,10 +651,10 @@ export default function MinhasReservasPage() {
                   <div style={{
                     margin: '1rem 0',
                     padding: '0.75rem',
-                    background: '#FEF2F2',
-                    border: '1px solid #FCA5A5',
+                    background: 'var(--error-bg)',
+                    border: '1px solid var(--line-hover)',
                     borderRadius: '8px',
-                    color: '#991B1B',
+                    color: 'var(--error)',
                     fontSize: '0.875rem'
                   }}>
                     {erroAcao}
@@ -750,8 +686,7 @@ export default function MinhasReservasPage() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+        </Janela>
       )}
     </div>
   )

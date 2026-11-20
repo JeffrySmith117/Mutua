@@ -265,12 +265,12 @@
 
 .status-reserva-confirmada {
   background: rgba(46, 175, 125, 0.12);
-  color: #1a7452;
+  color: var(--accent-text);
 }
 
 .status-reserva-pendente {
   background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
+  color: var(--warning);
 }
 
 .status-reserva-concluida {
@@ -280,22 +280,22 @@
 
 .status-reserva-cancelada {
   background: rgba(239, 68, 68, 0.12);
-  color: #dc2626;
+  color: var(--error);
 }
 
 .status-reserva-em_uso {
   background: rgba(2, 132, 199, 0.12);
-  color: #0284c7;
+  color: var(--info);
 }
 
 .status-reserva-recusada {
   background: rgba(239, 68, 68, 0.12);
-  color: #dc2626;
+  color: var(--error);
 }
 
 .status-reserva-nao_compareceu {
   background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
+  color: var(--warning);
 }
 
 .reserva-card-titulo {
@@ -399,7 +399,7 @@
   border-radius: var(--radius-element);
   font-size: 0.78rem;
   font-weight: 700;
-  color: #1a7452;
+  color: var(--accent-text);
   cursor: pointer;
   transition: all var(--transition-fast);
   font-family: var(--font);
@@ -413,7 +413,7 @@
 .btn-acao-perigo {
   background: none;
   border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #dc2626;
+  color: var(--error);
   padding: 0.45rem 0.85rem;
   border-radius: var(--radius-element);
   font-size: 0.78rem;
@@ -713,7 +713,7 @@
 .perigo-titulo {
   font-size: 1.25rem;
   font-weight: 800;
-  color: #dc2626;
+  color: var(--error);
 }
 
 .perigo-descricao {
@@ -736,12 +736,12 @@
 }
 
 .btn-confirmar-cancelamento {
-  background: #dc2626 !important;
-  color: #ffffff !important;
+  background: var(--danger-action) !important;
+  color: var(--on-danger) !important;
 }
 
 .btn-confirmar-cancelamento:hover {
-  background: #b91c1c !important;
+  background: var(--danger-action) !important;
 }
 
 /* Checkin */
@@ -809,14 +809,14 @@
    ESTILOS DE IMPRESSÃO (PRINT)
    ============================================================ */
 @media print {
-  body * {
+  body:has(.modal-comprovante-container[open]) * {
     visibility: hidden;
   }
 
-  .modal-comprovante-overlay,
+  .modal-comprovante-container,
   .comprovante-papel-timbrado,
   .comprovante-papel-timbrado * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
   .modal-comprovante-overlay {
@@ -882,4 +882,15 @@
   .btn-acao-perigo {
     margin-left: 0;
   }
+}
+
+.reserva-selecionada { margin-bottom: 12px; }
+.painel-filtros-reservas { margin-bottom: 16px; }
+.janela:is(.modal-comprovante-container, .modal-checkin-container, .modal-perigo-container) {
+  max-height: calc(100dvh - 32px);
+  max-width: calc(100% - 24px);
+}
+@media print {
+  dialog.modal-comprovante-container { position: absolute; inset: 0; max-height: none; width: 100%; overflow: visible; }
+  dialog.modal-comprovante-container::backdrop { display: none; }
 }

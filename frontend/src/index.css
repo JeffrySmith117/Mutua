@@ -37,23 +37,23 @@ html {
   /* --- Tipografia (30%) --- */
   --fg:            #09090B;
   --fg-muted:      #52525B;
-  --fg-subtle:     #A1A1AA;
+  --fg-subtle:     #62626B;
   --fg-invert:     #FFFFFF;
 
   /* --- Destaque Único (10%) — Verde Esmeralda Mútua/CREA --- */
-  --accent:        #059669;
+  --accent:        #08734F;
   --accent-hover:  #047857;
   --accent-subtle: #ECFDF5;
   --accent-text:   #065F46;
 
   /* --- Feedback (Semânticas) --- */
-  --success:       #059669;
+  --success:       #08734F;
   --success-bg:    #ECFDF5;
-  --warning:       #D97706;
+  --warning:       #8A4908;
   --warning-bg:    #FFFBEB;
-  --error:         #DC2626;
+  --error:         #A91D2A;
   --error-bg:      #FEF2F2;
-  --info:          #0284C7;
+  --info:          #075B87;
   --info-bg:       #F0F9FF;
 
   /* --- Raios de Borda --- */
@@ -95,7 +95,7 @@ html {
   --cor-secundaria-clara:      #10B981;
   --cor-secundaria-suave:      var(--accent-subtle);
   --cor-acento:                var(--warning);
-  --cor-acento-escura:         #B45309;
+  --cor-acento-escura:         var(--warning);
   --cor-acento-suave:          var(--warning-bg);
   --cor-fundo:                 var(--bg);
   --cor-fundo-alt:             var(--bg-alt);
@@ -167,7 +167,7 @@ html {
 
   --fg:            #FAFAFA;
   --fg-muted:      #A1A1AA;
-  --fg-subtle:     #52525B;
+  --fg-subtle:     #A1A1AA;
   --fg-invert:     #09090B;
 
   --accent:        #10B981;
@@ -352,7 +352,7 @@ select {
 .btn-primario,
 .btn-cta {
   background: var(--accent);
-  color:      #FFFFFF !important;
+  color:      var(--on-accent) !important;
   border-color: var(--accent);
 }
 .btn-accent:hover,
@@ -444,11 +444,11 @@ select {
 /* Variantes de dot */
 .status-pill--success { color: var(--accent-text); background: var(--accent-subtle); border-color: rgba(5, 150, 105, 0.15); }
 .status-pill--success .status-dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18); }
-.status-pill--warning { color: #92400E; background: var(--warning-bg); border-color: rgba(217, 119, 6, 0.15); }
+.status-pill--warning { color: var(--warning); background: var(--warning-bg); border-color: rgba(217, 119, 6, 0.15); }
 .status-pill--warning .status-dot { background: var(--warning); box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.18); }
-.status-pill--error   { color: #991B1B; background: var(--error-bg); border-color: rgba(220, 38, 38, 0.15); }
+.status-pill--error   { color: var(--error); background: var(--error-bg); border-color: rgba(220, 38, 38, 0.15); }
 .status-pill--error .status-dot   { background: var(--error); }
-.status-pill--info    { color: #0C4A6E; background: var(--info-bg); border-color: rgba(2, 132, 199, 0.15); }
+.status-pill--info    { color: var(--info); background: var(--info-bg); border-color: rgba(2, 132, 199, 0.15); }
 .status-pill--info .status-dot    { background: var(--info); }
 .status-pill--neutral { color: var(--fg-muted); }
 .status-pill--neutral .status-dot { background: var(--fg-subtle); }

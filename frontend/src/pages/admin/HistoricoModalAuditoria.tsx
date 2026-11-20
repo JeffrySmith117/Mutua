@@ -1,3 +1,4 @@
+import Janela from '../../components/Janela'
 import React from 'react'
 import type { RegistroHistorico } from '../../services/adminService'
 
@@ -47,14 +48,7 @@ export const HistoricoModalAuditoria: React.FC<Props> = ({ registro, aoFechar })
   }
 
   return (
-    <div className="modal-admin-overlay" onClick={aoFechar}>
-      <div
-        className="modal-admin-container modal-auditoria-container"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="titulo-auditoria"
-      >
+    <Janela className="modal-admin-container modal-auditoria-container" fechar={aoFechar} titulo="Ficha de auditoria">
         {/* Cabeçalho Oficial Timbrado */}
         <div className="auditoria-cabecalho-timbrado">
           <div className="auditoria-timbre-esquerda">
@@ -250,8 +244,7 @@ export const HistoricoModalAuditoria: React.FC<Props> = ({ registro, aoFechar })
             🖨️ Imprimir Ficha de Auditoria
           </button>
         </div>
-      </div>
-    </div>
+    </Janela>
   )
 }
 

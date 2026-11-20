@@ -1,403 +1,95 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
 import { useThemeStore } from '../../store/themeStore'
+import Icone, { type NomeIcone } from '../Icone'
+import Janela from '../Janela'
+import Marca from '../Marca'
+import BuscaGlobal from './BuscaGlobal'
 import './PainelLayout.css'
 
-export default function PainelLayout() {
-  const [sidebarAberta, setSidebarAberta] = useState(false)
-  const [menuPerfilAberto, setMenuPerfilAberto] = useState(false)
-  const [termoBusca, setTermoBusca] = useState('')
+const itens: { rota: string; nome: string; icone: NomeIcone }[] = [
+  { rota: '/', nome: 'Painel Inicial', icone: 'painel' },
+  { rota: '/ambientes', nome: 'Ambientes e Coworking', icone: 'ambiente' },
+  { rota: '/equipamentos', nome: 'Equipamentos HUB', icone: 'equipamento' },
+  { rota: '/minhas-reservas', nome: 'Minhas Reservas', icone: 'calendario' },
+]
 
+export default function PainelLayout() {
+  const [menuAberto, setMenuAberto] = useState(false)
+  const [recolhido, setRecolhido] = useState(false)
+  const perfilRef = useRef<HTMLDetailsElement>(null)
   const { usuario, sair } = useAuthStore()
   const { tema, alternarTema } = useThemeStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  // D21: Redireciona para o login caso não haja sessão ativa
-  if (!usuario) {
-    return <Navigate to="/entrar" replace />
+  if (!usuario) return <Navigate to="/entrar" replace />
+  const ehAdmin = usuario.perfil.toLowerCase() === 'admin'
+  const iniciais = usuario.nome.trim().split(/\s+/).slice(0, 2).map(parte => parte[0]).join('').toUpperCase()
+
+  function links(mobile: boolean) {
+    return <nav aria-label="Navegação principal">
+      {itens.map(({ rota, nome, icone }) =>
+        <NavLink end={rota === '/'} key={rota} to={rota} title={!mobile && recolhido ? nome : undefined}
+          aria-label={nome} onClick={() => setMenuAberto(false)}>
+          <Icone nome={icone} /><span>{nome}</span>
+        </NavLink>)}
+      {ehAdmin && <div className="navegacao-admin">
+        <NavLink to="/admin" aria-label="Administração" title={!mobile && recolhido ? 'Administração' : undefined} onClick={() => setMenuAberto(false)}>
+          <Icone nome="admin" /><span>Administração</span>
+        </NavLink>
+      </div>}
+    </nav>
   }
 
-  const ehAdmin = String(usuario.perfil).toLowerCase() === 'admin'
-
-  const obterIniciais = (nome: string) => {
-    return nome
-      .split(' ')
-      .map((parte) => parte[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase()
-  }
-
-  const handleLogout = () => {
-    sair()
-    navigate('/entrar')
-  }
-
-  const fecharSidebar = () => setSidebarAberta(false)
-
-  return (
-    <div className="painel-container">
-      {/* Overlay mobile para fechar sidebar */}
-      {sidebarAberta && (
-        <div
-          className="painel-overlay"
-          onClick={fecharSidebar}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Sidebar Lateral */}
-      <aside className={`painel-sidebar ${sidebarAberta ? 'sidebar-visivel' : ''}`}>
-        <div className="sidebar-cabecalho">
-          <div className="sidebar-logo">
-            <div className="logo-icone-wrapper">
-              <svg viewBox="0 0 40 40" fill="none" className="logo-svg">
-                <rect width="40" height="40" rx="10" fill="url(#logo-gradiente-layout)" />
-                <path d="M12 28L20 12L28 28H23L20 21L17 28H12Z" fill="white" />
-                <circle cx="20" cy="18" r="3" fill="#2EAF7D" />
-                <defs>
-                  <linearGradient id="logo-gradiente-layout" x1="0" y1="0" x2="40" y2="40">
-                    <stop stopColor="#1B4D6E" />
-                    <stop offset="1" stopColor="#0B2335" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <div className="logo-texto-bloco">
-              <span className="logo-marca">Mútua-PI</span>
-              <span className="logo-subtitulo">Espaços & Hub CREA</span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="botao-fechar-sidebar"
-            onClick={fecharSidebar}
-            aria-label="Fechar navegação"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Tag do Associado */}
-        <div className="sidebar-associado-status">
-          <div className="indicador-online" />
-          <span>Associado CREA-PI Ativo</span>
-        </div>
-
-        {/* Menu de Navegação */}
-        <nav className="sidebar-nav">
-          <div className="nav-grupo">
-            <span className="nav-grupo-titulo">Menu Principal</span>
-
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
-              onClick={fecharSidebar}
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-              </span>
-              <span className="nav-texto">Painel Inicial</span>
-            </NavLink>
-
-            <NavLink
-              to="/ambientes"
-              className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
-              onClick={fecharSidebar}
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-                  <path d="M9 22v-4h6v4" />
-                  <path d="M8 6h.01" />
-                  <path d="M16 6h.01" />
-                  <path d="M12 6h.01" />
-                  <path d="M12 10h.01" />
-                  <path d="M12 14h.01" />
-                  <path d="M16 10h.01" />
-                  <path d="M16 14h.01" />
-                  <path d="M8 10h.01" />
-                  <path d="M8 14h.01" />
-                </svg>
-              </span>
-              <span className="nav-texto">Salas & Coworking</span>
-              <span className="nav-badge">Disponíveis</span>
-            </NavLink>
-
-            <NavLink
-              to="/equipamentos"
-              className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
-              onClick={fecharSidebar}
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </span>
-              <span className="nav-texto">Equipamentos HUB</span>
-              <span className="nav-tag-destaque">Tec</span>
-            </NavLink>
-
-            <NavLink
-              to="/minhas-reservas"
-              className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
-              onClick={fecharSidebar}
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </span>
-              <span className="nav-texto">Minhas Reservas</span>
-            </NavLink>
-
-            {ehAdmin && (
-              <NavLink
-                to="/admin"
-                className={({ isActive }) => `nav-item ${isActive ? 'nav-item-ativo' : ''}`}
-                onClick={fecharSidebar}
-              >
-                <span className="nav-icone">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                </span>
-                <span className="nav-texto">Painel Gestor (Admin)</span>
-                <span className="nav-tag-destaque" style={{ background: '#f59e0b' }}>Admin</span>
-              </NavLink>
-            )}
-          </div>
-
-          <div className="nav-grupo">
-            <span className="nav-grupo-titulo">Informações & Apoio</span>
-
-            <a
-              href="#regras-uso"
-              className="nav-item"
-              onClick={(e) => {
-                e.preventDefault()
-                alert('Regulamento de Uso do Coworking e Equipamentos HUB Mútua-PI disponível na seção de Ajuda.')
-              }}
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
-              </span>
-              <span className="nav-texto">Regulamento de Uso</span>
-            </a>
-
-            <a
-              href="mailto:suporte@mutua-pi.com.br"
-              className="nav-item"
-            >
-              <span className="nav-icone">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-              </span>
-              <span className="nav-texto">Suporte ao Associado</span>
-            </a>
-          </div>
-        </nav>
-
-        {/* Card institucional no rodapé da sidebar */}
-        <div className="sidebar-rodape-card">
-          <div className="rodape-card-badge">Crea Tec HUB</div>
-          <p className="rodape-card-titulo">Espaço de Inovação & Tecnologia</p>
-          <p className="rodape-card-desc">
-            Equipamentos de alta precisão disponíveis para profissionais com anuidade em dia.
-          </p>
-          <div className="rodape-card-rodape">
-            <span>Sede Mútua • Teresina-PI</span>
-          </div>
-        </div>
-      </aside>
-
-      {/* Conteúdo Principal + Header */}
-      <div className="painel-corpo">
-        {/* Header Superior */}
-        <header className="painel-header">
-          <div className="header-esquerda">
-            <button
-              type="button"
-              className="botao-menu-mobile"
-              onClick={() => setSidebarAberta(true)}
-              aria-label="Abrir menu lateral"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </button>
-
-            <div className="header-busca">
-              <span className="icone-busca">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                placeholder="Pesquisar salas, auditórios, drones, equipamentos..."
-                value={termoBusca}
-                onChange={(e) => setTermoBusca(e.target.value)}
-                className="input-busca-header"
-              />
-              <span className="atalho-busca">Ctrl K</span>
-            </div>
-          </div>
-
-          <div className="header-direita">
-            {/* Alternador de Tema Claro / Escuro */}
-            <button
-              type="button"
-              className="botao-tema"
-              onClick={alternarTema}
-              title={tema === 'claro' ? 'Mudar para tema escuro' : 'Mudar para tema claro'}
-              aria-label="Alternar tema de cores"
-            >
-              {tema === 'claro' ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              )}
-            </button>
-
-            {/* Notificações */}
-            <button
-              type="button"
-              className="botao-notificacao"
-              title="Notificações e avisos"
-              onClick={() => alert('Nenhuma nova notificação no momento.')}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="badge-notificacao-ponto" />
-            </button>
-
-            {/* Divisor */}
-            <div className="header-divisor" />
-
-            {/* Perfil do Usuário */}
-            <div className="perfil-menu-container">
-              <button
-                type="button"
-                className="botao-perfil"
-                onClick={() => setMenuPerfilAberto(!menuPerfilAberto)}
-                aria-expanded={menuPerfilAberto}
-              >
-                <div className="perfil-avatar">
-                  {obterIniciais(usuario.nome)}
-                </div>
-                <div className="perfil-info">
-                  <span className="perfil-nome">{usuario.nome}</span>
-                  <span className="perfil-crea">{usuario.registroCrea || 'Profissional CREA-PI'}</span>
-                </div>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className={`seta-dropdown ${menuPerfilAberto ? 'seta-aberta' : ''}`}
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-
-              {menuPerfilAberto && (
-                <>
-                  <div
-                    className="overlay-menu-perfil"
-                    onClick={() => setMenuPerfilAberto(false)}
-                  />
-                  <div className="dropdown-perfil">
-                    <div className="dropdown-cabecalho">
-                      <p className="dropdown-nome">{usuario.nome}</p>
-                      <p className="dropdown-email">{usuario.email}</p>
-                      <span className="dropdown-tag-tipo">
-                        {ehAdmin ? 'Administrador' : 'Profissional Habilitado'}
-                      </span>
-                    </div>
-
-                    <div className="dropdown-divisor" />
-
-                    <div className="dropdown-acoes">
-                      <button
-                        type="button"
-                        className="dropdown-item"
-                        onClick={() => {
-                          setMenuPerfilAberto(false)
-                          navigate('/minhas-reservas')
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                          <line x1="16" y1="2" x2="16" y2="6" />
-                          <line x1="8" y1="2" x2="8" y2="6" />
-                        </svg>
-                        <span>Minhas Reservas Ativas</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className="dropdown-item item-logout"
-                        onClick={handleLogout}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                          <polyline points="16 17 21 12 16 7" />
-                          <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                        <span>Encerrar Sessão</span>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Conteúdo Dinâmico das Rotas */}
-        <main className="painel-main">
-          <Outlet />
-        </main>
+  return <div className={`estrutura-sigra ${recolhido ? 'estrutura-recolhida' : ''}`}>
+    <aside className="navegacao-desktop">
+      <Marca />
+      {links(false)}
+      <button type="button" className="controle-icone recolher-menu" aria-pressed={recolhido}
+        aria-label={recolhido ? 'Expandir navegação' : 'Recolher navegação'}
+        title={recolhido ? 'Expandir navegação' : 'Recolher navegação'}
+        onClick={() => setRecolhido(!recolhido)}><Icone nome="recolher" /></button>
+    </aside>
+    {menuAberto && <Janela fechar={() => setMenuAberto(false)} titulo="Menu do Mútua Tec Hub" className="navegacao-mobile">
+      <div className="janela-topo"><strong>Mútua Tec Hub</strong>
+        <button type="button" className="controle-icone" onClick={() => setMenuAberto(false)} aria-label="Fechar navegação"><Icone nome="fechar" /></button>
       </div>
+      {links(true)}
+    </Janela>}
+    <div className="corpo-sigra">
+      <header className="barra-sigra" onPointerDown={event => {
+        if (!perfilRef.current?.contains(event.target as Node)) perfilRef.current?.removeAttribute('open')
+      }}>
+        <button type="button" className="controle-icone abrir-menu" onClick={() => setMenuAberto(true)}
+          aria-label="Abrir navegação" aria-haspopup="dialog"><Icone nome="menu" /></button>
+        <BuscaGlobal usuarioId={usuario.id} />
+        <button type="button" className="controle-icone controle-tema" onClick={alternarTema}
+          aria-pressed={tema === 'escuro'} aria-label="Tema escuro" title={tema === 'escuro' ? 'Usar tema claro' : 'Usar tema escuro'}>
+          <Icone nome={tema === 'escuro' ? 'sol' : 'lua'} />
+        </button>
+        <details className="perfil-sigra" ref={perfilRef} onBlur={event => {
+          if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false
+        }} onKeyDown={event => {
+          if (event.key === 'Escape' && event.currentTarget.open) {
+            event.currentTarget.open = false
+            event.currentTarget.querySelector('summary')?.focus()
+          }
+        }}>
+          <summary aria-label="Conta de usuário"><span aria-hidden="true">{iniciais}</span><strong>{usuario.nome}</strong></summary>
+          <div className="perfil-opcoes">
+            <strong>{usuario.nome}</strong><small>{usuario.email}</small>
+            <button className="btn btn-secundario" type="button" onClick={() => {
+              sair()
+              queryClient.clear()
+              navigate('/entrar', { replace: true })
+            }}>Encerrar sessão</button>
+          </div>
+        </details>
+      </header>
+      <main className="conteudo-sigra"><Outlet /></main>
     </div>
-  )
+  </div>
 }
