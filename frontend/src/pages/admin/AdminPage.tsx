@@ -1,31 +1,39 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
+import { corresponde } from '../../utils/corresponde'
+import { useState, useMemo } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useAuthStore } from '../../store/authStore'
+import InventarioAdmin from './InventarioAdmin'
+import Janela from '../../components/Janela'
+import { extrairMensagemErro } from '../../utils/erroApi'
 import {
   adminService,
   type SolicitacaoPendente,
   type MovimentacaoBalcao,
-  type MetricasAdmin,
   type RegistroHistorico,
   type StatusHistorico,
   type TipoRecursoHistorico,
 } from '../../services/adminService'
-import { mensagemDeErro } from '../../services/api'
 import type { CondicaoEquipamento } from '../../types'
 import HistoricoModalAuditoria from './HistoricoModalAuditoria'
 import './Admin.css'
 
 export default function AdminPage() {
-  const queryClient = useQueryClient()
-  // Evita disparar duas ações administrativas ao mesmo tempo (clique duplo, aprovar e recusar em seguida).
-  const acaoEmAndamento = useRef(false)
-  const atualizarCatalogoDeEquipamentos = () => queryClient.invalidateQueries({ queryKey: ['equipamentos'] })
   const [abaAtiva, setAbaAtiva] = useState<'pendencias' | 'balcao' | 'inventario' | 'historico'>('pendencias')
-  const [metricas, setMetricas] = useState<MetricasAdmin | null>(null)
-  const [pendencias, setPendencias] = useState<SolicitacaoPendente[]>([])
-  const [movimentacoes, setMovimentacoes] = useState<MovimentacaoBalcao[]>([])
-  const [historico, setHistorico] = useState<RegistroHistorico[]>([])
-  const [totalHistorico, setTotalHistorico] = useState(0)
-  const [carregando, setCarregando] = useState(true)
+  const queryClient = useQueryClient()
+  const usuarioId = useAuthStore(state => state.usuario?.id)
+  const chave = ['admin', usuarioId]
+  const metricasQuery = useQuery({ queryKey: [...chave, 'metricas'], queryFn: adminService.obterMetricas, staleTime: 0 })
+  const pendenciasQuery = useQuery({ queryKey: [...chave, 'pendencias'], queryFn: adminService.listarPendencias, staleTime: 0 })
+  const movimentacoesQuery = useQuery({ queryKey: [...chave, 'movimentacoes'], queryFn: adminService.listarMovimentacoes, enabled: abaAtiva === 'balcao', staleTime: 0 })
+  const historicoQuery = useQuery({ queryKey: [...chave, 'historico'], queryFn: adminService.listarHistorico, enabled: abaAtiva === 'historico', staleTime: 0 })
+  const chaveInventario = [...chave, 'inventario']
+  const inventarioQuery = useQuery({ queryKey: chaveInventario, queryFn: adminService.listarRecursos, enabled: abaAtiva === 'inventario', staleTime: 0 })
+  const metricas = metricasQuery.data
+  const pendencias = pendenciasQuery.data ?? []
+  const movimentacoes = movimentacoesQuery.data ?? []
+  const historico = historicoQuery.data
+  const consulta = { pendencias: pendenciasQuery, balcao: movimentacoesQuery, historico: historicoQuery, inventario: inventarioQuery }[abaAtiva]
+  const carregando = consulta.isPending
 
   // Filtros do Histórico
   const [buscaHistorico, setBuscaHistorico] = useState('')
@@ -43,47 +51,22 @@ export default function AdminPage() {
   const [movimentacaoParaDevolucao, setMovimentacaoParaDevolucao] =
     useState<MovimentacaoBalcao | null>(null)
   const [condicaoDevolucao, setCondicaoDevolucao] = useState<CondicaoEquipamento>('otimo')
+  const [movimentacaoParaRetirada, setMovimentacaoParaRetirada] = useState<MovimentacaoBalcao | null>(null)
+  const [processando, setProcessando] = useState(false)
+  const [erroAcao, setErroAcao] = useState('')
   const [obsDevolucao, setObsDevolucao] = useState('')
   const [registroParaAuditoria, setRegistroParaAuditoria] = useState<RegistroHistorico | null>(null)
   const [feedbackMensagem, setFeedbackMensagem] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function carregarDados() {
-      setCarregando(true)
-      try {
-        const [dadosMetricas, dadosPendencias, dadosMov, dadosHist] = await Promise.all([
-          adminService.obterMetricas(),
-          adminService.listarPendencias(),
-          adminService.listarMovimentacoes(),
-          adminService.listarHistoricoComTotal(),
-        ])
-        setMetricas(dadosMetricas)
-        setPendencias(dadosPendencias)
-        setMovimentacoes(dadosMov)
-        setHistorico(dadosHist.registros)
-        setTotalHistorico(dadosHist.total)
-      } catch (erro) {
-        alert(mensagemDeErro(erro))
-      } finally {
-        setCarregando(false)
-      }
-    }
-    carregarDados()
-  }, [])
-
   // Filtragem reativa do histórico
   const historicoFiltrado = useMemo(() => {
-    let lista = [...historico]
+    let lista = [...(historico ?? [])]
 
     if (buscaHistorico.trim()) {
       const termo = buscaHistorico.toLowerCase().trim()
       lista = lista.filter(
-        (item) =>
-          item.profissionalNome.toLowerCase().includes(termo) ||
-          item.registroCrea.toLowerCase().includes(termo) ||
-          item.recursoNome.toLowerCase().includes(termo) ||
-          item.patrimonioOuLocal.toLowerCase().includes(termo) ||
-          item.protocolo.toLowerCase().includes(termo)
+        item => corresponde(termo, item.profissionalNome, item.registroCrea,
+          item.recursoNome, item.patrimonioOuLocal, item.protocolo)
       )
     }
 
@@ -100,7 +83,7 @@ export default function AdminPage() {
     }
 
     if (dataFimFiltro) {
-      lista = lista.filter((item) => item.dataFim <= dataFimFiltro)
+      lista = lista.filter((item) => item.dataFim.slice(0, 10) <= dataFimFiltro)
     }
 
     return lista
@@ -126,92 +109,53 @@ export default function AdminPage() {
     setTimeout(() => setFeedbackMensagem(null), 3500)
   }
 
-  // Aprovação
-  const handleAprovar = async (sol: SolicitacaoPendente) => {
-    if (acaoEmAndamento.current) return
-    acaoEmAndamento.current = true
+  async function executar(acao: () => Promise<void>, mensagem: string, atualizar = true) {
+    if (processando) return
+    setProcessando(true)
+    setErroAcao('')
     try {
-      await adminService.aprovarSolicitacao(sol.id)
+      await acao()
+      if (atualizar) {
+        void queryClient.invalidateQueries({ queryKey: chave })
+        void queryClient.invalidateQueries({ queryKey: ['minhas-reservas'] })
+        void queryClient.invalidateQueries({ queryKey: ['equipamentos'] })
+        void queryClient.invalidateQueries({ queryKey: ['disponibilidade'] })
+      }
+      if (mensagem) dispararFeedback(mensagem)
     } catch (erro) {
-      alert(mensagemDeErro(erro))
-      return
+      setErroAcao(extrairMensagemErro(erro))
     } finally {
-      acaoEmAndamento.current = false
+      setProcessando(false)
     }
-    atualizarCatalogoDeEquipamentos()
-    setPendencias((prev) => prev.filter((p) => p.id !== sol.id))
-    if (metricas) {
-      setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
-    }
-    dispararFeedback(`Solicitação ${sol.protocolo} aprovada com sucesso! O associado foi notificado.`)
   }
 
-  // Recusa
-  const handleConfirmarRecusa = async () => {
-    if (!solicitacaoParaRecusa || acaoEmAndamento.current) return
-    acaoEmAndamento.current = true
-    try {
-      await adminService.recusarSolicitacao(
-        solicitacaoParaRecusa.id,
-        motivoRecusa || 'Incompatibilidade com o regulamento de uso'
-      )
-    } catch (erro) {
-      alert(mensagemDeErro(erro))
-      return
-    } finally {
-      acaoEmAndamento.current = false
-    }
-    atualizarCatalogoDeEquipamentos()
-    setPendencias((prev) => prev.filter((p) => p.id !== solicitacaoParaRecusa.id))
-    if (metricas) {
-      setMetricas({ ...metricas, solicitacoesPendentes: metricas.solicitacoesPendentes - 1 })
-    }
-    dispararFeedback(`Solicitação ${solicitacaoParaRecusa.protocolo} recusada. Notificação enviada.`)
-    setSolicitacaoParaRecusa(null)
-    setMotivoRecusa('')
+  const handleAprovar = (sol: SolicitacaoPendente) => executar(async () => {
+    await adminService.aprovarSolicitacao(sol.id)
+  }, `Solicitação ${sol.protocolo} aprovada.`)
+
+  const handleConfirmarRecusa = () => {
+    if (!solicitacaoParaRecusa || !motivoRecusa.trim()) return
+    void executar(async () => {
+      await adminService.recusarSolicitacao(solicitacaoParaRecusa.id, motivoRecusa.trim())
+      setSolicitacaoParaRecusa(null)
+      setMotivoRecusa('')
+    }, `Solicitação ${solicitacaoParaRecusa.protocolo} recusada.`)
   }
 
-  // Devolução no Balcão
-  const handleConfirmarDevolucao = async () => {
-    if (!movimentacaoParaDevolucao || acaoEmAndamento.current) return
-    acaoEmAndamento.current = true
-    try {
-      await adminService.registrarDevolucao(
-        movimentacaoParaDevolucao.id,
-        condicaoDevolucao,
-        obsDevolucao
-      )
-    } catch (erro) {
-      alert(mensagemDeErro(erro))
-      return
-    } finally {
-      acaoEmAndamento.current = false
-    }
-    atualizarCatalogoDeEquipamentos()
-
-    setMovimentacoes((prev) =>
-      prev.map((m) =>
-        m.id === movimentacaoParaDevolucao.id
-          ? {
-              ...m,
-              statusMovimentacao: 'devolvido',
-              condicaoDevolucao,
-              dataDevolucaoEfetiva: new Date().toISOString(),
-            }
-          : m
-      )
-    )
-
-    if (metricas) {
-      setMetricas({ ...metricas, equipamentosEmCampo: Math.max(0, metricas.equipamentosEmCampo - 1) })
-    }
-
-    dispararFeedback(
-      `Devolução do equipamento ${movimentacaoParaDevolucao.patrimonio} registrada com sucesso no balcão.`
-    )
-    setMovimentacaoParaDevolucao(null)
-    setObsDevolucao('')
+  const concluirMovimentacao = () => {
+    const mov = movimentacaoParaRetirada ?? movimentacaoParaDevolucao
+    if (!mov) return
+    const retirada = Boolean(movimentacaoParaRetirada)
+    void executar(async () => {
+      if (retirada) await adminService.registrarRetirada(mov.id, condicaoDevolucao, obsDevolucao)
+      else await adminService.registrarDevolucao(mov.id, condicaoDevolucao, obsDevolucao)
+      setMovimentacaoParaRetirada(null)
+      setMovimentacaoParaDevolucao(null)
+      setObsDevolucao('')
+    }, retirada ? 'Retirada registrada.' : 'Devolução registrada.')
   }
+
+  const movimentacaoSelecionada = movimentacaoParaRetirada ?? movimentacaoParaDevolucao
 
   const formatarDataHora = (iso: string) => {
     try {
@@ -224,9 +168,14 @@ export default function AdminPage() {
 
   return (
     <div className="admin-page-container">
+      {erroAcao && !solicitacaoParaRecusa && !movimentacaoSelecionada && <p className="erro-sigra" role="alert">{erroAcao}</p>}
+      {metricasQuery.isError && <p className="erro-sigra" role="alert">Não foi possível carregar as métricas.{' '}
+        <button type="button" onClick={() => void metricasQuery.refetch()}>Tentar novamente</button></p>}
+      {consulta.isError && <p className="erro-sigra" role="alert">Não foi possível carregar esta seção.{' '}
+        <button type="button" onClick={() => void consulta.refetch()}>Tentar novamente</button></p>}
       {/* Toast Feedback */}
       {feedbackMensagem && (
-        <div className="toast-admin-feedback">
+        <div className="toast-admin-feedback" role="status">
           <span className="toast-icone">✓</span>
           <span>{feedbackMensagem}</span>
         </div>
@@ -252,7 +201,8 @@ export default function AdminPage() {
       {/* ============================================================
           METRICAS GERAIS DE ADMINISTRAÇÃO (KPIS)
           ============================================================ */}
-      <section className="admin-kpis-grid">
+      {metricasQuery.isPending && <p className="texto-apoio" role="status">Carregando métricas…</p>}
+      {metricas && <section className="admin-kpis-grid">
         <div className="admin-kpi-card card-kpi-pendentes">
           <div className="kpi-icone-box icone-laranja">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -263,7 +213,7 @@ export default function AdminPage() {
             </svg>
           </div>
           <div className="kpi-info-bloco">
-            <span className="kpi-valor-grande">{metricas?.solicitacoesPendentes ?? 3}</span>
+            <span className="kpi-valor-grande">{metricas.solicitacoesPendentes}</span>
             <span className="kpi-rotulo-texto">Solicitações Pendentes</span>
             <span className="kpi-descricao-texto">Aguardando parecer da gestão</span>
           </div>
@@ -277,13 +227,9 @@ export default function AdminPage() {
             </svg>
           </div>
           <div className="kpi-info-bloco">
-            <span className="kpi-valor-grande">{metricas?.equipamentosEmCampo ?? 1}</span>
+            <span className="kpi-valor-grande">{metricas.equipamentosEmCampo}</span>
             <span className="kpi-rotulo-texto">Equipamentos em Campo</span>
-            <span className="kpi-descricao-texto">
-              {metricas?.equipamentosEmAtraso
-                ? `⚠ ${metricas.equipamentosEmAtraso} em atraso na devolução`
-                : 'Com termo de guarda ativo'}
-            </span>
+            <span className="kpi-descricao-texto">Com termo de guarda ativo</span>
           </div>
         </div>
 
@@ -295,7 +241,7 @@ export default function AdminPage() {
             </svg>
           </div>
           <div className="kpi-info-bloco">
-            <span className="kpi-valor-grande">{metricas?.taxaOcupacaoSalas ?? '82%'}</span>
+            <span className="kpi-valor-grande">{metricas.taxaOcupacaoSalas}</span>
             <span className="kpi-rotulo-texto">Taxa de Ocupação</span>
             <span className="kpi-descricao-texto">Média de uso dos espaços</span>
           </div>
@@ -311,12 +257,12 @@ export default function AdminPage() {
             </svg>
           </div>
           <div className="kpi-info-bloco">
-            <span className="kpi-valor-grande">{metricas?.profissionaisAtivos ?? 312}</span>
+            <span className="kpi-valor-grande">{metricas.profissionaisAtivos}</span>
             <span className="kpi-rotulo-texto">Associados Habilitados</span>
             <span className="kpi-descricao-texto">Com anuidade regular</span>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ============================================================
           ABAS DE NAVEGAÇÃO ADMINISTRATIVA
@@ -325,8 +271,8 @@ export default function AdminPage() {
         <div className="admin-abas-navegacao">
           <button
             type="button"
-            className={`admin-aba-btn ${abaAtiva === 'pendencias' ? 'aba-ativa' : ''}`}
-            onClick={() => setAbaAtiva('pendencias')}
+            className="admin-aba-btn"
+            aria-pressed={abaAtiva === 'pendencias'} onClick={() => setAbaAtiva('pendencias')}
           >
             <span>📥 Fila de Despacho & Aprovações</span>
             {pendencias.length > 0 && (
@@ -336,33 +282,22 @@ export default function AdminPage() {
 
           <button
             type="button"
-            className={`admin-aba-btn ${abaAtiva === 'balcao' ? 'aba-ativa' : ''}`}
-            onClick={() => setAbaAtiva('balcao')}
+            className="admin-aba-btn"
+            aria-pressed={abaAtiva === 'balcao'} onClick={() => setAbaAtiva('balcao')}
           >
             <span>🔄 Balcão de Retiradas & Devoluções HUB</span>
           </button>
 
-          <button
-            type="button"
-            className={`admin-aba-btn ${abaAtiva === 'inventario' ? 'aba-ativa' : ''}`}
-            onClick={() => setAbaAtiva('inventario')}
-          >
-            <span>🏢 Status dos Espaços da Sede</span>
-          </button>
-
-          <button
-            type="button"
-            className={`admin-aba-btn ${abaAtiva === 'historico' ? 'aba-ativa' : ''}`}
-            onClick={() => setAbaAtiva('historico')}
-          >
-            <span>📜 Histórico Geral & Auditoria</span>
-          </button>
+          <button type="button" className="admin-aba-btn"
+            aria-pressed={abaAtiva === 'inventario'} onClick={() => setAbaAtiva('inventario')}>Inventário</button>
+          <button type="button" className="admin-aba-btn"
+            aria-pressed={abaAtiva === 'historico'} onClick={() => setAbaAtiva('historico')}>Histórico e auditoria</button>
         </div>
 
         {/* ============================================================
             CONTEÚDO DA ABA 1: PENDÊNCIAS DE APROVAÇÃO
             ============================================================ */}
-        {abaAtiva === 'pendencias' && (
+        {abaAtiva === 'pendencias' && !consulta.isError && (
           <div className="admin-conteudo-aba">
             {carregando ? (
               <div className="admin-carregando">Carregando solicitações...</div>
@@ -420,14 +355,14 @@ export default function AdminPage() {
                       <button
                         type="button"
                         className="btn btn-recusar-admin"
-                        onClick={() => setSolicitacaoParaRecusa(sol)}
+                        onClick={() => { setErroAcao(''); setSolicitacaoParaRecusa(sol) }}
                       >
                         Recusar / Pedir Ajuste
                       </button>
                       <button
                         type="button"
                         className="btn btn-aprovar-admin"
-                        onClick={() => handleAprovar(sol)}
+                        disabled={processando} onClick={() => void handleAprovar(sol)}
                       >
                         ✓ Aprovar Solicitação
                       </button>
@@ -442,9 +377,11 @@ export default function AdminPage() {
         {/* ============================================================
             CONTEÚDO DA ABA 2: BALCÃO DE RETIRADA & DEVOLUÇÃO
             ============================================================ */}
-        {abaAtiva === 'balcao' && (
+        {abaAtiva === 'balcao' && !consulta.isError && (
           <div className="admin-conteudo-aba">
-            <div className="balcao-tabela-wrapper">
+            {carregando && <p role="status">Carregando movimentações…</p>}
+            {!carregando && movimentacoes.length === 0 && <p>Nenhuma movimentação registrada.</p>}
+            {movimentacoes.length > 0 && <div className="balcao-tabela-wrapper">
               <table className="balcao-tabela">
                 <thead>
                   <tr>
@@ -473,23 +410,26 @@ export default function AdminPage() {
                       </td>
                       <td>{formatarDataHora(mov.dataDevolucaoPrevista)}</td>
                       <td>
-                        <span className={`badge-balcao-status status-${mov.statusMovimentacao}${mov.emAtraso ? ' status-em_atraso' : ''}`}>
-                          {mov.statusMovimentacao === 'em_campo' && (mov.emAtraso ? '⚠ Em Atraso' : '● Em Campo')}
+                        <span className={'badge-balcao-status status-' + mov.statusMovimentacao}>
+                          {mov.statusMovimentacao === 'em_campo' && '● Em Campo'}
                           {mov.statusMovimentacao === 'devolvido' && '✓ Devolvido'}
                           {mov.statusMovimentacao === 'aguardando_retirada' && '⏳ Aguarda Retirada'}
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        {mov.statusMovimentacao === 'em_campo' ? (
+                        {(mov.statusMovimentacao === 'em_campo' || mov.statusMovimentacao === 'aguardando_retirada') ? (
                           <button
                             type="button"
                             className="btn btn-sm btn-devolver-tabela"
                             onClick={() => {
-                              setMovimentacaoParaDevolucao(mov)
+                              setErroAcao('')
+                              setObsDevolucao('')
+                              if (mov.statusMovimentacao === 'em_campo') setMovimentacaoParaDevolucao(mov)
+                              else setMovimentacaoParaRetirada(mov)
                               setCondicaoDevolucao('otimo')
                             }}
                           >
-                            Registrar Devolução
+                            {mov.statusMovimentacao === 'em_campo' ? 'Registrar devolução' : 'Registrar retirada'}
                           </button>
                         ) : (
                           <span className="texto-concluido-tabela">Finalizado</span>
@@ -499,103 +439,22 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </div>}
           </div>
         )}
 
         {/* ============================================================
             CONTEÚDO DA ABA 3: INVENTÁRIO & DISPONIBILIDADE DA SEDE
             ============================================================ */}
-        {abaAtiva === 'inventario' && (
-          <div className="admin-conteudo-aba">
-            <div className="inventario-grid-cards">
-              <div className="inventario-card">
-                <div className="inventario-card-topo">
-                  <span className="inventario-tipo-tag">🏢 Espaço Físico</span>
-                  <span className="badge-inventario-livre">Operacional</span>
-                </div>
-                <h4 className="inventario-nome">Espaço Coworking Compartilhado</h4>
-                <p className="inventario-detalhes">Capacidade: 24 profissionais • Térreo Ala Sul</p>
-                <div className="inventario-recursos-mini">
-                  <span>Wi-Fi 6</span> • <span>Climatização</span> • <span>Café</span>
-                </div>
-              </div>
-
-              <div className="inventario-card">
-                <div className="inventario-card-topo">
-                  <span className="inventario-tipo-tag">🤝 Sala Privativa</span>
-                  <span className="badge-inventario-livre">Operacional</span>
-                </div>
-                <h4 className="inventario-nome">Sala de Reuniões Executiva A</h4>
-                <p className="inventario-detalhes">Capacidade: 8 pessoas • 2º Andar Sala 204</p>
-                <div className="inventario-recursos-mini">
-                  <span>Smart TV 65"</span> • <span>Videoconferência</span> • <span>Lousa de Vidro</span>
-                </div>
-              </div>
-
-              <div className="inventario-card">
-                <div className="inventario-card-topo">
-                  <span className="inventario-tipo-tag">🎙️ Auditório Solene</span>
-                  <span className="badge-inventario-livre">Operacional</span>
-                </div>
-                <h4 className="inventario-nome">Auditório Master Cláudio Portella</h4>
-                <p className="inventario-detalhes">Capacidade: 60 pessoas • 3º Andar</p>
-                <div className="inventario-recursos-mini">
-                  <span>Projetor Laser 6000L</span> • <span>Som Digital</span> • <span>Púlpito</span>
-                </div>
-              </div>
-
-              <div className="inventario-card">
-                <div className="inventario-card-topo">
-                  <span className="inventario-tipo-tag">🛰️ Equipamento HUB</span>
-                  <span className="badge-inventario-livre">Disponível</span>
-                </div>
-                <h4 className="inventario-nome">Drone DJI Phantom 4 RTK (HUB-0042)</h4>
-                <p className="inventario-detalhes">Baterias: 3 unidades testadas • Calibrado</p>
-                <div className="inventario-recursos-mini">
-                  <span>Câmera 20MP</span> • <span>RTK Centimétrico</span> • <span>Maleta Rígida</span>
-                </div>
-              </div>
-
-              <div className="inventario-card">
-                <div className="inventario-card-topo">
-                  <span className="inventario-tipo-tag">📷 Equipamento HUB</span>
-                  <span className="badge-inventario-livre">Disponível</span>
-                </div>
-                <h4 className="inventario-nome">Câmera Termográfica FLIR E8-XT (HUB-0019)</h4>
-                <p className="inventario-detalhes">Calibração válida até Dez/2026</p>
-                <div className="inventario-recursos-mini">
-                  <span>320x240 pixels</span> • <span>Faixa -20°C a 550°C</span> • <span>MSX</span>
-                </div>
-              </div>
-
-              <div className="inventario-card">
-                <div className="inventario-card-topo">
-                  <span className="inventario-tipo-tag">📐 Equipamento HUB</span>
-                  <span className="badge-inventario-campo">Em Campo</span>
-                </div>
-                <h4 className="inventario-nome">Estação Total Leica FlexLine TS07 (HUB-0008)</h4>
-                <p className="inventario-detalhes">Em uso com Eng. Marcelo Cavalcante</p>
-                <div className="inventario-recursos-mini">
-                  <span>Precisão 2"</span> • <span>Tripé + Prisma</span> • <span>Devolução: 22/10</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        {abaAtiva === 'inventario' && !consulta.isError && (
+          <InventarioAdmin itens={inventarioQuery.data ?? []} carregando={carregando} chave={chaveInventario} />
         )}
 
         {/* ============================================================
             CONTEÚDO DA ABA 4: HISTÓRICO GERAL & AUDITORIA
             ============================================================ */}
-        {abaAtiva === 'historico' && (
+        {abaAtiva === 'historico' && !consulta.isError && (
           <div className="admin-conteudo-aba">
-            {totalHistorico > historico.length && (
-              <p className="historico-aviso-limite" role="status">
-                Exibindo os {historico.length} registros mais recentes de {totalHistorico}. Os filtros
-                abaixo valem só para os registros carregados.
-              </p>
-            )}
-
             {/* Barra de Filtros do Histórico */}
             <div className="historico-filtros-card">
               <div className="historico-filtros-grid">
@@ -652,7 +511,6 @@ export default function AdminPage() {
                     <option value="concluida">✓ Concluídas</option>
                     <option value="em_uso">● Em Uso</option>
                     <option value="cancelada">✕ Canceladas</option>
-                    <option value="nao_compareceu">⚠ Não compareceu</option>
                     <option value="recusada">✕ Recusadas</option>
                   </select>
                 </div>
@@ -774,7 +632,6 @@ export default function AdminPage() {
                               {item.status === 'concluida' && '✓ Concluída'}
                               {item.status === 'em_uso' && '● Em Uso'}
                               {item.status === 'cancelada' && '✕ Cancelada'}
-                              {item.status === 'nao_compareceu' && '⚠ Não compareceu'}
                               {item.status === 'recusada' && '✕ Recusada'}
                             </span>
                           </td>
@@ -782,7 +639,9 @@ export default function AdminPage() {
                             <button
                               type="button"
                               className="btn-inspecionar-auditoria"
-                              onClick={() => setRegistroParaAuditoria(item)}
+                              disabled={processando} onClick={() => void executar(async () => {
+                                setRegistroParaAuditoria(await adminService.obterHistoricoPorId(item.id))
+                              }, '', false)}
                             >
                               Ver Auditoria
                             </button>
@@ -829,19 +688,14 @@ export default function AdminPage() {
           MODAL DE RECUSA / AJUSTE DE SOLICITAÇÃO
           ============================================================ */}
       {solicitacaoParaRecusa && (
-        <div className="modal-admin-overlay" onClick={() => setSolicitacaoParaRecusa(null)}>
-          <div
-            className="modal-admin-container"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
+        <Janela className="modal-admin-container" titulo="Recusar solicitação" fechar={() => { if (processando) return; setSolicitacaoParaRecusa(null); setErroAcao('') }}>
+            {erroAcao && <p className="erro-sigra" role="alert">{erroAcao}</p>}
             <div className="modal-admin-cabecalho">
               <h3>Recusar ou Solicitar Ajuste</h3>
               <button
                 type="button"
-                className="btn-fechar-admin"
-                onClick={() => setSolicitacaoParaRecusa(null)}
+                className="btn-fechar-admin" aria-label="Fechar janela"
+                disabled={processando} onClick={() => { setSolicitacaoParaRecusa(null); setErroAcao('') }}
               >
                 ✕
               </button>
@@ -857,6 +711,8 @@ export default function AdminPage() {
 
               <textarea
                 rows={4}
+                aria-label="Justificativa da recusa"
+                maxLength={500}
                 required
                 placeholder="Ex: Anuidade em aberto com pendência financeira, falta de ART registrada ou choque de horário com evento oficial da Mútua..."
                 value={motivoRecusa}
@@ -868,43 +724,37 @@ export default function AdminPage() {
                 <button
                   type="button"
                   className="btn btn-secundario"
-                  onClick={() => setSolicitacaoParaRecusa(null)}
+                  disabled={processando} onClick={() => { setSolicitacaoParaRecusa(null); setErroAcao('') }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   className="btn btn-confirmar-recusa"
-                  onClick={handleConfirmarRecusa}
+                  disabled={processando || !motivoRecusa.trim()} onClick={handleConfirmarRecusa}
                 >
-                  Confirmar Recusa e Notificar
+                  Confirmar recusa
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+        </Janela>
       )}
 
       {/* ============================================================
           MODAL DE CHECKLIST DE DEVOLUÇÃO NO BALCÃO
           ============================================================ */}
-      {movimentacaoParaDevolucao && (
-        <div className="modal-admin-overlay" onClick={() => setMovimentacaoParaDevolucao(null)}>
-          <div
-            className="modal-admin-container"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
+      {movimentacaoSelecionada && (
+        <Janela className="modal-admin-container" titulo="Movimentação de equipamento" fechar={() => { if (processando) return; setMovimentacaoParaDevolucao(null); setMovimentacaoParaRetirada(null); setErroAcao('') }}>
+            {erroAcao && <p className="erro-sigra" role="alert">{erroAcao}</p>}
             <div className="modal-admin-cabecalho">
               <div>
                 <span className="subtitulo-admin-modal">Conferência Presencial de Balcão</span>
-                <h3>Devolução: {movimentacaoParaDevolucao.equipamentoNome}</h3>
+                <h3>{movimentacaoParaRetirada ? 'Retirada' : 'Devolução'}: {movimentacaoSelecionada.equipamentoNome}</h3>
               </div>
               <button
                 type="button"
-                className="btn-fechar-admin"
-                onClick={() => setMovimentacaoParaDevolucao(null)}
+                className="btn-fechar-admin" aria-label="Fechar janela"
+                disabled={processando} onClick={() => { setMovimentacaoParaDevolucao(null); setMovimentacaoParaRetirada(null); setErroAcao('') }}
               >
                 ✕
               </button>
@@ -914,18 +764,18 @@ export default function AdminPage() {
               <div className="box-resumo-devolucao">
                 <div>
                   <span className="rotulo-dev">Patrimônio:</span>
-                  <strong>{movimentacaoParaDevolucao.patrimonio}</strong>
+                  <strong>{movimentacaoSelecionada.patrimonio}</strong>
                 </div>
                 <div>
                   <span className="rotulo-dev">Associado Responsável:</span>
-                  <strong>{movimentacaoParaDevolucao.profissionalNome}</strong>
+                  <strong>{movimentacaoSelecionada.profissionalNome}</strong>
                 </div>
               </div>
 
               {/* Avaliação da Condição Física */}
               <div className="campo-grupo-admin">
-                <label className="label-admin">Estado de Conservação na Devolução *</label>
-                <select
+                <label className="label-admin" htmlFor="condicao-balcao">Estado de conservação *</label>
+                <select id="condicao-balcao"
                   value={condicaoDevolucao}
                   onChange={(e) => setCondicaoDevolucao(e.target.value as CondicaoEquipamento)}
                   className="select-condicao-admin"
@@ -937,28 +787,11 @@ export default function AdminPage() {
                 </select>
               </div>
 
-              {/* Checklist de Itens */}
-              <div className="checklist-balcao-caixa">
-                <span className="checklist-titulo">Itens Conferidos na Maleta:</span>
-                <label className="checkbox-item-checklist">
-                  <input type="checkbox" defaultChecked />
-                  <span>Baterias conferidas e íntegras</span>
-                </label>
-                <label className="checkbox-item-checklist">
-                  <input type="checkbox" defaultChecked />
-                  <span>Cabos, carregador e conectores originais presentes</span>
-                </label>
-                <label className="checkbox-item-checklist">
-                  <input type="checkbox" defaultChecked />
-                  <span>Maleta rígida sem travas quebradas</span>
-                </label>
-              </div>
-
               {/* Observações da Devolução */}
               <div className="campo-grupo-admin">
-                <label className="label-admin">Observações do Atendente de Balcão</label>
+                <label className="label-admin" htmlFor="observacoes-balcao">Observações do Atendente de Balcão</label>
                 <input
-                  type="text"
+                  type="text" id="observacoes-balcao"
                   placeholder="Ex: Devolvido com carga completa, testado no ato sem anomalias..."
                   value={obsDevolucao}
                   onChange={(e) => setObsDevolucao(e.target.value)}
@@ -970,21 +803,20 @@ export default function AdminPage() {
                 <button
                   type="button"
                   className="btn btn-secundario"
-                  onClick={() => setMovimentacaoParaDevolucao(null)}
+                  disabled={processando} onClick={() => { setMovimentacaoParaDevolucao(null); setMovimentacaoParaRetirada(null); setErroAcao('') }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   className="btn btn-primario"
-                  onClick={handleConfirmarDevolucao}
+                  disabled={processando} onClick={concluirMovimentacao}
                 >
-                  Concluir Devolução e Liberar Bem
+                  {movimentacaoParaRetirada ? 'Concluir retirada' : 'Concluir devolução'}
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+        </Janela>
       )}
 
       {/* ============================================================

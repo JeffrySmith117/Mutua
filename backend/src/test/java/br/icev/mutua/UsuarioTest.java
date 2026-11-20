@@ -25,7 +25,7 @@ class UsuarioTest extends IntegracaoBase {
     void adminCriaOutroAdminQueAcessaOPainel() throws Exception {
         String email = novoEmail();
         criar(tokenAdmin(), novoUsuarioJson(email, "ADMIN")).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.perfil").value("ADMIN"))
+                .andExpect(jsonPath("$.perfil").value("admin"))
                 .andExpect(jsonPath("$.email").value(email));
 
         String tokenNovo = login(email, "senhaSegura123");
@@ -36,7 +36,7 @@ class UsuarioTest extends IntegracaoBase {
     @Test
     void adminTambemPodeCriarProfissional() throws Exception {
         criar(tokenAdmin(), novoUsuarioJson(novoEmail(), "PROFISSIONAL")).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.perfil").value("PROFISSIONAL"));
+                .andExpect(jsonPath("$.perfil").value("profissional"));
     }
 
     @Test

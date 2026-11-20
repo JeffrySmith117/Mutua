@@ -13,11 +13,11 @@ public final class RecursoDtos {
     public record AmbienteResponse(UUID id, String nome, TipoRecurso tipo, int capacidade, String localizacao,
                                    String descricao, List<String> recursosDisponiveis,
                                    String horarioFuncionamento, LocalTime horarioAbertura,
-                                   LocalTime horarioFechamento, boolean exigeAprovacao, boolean ativo) {
+                                   LocalTime horarioFechamento, boolean exigeAprovacao, boolean ativo, List<Integer> diasSemana) {
         public static AmbienteResponse de(Recurso r) {
             return new AmbienteResponse(r.getId(), r.getNome(), r.getTipo(), r.getCapacidade(),
                     r.getLocalizacao(), r.getDescricao(), r.getRecursosDisponiveis(), Horarios.descrever(r),
-                    r.getHorarioAbertura(), r.getHorarioFechamento(), r.isExigeAprovacao(), r.isAtivo());
+                    r.getHorarioAbertura(), r.getHorarioFechamento(), r.isExigeAprovacao(), r.isAtivo(), r.getDiasSemana());
         }
     }
 
@@ -25,12 +25,14 @@ public final class RecursoDtos {
     public record EquipamentoResponse(UUID id, String nome, String patrimonio, String categoria,
                                       String descricao, int prazoMaximoDias, boolean exigeArtSisAnt,
                                       String status, List<String> especificacoes, boolean exigeAprovacao,
-                                      boolean ativo) {
+                                      boolean ativo, List<Integer> diasSemana, LocalTime horarioAbertura,
+                                      LocalTime horarioFechamento, String horarioFuncionamento) {
         public static EquipamentoResponse de(Recurso r, boolean emCampo) {
             return new EquipamentoResponse(r.getId(), r.getNome(), r.getPatrimonio(), r.getCategoria(),
                     r.getDescricao(), r.getPrazoMaxDias(), r.isExigeArtSisant(),
                     emCampo ? "EM_CAMPO" : "DISPONIVEL", r.getEspecificacoes(), r.isExigeAprovacao(),
-                    r.isAtivo());
+                    r.isAtivo(), r.getDiasSemana(), r.getHorarioAbertura(), r.getHorarioFechamento(),
+                    Horarios.descrever(r));
         }
     }
 

@@ -1,7 +1,11 @@
 package br.icev.mutua.reserva;
 
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Ciclo de vida da reserva (docs/ciclo-de-vida-reservas.md).
@@ -19,6 +23,19 @@ public enum StatusReserva {
 
     /** Estados que ocupam o horário do recurso. */
     public static final Set<StatusReserva> ATIVAS = EnumSet.of(PENDENTE, CONFIRMADA, EM_USO);
+
+    @JsonValue
+    public String getValor() {
+        return name().toLowerCase(Locale.ROOT);
+    }
+
+    @JsonCreator
+    public static StatusReserva doValor(String v) {
+        if (v == null || v.isBlank()) {
+            return null;
+        }
+        return StatusReserva.valueOf(v.trim().toUpperCase(Locale.ROOT));
+    }
 
     public boolean podeIrPara(StatusReserva destino) {
         return switch (this) {

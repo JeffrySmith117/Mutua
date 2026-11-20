@@ -32,11 +32,9 @@ public final class ReservaDtos {
             LocalDateTime dataInicio, LocalDateTime dataFim,
             LocalDate data, LocalTime horarioInicio, LocalTime horarioFim,
             LocalDate dataRetirada, LocalTime horarioRetirada, LocalDate dataDevolucao, LocalTime horarioDevolucao,
-            @NotBlank(message = "Informe a finalidade.")
-            @Size(max = 1000, message = "A finalidade deve ter no máximo 1000 caracteres.") String finalidade,
-            @Size(max = 180, message = "O documento vinculado deve ter no máximo 180 caracteres.")
-            String documentoVinculado,
-            @Size(max = 150, message = "O número da ART deve ter no máximo 150 caracteres.") String numeroArt,
+            @NotBlank(message = "Informe a finalidade.") @Size(max = 1000, message = "A finalidade deve ter no máximo 1000 caracteres.") String finalidade,
+            @Size(max = 180, message = "O documento vinculado deve ter no máximo 180 caracteres.") String documentoVinculado,
+            @Size(max = 180, message = "O número da ART deve ter no máximo 180 caracteres.") String numeroArt,
             Boolean termoAceito) {
 
         public Periodo periodo() {
@@ -64,7 +62,8 @@ public final class ReservaDtos {
         }
     }
 
-    public record CancelarRequest(@Size(max = 500, message = "O motivo deve ter no máximo 500 caracteres.") String motivo) {
+    public record CancelarRequest(
+            @Size(max = 500, message = "O motivo deve ter no máximo 500 caracteres.") String motivo) {
     }
 
     public record ReservaCriadaResponse(UUID id, String protocolo, UUID recursoId, String recursoNome,
@@ -88,7 +87,7 @@ public final class ReservaDtos {
                                 boolean podeCancelar, boolean podeCheckin,
                                 String titulo, String subtitulo, String localOuPatrimonio,
                                 boolean permitirCancelamento, boolean permitirCheckin,
-                                List<String> detalhesTecnicos, LocalDateTime termoAceitoEm) {
+                                List<String> detalhesTecnicos) {
         public static ReservaResumo de(Reserva r, boolean podeCancelar, boolean podeCheckin) {
             Recurso rec = r.getRecurso();
             String local = rec.isEquipamento()
@@ -99,8 +98,7 @@ public final class ReservaDtos {
                     rec.isEquipamento() ? "equipamento" : "ambiente",
                     rec.isEquipamento() ? rec.getPatrimonio() : rec.getLocalizacao(), r.getDataInicio(),
                     r.getDataFim(), r.getStatus(), r.getFinalidade(), r.getCriadoEm(), podeCancelar,
-                    podeCheckin, rec.getNome(), rec.getDescricao(), local, podeCancelar, podeCheckin, detalhes,
-                    r.getTermoAceitoEm());
+                    podeCheckin, rec.getNome(), rec.getDescricao(), local, podeCancelar, podeCheckin, detalhes);
         }
     }
 }

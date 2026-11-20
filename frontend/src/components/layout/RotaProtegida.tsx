@@ -6,7 +6,6 @@ import type { PerfilUsuario } from '../../types'
 interface RotaProtegidaProps {
   children: ReactNode
   redirecionarPara?: string
-  /** Se informado, só esses perfis acessam; os demais voltam para o início. */
   perfisPermitidos?: PerfilUsuario[]
 }
 
@@ -17,12 +16,20 @@ export default function RotaProtegida({
 }: RotaProtegidaProps) {
   const { estaAutenticado, usuario } = useAuthStore()
 
-  if (!estaAutenticado || !usuario) {
+  if (!estaAutenticado) {
     return <Navigate to={redirecionarPara} replace />
   }
 
-  if (perfisPermitidos && !perfisPermitidos.includes(usuario.perfil)) {
-    return <Navigate to="/" replace />
+  // D05: Validação de perfis autorizados (ex: rota /admin exclusiva para admin)
+  if (perfisPermitidos && perfisPermitidos.length > 0) {
+    const perfilUsuario = (usuario?.perfil ? String(usuario.perfil).toLowerCase() : '') as PerfilUsuario
+    const temPermissao = perfisPermitidos.some(
+      (p) => String(p).toLowerCase() === perfilUsuario
+    )
+
+    if (!temPermissao) {
+      return <Navigate to="/" replace />
+    }
   }
 
   return <>{children}</>

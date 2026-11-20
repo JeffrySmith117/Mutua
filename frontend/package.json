@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "tsc --ignoreConfig --target es2022 --module commonjs --types node --skipLibCheck --outDir node_modules/.cache/sigra-tests src/utils/corresponde.ts src/utils/dataLocal.ts && node --test tests/corresponde.test.mjs tests/dataLocal.test.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",

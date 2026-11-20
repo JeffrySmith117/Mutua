@@ -1,2 +1,6 @@
-/* App.css — Estilos globais da aplicação */
-/* Estilos específicos de páginas ficam em seus próprios diretórios */
+/* App.css — Ponto de entrada dos estilos globais */
+/* Os tokens e reset estão em index.css              */
+/* Os componentes reutilizáveis estão em components.css */
+
+@import './components.css';
+@import './sigra.css';

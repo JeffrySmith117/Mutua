@@ -38,7 +38,7 @@ class ReservaFluxoTest extends IntegracaoBase {
         mvc.perform(post("/auth/cadastro").contentType(MediaType.APPLICATION_JSON)
                         .content(corpoCadastro(email, "senhaSegura123")))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.perfil").value("PROFISSIONAL"))
+                .andExpect(jsonPath("$.perfil").value("profissional"))
                 .andExpect(jsonPath("$.token", notNullValue()))
                 .andExpect(jsonPath("$.mensagem").value("Cadastro realizado com sucesso."));
 
@@ -46,7 +46,7 @@ class ReservaFluxoTest extends IntegracaoBase {
                         .content("{\"email\":\"" + email + "\",\"senha\":\"senhaSegura123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.usuario.perfil").value("PROFISSIONAL"));
+                .andExpect(jsonPath("$.usuario.perfil").value("profissional"));
 
         mvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"" + email + "\",\"senha\":\"errada\"}"))
@@ -75,7 +75,7 @@ class ReservaFluxoTest extends IntegracaoBase {
         LocalDate dia = proximoDiaUtil(10);
 
         String primeira = criar(token, sala, dia, "10:00", "11:00").andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("CONFIRMADA")).andReturn().getResponse().getContentAsString();
+                .andExpect(jsonPath("$.status").value("confirmada")).andReturn().getResponse().getContentAsString();
 
         criar(token, sala, dia, "10:30", "11:30").andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
@@ -89,7 +89,7 @@ class ReservaFluxoTest extends IntegracaoBase {
         mvc.perform(patch("/reservas/" + idPrimeira + "/cancelar").header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON).content("{\"motivo\":\"Adiado.\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CANCELADA"));
+                .andExpect(jsonPath("$.status").value("cancelada"));
 
         criar(token, sala, dia, "10:00", "11:00").andExpect(status().isCreated());
     }
@@ -130,7 +130,7 @@ class ReservaFluxoTest extends IntegracaoBase {
         LocalDate dia = proximoDiaUtil(12);
 
         String corpo = criar(token, auditorio, dia, "09:00", "12:00").andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("PENDENTE")).andReturn().getResponse().getContentAsString();
+                .andExpect(jsonPath("$.status").value("pendente")).andReturn().getResponse().getContentAsString();
         String id = json.readTree(corpo).get("id").asText();
 
         criar(outro, auditorio, dia, "10:00", "11:00").andExpect(status().isConflict());
@@ -144,7 +144,7 @@ class ReservaFluxoTest extends IntegracaoBase {
                 .andExpect(jsonPath("$.status").value("recusada"));
 
         criar(outro, auditorio, dia, "10:00", "11:00").andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("PENDENTE"));
+                .andExpect(jsonPath("$.status").value("pendente"));
     }
 
     @Test
@@ -206,7 +206,7 @@ class ReservaFluxoTest extends IntegracaoBase {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(corpoEquipamento(drone, retirada, true)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value("PENDENTE"))
+                .andExpect(jsonPath("$.status").value("pendente"))
                 .andExpect(jsonPath("$.protocolo").value(org.hamcrest.Matchers.startsWith("HUB-")))
                 .andReturn().getResponse().getContentAsString();
         String id = json.readTree(corpo).get("id").asText();
@@ -269,8 +269,13 @@ class ReservaFluxoTest extends IntegracaoBase {
     }
 
     private String corpoEquipamento(String id, LocalDate retirada, boolean termo) {
+        LocalDate devolucao = retirada.plusDays(1);
+        while (devolucao.getDayOfWeek() == DayOfWeek.SATURDAY
+                || devolucao.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            devolucao = devolucao.plusDays(1);
+        }
         return "{\"recursoId\":\"" + id + "\",\"tipo\":\"equipamento\",\"dataInicio\":\"" + retirada
-                + "T08:30:00\",\"dataFim\":\"" + retirada.plusDays(2) + "T17:00:00\","
+                + "T08:30:00\",\"dataFim\":\"" + devolucao + "T17:00:00\"," 
                 + "\"finalidade\":\"Levantamento planialtimétrico.\","
                 + "\"documentoVinculado\":\"ART: PI2026008491 • SISANT: 412850-BR\",\"termoAceito\":" + termo + "}";
     }

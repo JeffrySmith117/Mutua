@@ -31,8 +31,10 @@ Authorization: Bearer <TOKEN_JWT>
 ```
 
 ### 2.2 Perfis de Acesso (Roles)
-- `PROFISSIONAL`: Profissional vinculado ao Sistema Confea/CREA-PI. Pode consultar disponibilidade, criar reservas, visualizar "Minhas Reservas", efetuar check-in e cancelar reservas próprias.
-- `ADMIN`: Diretoria e equipe administrativa da Mútua-PI. Possui todas as permissões de `PROFISSIONAL` mais acesso irrestrito às rotas `/api/v1/admin/**` (aprovação/despacho, balcão de retiradas/devoluções, visualização de inventário e auditoria/histórico).
+- `profissional` (`PROFISSIONAL`): Profissional vinculado ao Sistema Confea/CREA-PI. Pode consultar disponibilidade, criar reservas, visualizar "Minhas Reservas", efetuar check-in e cancelar reservas próprias.
+- `admin` (`ADMIN`): Diretoria e equipe administrativa da Mútua-PI. Possui todas as permissões de `profissional` mais acesso irrestrito às rotas `/api/v1/admin/**` (aprovação/despacho, balcão de retiradas/devoluções, visualização de inventário e auditoria/histórico).
+
+> **Padrão de Serialização JSON**: Os enums são serializados no corpo das respostas JSON em letras minúsculas (ex: `"perfil": "profissional"`, `"status": "confirmada"`, `"status": "em_uso"`). Na recepção de requisições, o back-end aceita tanto minúsculas quanto maiúsculas via `@JsonCreator`.
 
 ### 2.3 Configuração de CORS no Spring Security
 O Back-end deve habilitar CORS explicitamente para o Front-end:
@@ -110,13 +112,13 @@ Realiza a autenticação e retorna o JWT com as informações do usuário.
     "email": "elias.mendes@crea-pi.org.br",
     "registroCrea": "CREA-PI 32415/D",
     "cpf": "123.456.789-00",
-    "perfil": "PROFISSIONAL"
+    "perfil": "profissional"
   }
 }
 ```
 
 #### `POST /api/v1/auth/cadastro` (Público)
-Cadastro público de novos associados. **Importante**: Todo cadastro público nasce exclusivamente com perfil `PROFISSIONAL` (contas `ADMIN` devem ser geradas via seed no banco ou criadas por outro administrador).
+Cadastro público de novos associados. **Importante**: Todo cadastro público nasce exclusivamente com perfil `profissional` (contas `admin` devem ser geradas via seed no banco ou criadas por outro administrador).
 
 **Request Body:**
 ```json
@@ -137,7 +139,7 @@ Cadastro público de novos associados. **Importante**: Todo cadastro público na
   "nome": "Eng. Agrimensor Carlos Eduardo Vieira",
   "email": "carlos.vieira@crea-pi.org.br",
   "registroCrea": "CREA-PI 22419/D",
-  "perfil": "PROFISSIONAL",
+  "perfil": "profissional",
   "mensagem": "Cadastro realizado com sucesso."
 }
 ```
@@ -287,7 +289,7 @@ Cria uma solicitação de reserva de ambiente ou de empréstimo de equipamento.
   "recursoId": "eq-1",
   "recursoNome": "Drone DJI Phantom 4 RTK",
   "usuarioId": "usr-1",
-  "status": "PENDENTE",
+  "status": "pendente",
   "dataInicio": "2026-10-24T08:30:00",
   "dataFim": "2026-10-26T17:00:00",
   "criadoEm": "2026-10-21T15:00:00",
@@ -313,7 +315,7 @@ Lista o histórico de reservas do profissional autenticado.
     "patrimonioOuLocal": "HUB-0042",
     "dataInicio": "2026-10-24T08:30:00",
     "dataFim": "2026-10-26T17:00:00",
-    "status": "PENDENTE",
+    "status": "pendente",
     "finalidade": "Levantamento planialtimétrico cadastral...",
     "podeCancelar": true,
     "podeCheckin": false
@@ -458,7 +460,7 @@ Responde `201 Created` com o usuário.
   "cpf": "123.456.789-00",
   "registroCrea": "CREA-PI 100/D",
   "telefone": "(86) 99999-0000",
-  "perfil": "ADMIN"
+  "perfil": "admin"
 }
 ```
 `registroCrea` e `telefone` são opcionais. E-mail ou CPF já cadastrado retorna `409`.

@@ -1,0 +1,291 @@
+/* ============================================================
+   COMPONENTES EDITORIAIS — Etapa 2: Cards, Filtros e Badges
+   Arquivo de extensão — importado após index.css via App.css
+   ============================================================ */
+
+/* ============================================================
+   CARD EDITORIAL — Branco, raio 20px, sem sombras difusas
+   ============================================================ */
+.editorial-card {
+  background:    var(--card);
+  border-radius: var(--radius-card);
+  border:        1px solid var(--line);
+  transition:    border-color var(--transition), transform var(--transition);
+  overflow:      hidden;
+}
+
+.editorial-card:hover {
+  border-color: var(--line-hover);
+}
+
+.editorial-card-clickable {
+  cursor: pointer;
+}
+
+.editorial-card-clickable:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-hover);
+}
+
+/* Cabeçalho interno de card */
+.card-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         16px 20px;
+  border-bottom:   1px solid var(--line);
+}
+
+.card-titulo {
+  font-size:      16px;
+  font-weight:    500;
+  color:          var(--fg);
+  letter-spacing: -0.02em;
+}
+
+.card-subtitulo {
+  font-size:  12px;
+  color:      var(--fg-subtle);
+  margin-top: 2px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-footer {
+  display:       flex;
+  align-items:   center;
+  gap:           10px;
+  padding:       14px 20px;
+  border-top:    1px solid var(--line);
+  background:    var(--bg-alt);
+}
+
+/* ============================================================
+   FILTROS EM PÍLULA — Seleção de categorias
+   ============================================================ */
+.filtros-pill-grupo {
+  display:     flex;
+  flex-wrap:   wrap;
+  gap:         6px;
+  align-items: center;
+}
+
+.filtro-pill {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            6px;
+  height:         34px;
+  padding:        0 14px;
+  border-radius:  var(--radius-pill);
+  font-size:      13px;
+  font-weight:    400;
+  letter-spacing: -0.01em;
+  color:          var(--fg-muted);
+  background:     var(--card);
+  border:         1px solid var(--line);
+  cursor:         pointer;
+  transition:     background var(--transition-sm), color var(--transition-sm), border-color var(--transition-sm);
+  white-space:    nowrap;
+  user-select:    none;
+  font-family:    var(--font);
+}
+
+.filtro-pill:hover {
+  border-color: var(--line-hover);
+  color:        var(--fg);
+  background:   var(--card);
+}
+
+.filtro-pill-ativo {
+  background:   var(--fg);
+  color:        var(--fg-invert) !important;
+  border-color: var(--fg);
+  font-weight:  500;
+}
+
+.filtro-pill-ativo:hover {
+  opacity: 0.9;
+}
+
+/* Variante accent */
+.filtro-pill-accent-ativo {
+  background:   var(--accent);
+  color:        var(--on-accent) !important;
+  border-color: var(--accent);
+  font-weight:  500;
+}
+
+.filtro-pill-accent-ativo:hover {
+  background: var(--accent-hover);
+}
+
+/* ============================================================
+   BADGE MICRO — Contagens e números pequenos
+   ============================================================ */
+.badge {
+  display:        inline-flex;
+  align-items:    center;
+  justify-content: center;
+  min-width:      18px;
+  height:         18px;
+  padding:        0 5px;
+  border-radius:  var(--radius-pill);
+  font-size:      11px;
+  font-weight:    500;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.badge-accent   { background: var(--accent);   color: var(--on-accent); }
+.badge-warning  { background: var(--warning-bg);  color: var(--warning); }
+.badge-error    { background: var(--error-bg);    color: var(--error); }
+.badge-neutral  { background: var(--bg-alt);   color: var(--fg-muted); border: 1px solid var(--line); }
+
+/* ============================================================
+   SECTION HEADER — Bloco de título de seção
+   ============================================================ */
+.section-header {
+  display:         flex;
+  align-items:     flex-end;
+  justify-content: space-between;
+  gap:             16px;
+  margin-bottom:   20px;
+  flex-wrap:       wrap;
+}
+
+.section-eyebrow {
+  font-size:      11px;
+  font-weight:    500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color:          var(--fg-subtle);
+  margin-bottom:  4px;
+}
+
+.section-title {
+  font-size:      clamp(20px, 2vw, 26px);
+  font-weight:    500;
+  color:          var(--fg);
+  letter-spacing: -0.03em;
+  line-height:    1.1;
+}
+
+.section-desc {
+  font-size:   14px;
+  color:       var(--fg-muted);
+  line-height: 1.5;
+  margin-top:  4px;
+  max-width:   52ch;
+}
+
+/* ============================================================
+   MÉTRICA / STAT CARD
+   ============================================================ */
+.stat-card {
+  display:        flex;
+  flex-direction: column;
+  gap:            4px;
+  padding:        20px;
+  background:     var(--card);
+  border-radius:  var(--radius-card);
+  border:         1px solid var(--line);
+}
+
+.stat-label {
+  font-size:      12px;
+  font-weight:    500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color:          var(--fg-subtle);
+}
+
+.stat-value {
+  font-size:            clamp(28px, 3vw, 42px);
+  font-weight:          500;
+  color:                var(--fg);
+  letter-spacing:       -0.045em;
+  line-height:          1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-trend {
+  font-size:   13px;
+  color:       var(--fg-muted);
+  margin-top:  2px;
+}
+
+.stat-trend--up   { color: var(--accent); }
+.stat-trend--down { color: var(--error); }
+
+/* ============================================================
+   DIVIDER (linha separadora fina)
+   ============================================================ */
+.divider {
+  height:     1px;
+  background: var(--line);
+  border:     none;
+  margin:     0;
+}
+
+.divider-vertical {
+  width:      1px;
+  background: var(--line);
+  align-self: stretch;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             12px;
+  padding:         48px 24px;
+  text-align:      center;
+  color:           var(--fg-subtle);
+}
+
+.empty-state svg {
+  opacity: 0.4;
+}
+
+.empty-state-titulo {
+  font-size:      16px;
+  font-weight:    500;
+  color:          var(--fg-muted);
+  letter-spacing: -0.02em;
+}
+
+.empty-state-desc {
+  font-size:  14px;
+  max-width:  36ch;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   SKELETON LOADING (sem animação pesada — fade simples)
+   ============================================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-alt) 0%,
+    var(--line) 50%,
+    var(--bg-alt) 100%
+  );
+  background-size: 200% 100%;
+  border-radius:   var(--radius-sm);
+  animation:       shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: var(--bg-alt); }
+}
+

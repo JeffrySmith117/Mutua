@@ -6,7 +6,6 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import br.icev.mutua.common.ApiException;
 import br.icev.mutua.common.Relogio;
@@ -21,11 +20,8 @@ import br.icev.mutua.usuario.Usuario;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ReservaService {
@@ -36,15 +32,13 @@ public class ReservaService {
     private final RecursoRepository recursos;
     private final AuditoriaService auditoria;
     private final ReservaProperties props;
-    private final TransactionTemplate transacoes;
 
     public ReservaService(ReservaRepository reservas, RecursoRepository recursos, AuditoriaService auditoria,
-                          ReservaProperties props, PlatformTransactionManager gerenciadorDeTransacoes) {
+                          ReservaProperties props) {
         this.reservas = reservas;
         this.recursos = recursos;
         this.auditoria = auditoria;
         this.props = props;
-        this.transacoes = new TransactionTemplate(gerenciadorDeTransacoes);
     }
 
     /**
@@ -62,7 +56,6 @@ public class ReservaService {
         }
         LocalDateTime agora = Relogio.agora();
         validarJanela(recurso, periodo, agora);
-        validarLimiteDoUsuario(usuario);
         validarRequisitosDoEquipamento(recurso, req);
         verificarConflito(recurso, periodo);
 
@@ -76,19 +69,13 @@ public class ReservaService {
         reserva.setDocumentoVinculado(req.documento());
         reserva.setExclusivo(recurso.isExclusivo());
         reserva.setCriadoEm(agora);
-        if (recurso.isEquipamento()) {
-            // validarRequisitosDoEquipamento já garantiu termoAceito = true.
-            reserva.setTermoAceitoEm(agora);
-        }
         if (!recurso.isExigeAprovacao()) {
             reserva.mudarPara(StatusReserva.CONFIRMADA);
         }
         reservas.saveAndFlush(reserva);
 
         auditoria.registrar(reserva, "solicitacao", "Solicitação registrada", usuario.getNome(),
-                "Solicitação de " + recurso.getNome() + " registrada sob o protocolo " + reserva.getProtocolo() + "."
-                        + (reserva.getTermoAceitoEm() == null ? ""
-                        : " Termo de Guarda e Responsabilidade aceito eletronicamente pelo solicitante."));
+                "Solicitação de " + recurso.getNome() + " registrada sob o protocolo " + reserva.getProtocolo() + ".");
         String mensagem;
         if (reserva.getStatus() == StatusReserva.CONFIRMADA) {
             auditoria.registrar(reserva, "aprovacao", "Reserva confirmada", AuditoriaService.SISTEMA,
@@ -133,15 +120,17 @@ public class ReservaService {
             throw ApiException.conflito("Equipamentos são retirados no balcão do Crea Tec HUB, não por check-in.");
         }
         LocalDateTime agora = Relogio.agora();
-        LocalDateTime abertura = reserva.getDataInicio().minusMinutes(props.antecedenciaCheckinMinutos());
-        LocalDateTime fechamento = reserva.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos());
-        if (agora.isBefore(abertura)) {
-            throw ApiException.conflito("Fora da janela de check-in: ele abre " + props.antecedenciaCheckinMinutos()
-                    + " minuto(s) antes do início da reserva.");
+        LocalDateTime inicioJanela = reserva.getDataInicio().minusMinutes(15);
+        if (agora.isBefore(inicioJanela)) {
+            throw ApiException.conflito("O check-in só é liberado a partir de 15 minutos antes do início do agendamento.");
         }
-        if (agora.isAfter(fechamento)) {
-            throw ApiException.conflito("A tolerância de " + props.toleranciaCheckinMinutos()
-                    + " minuto(s) para o check-in já terminou.");
+        LocalDateTime fimJanela = reserva.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos());
+        if (agora.isAfter(fimJanela)) {
+            throw ApiException.conflito("O prazo limite de tolerância para check-in ("
+                    + props.toleranciaCheckinMinutos() + " minutos) foi ultrapassado.");
+        }
+        if (!agora.isBefore(reserva.getDataFim())) {
+            throw ApiException.conflito("O horário desta reserva já foi encerrado.");
         }
         reserva.mudarPara(StatusReserva.EM_USO);
         auditoria.registrar(reserva, "checkin", "Check-in realizado", usuario.getNome(),
@@ -172,66 +161,48 @@ public class ReservaService {
 
     /**
      * Rotina periódica: expira pendências sem despacho, marca não comparecimentos e conclui o uso de
-     * ambientes cujo horário acabou. Cada reserva é tratada na própria transação: se uma delas for alterada
-     * por outra operação ao mesmo tempo, só ela fica para a próxima rodada, sem desfazer as demais.
+     * ambientes cujo horário acabou.
      */
+    @Transactional
     public int processarVencimentos() {
         LocalDateTime agora = Relogio.agora();
         int alteradas = 0;
 
         for (Reserva r : reservas.findByStatusAndDataInicioBefore(StatusReserva.PENDENTE, agora)) {
-            alteradas += vencer(r.getId(), StatusReserva.PENDENTE, atual -> {
-                atual.mudarPara(StatusReserva.CANCELADA);
-                atual.setMotivoRecusaCancelamento("Solicitação expirada sem despacho da gestão.");
-                auditoria.registrar(atual, "cancelamento", "Solicitação expirada", AuditoriaService.SISTEMA,
-                        atual.getMotivoRecusaCancelamento());
-            });
+            r.mudarPara(StatusReserva.CANCELADA);
+            r.setMotivoRecusaCancelamento("Solicitação expirada sem despacho da gestão.");
+            auditoria.registrar(r, "cancelamento", "Solicitação expirada", AuditoriaService.SISTEMA,
+                    r.getMotivoRecusaCancelamento());
+            alteradas++;
         }
 
         LocalDateTime limiteCheckin = agora.minusMinutes(props.toleranciaCheckinMinutos());
         for (Reserva r : reservas.findByStatusAndDataInicioBefore(StatusReserva.CONFIRMADA, limiteCheckin)) {
             if (!r.getRecurso().isEquipamento()) {
-                alteradas += vencer(r.getId(), StatusReserva.CONFIRMADA, atual -> naoCompareceu(atual,
-                        "Sem check-in dentro da tolerância de " + props.toleranciaCheckinMinutos() + " minutos."));
+                naoCompareceu(r, "Sem check-in dentro da tolerância de " + props.toleranciaCheckinMinutos()
+                        + " minutos.");
+                alteradas++;
             }
         }
         for (Reserva r : reservas.findByStatusAndDataFimBefore(StatusReserva.CONFIRMADA, agora)) {
             if (r.getRecurso().isEquipamento()) {
-                alteradas += vencer(r.getId(), StatusReserva.CONFIRMADA, atual -> naoCompareceu(atual,
-                        "Equipamento não retirado dentro do período reservado."));
+                naoCompareceu(r, "Equipamento não retirado dentro do período reservado.");
+                alteradas++;
             }
         }
 
         for (Reserva r : reservas.findByStatusAndDataFimBefore(StatusReserva.EM_USO, agora)) {
             if (!r.getRecurso().isEquipamento()) {
-                alteradas += vencer(r.getId(), StatusReserva.EM_USO, atual -> {
-                    atual.mudarPara(StatusReserva.CONCLUIDA);
-                    auditoria.registrar(atual, "devolucao", "Uso concluído", AuditoriaService.SISTEMA,
-                            "Horário da reserva encerrado.");
-                });
+                r.mudarPara(StatusReserva.CONCLUIDA);
+                auditoria.registrar(r, "devolucao", "Uso concluído", AuditoriaService.SISTEMA,
+                        "Horário da reserva encerrado.");
+                alteradas++;
             }
         }
         if (alteradas > 0) {
             log.info("Vencimentos processados: {} reserva(s) atualizada(s).", alteradas);
         }
         return alteradas;
-    }
-
-    /** Aplica o vencimento em transação própria, se a reserva ainda estiver no status esperado. */
-    private int vencer(UUID id, StatusReserva esperado, Consumer<Reserva> acao) {
-        try {
-            Integer feitas = transacoes.execute(status -> reservas.findById(id)
-                    .filter(atual -> atual.getStatus() == esperado)
-                    .map(atual -> {
-                        acao.accept(atual);
-                        return 1;
-                    })
-                    .orElse(0));
-            return feitas == null ? 0 : feitas;
-        } catch (OptimisticLockingFailureException e) {
-            log.info("Reserva {} alterada por outra operação durante os vencimentos; fica para a próxima rodada.", id);
-            return 0;
-        }
     }
 
     public Reserva buscar(UUID id) {
@@ -247,10 +218,12 @@ public class ReservaService {
     }
 
     public boolean podeCheckin(Reserva r, LocalDateTime agora) {
-        return r.getStatus() == StatusReserva.CONFIRMADA
-                && !r.getRecurso().isEquipamento()
-                && !agora.isBefore(r.getDataInicio().minusMinutes(props.antecedenciaCheckinMinutos()))
-                && !agora.isAfter(r.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos()));
+        if (r.getStatus() != StatusReserva.CONFIRMADA || r.getRecurso().isEquipamento()) {
+            return false;
+        }
+        LocalDateTime inicioJanela = r.getDataInicio().minusMinutes(15);
+        LocalDateTime fimJanela = r.getDataInicio().plusMinutes(props.toleranciaCheckinMinutos());
+        return !agora.isBefore(inicioJanela) && !agora.isAfter(fimJanela) && agora.isBefore(r.getDataFim());
     }
 
     private void naoCompareceu(Reserva r, String descricao) {
@@ -271,19 +244,6 @@ public class ReservaService {
         if (p.inicio().isBefore(agora.minusMinutes(1))) {
             throw ApiException.campoInvalido("dataInicio", "Não é possível reservar um horário no passado.");
         }
-        if (p.inicio().isAfter(agora.plusDays(props.antecedenciaMaximaDias()))) {
-            throw ApiException.campoInvalido("dataInicio", "As reservas podem ser feitas com até "
-                    + props.antecedenciaMaximaDias() + " dias de antecedência.");
-        }
-        Duration duracao = Duration.between(p.inicio(), p.fim());
-        if (duracao.toMinutes() < props.duracaoMinimaMinutos()) {
-            throw ApiException.campoInvalido("dataFim", "A reserva deve durar ao menos "
-                    + props.duracaoMinimaMinutos() + " minutos.");
-        }
-        if (!recurso.isEquipamento() && duracao.compareTo(Duration.ofHours(props.duracaoMaximaAmbienteHoras())) > 0) {
-            throw ApiException.campoInvalido("dataFim", "A reserva de ambiente pode durar no máximo "
-                    + props.duracaoMaximaAmbienteHoras() + " horas.");
-        }
         if (recurso.isEquipamento()) {
             if (Duration.between(p.inicio(), p.fim()).compareTo(Duration.ofDays(recurso.getPrazoMaxDias())) > 0) {
                 throw ApiException.campoInvalido("dataFim", "O prazo máximo de empréstimo deste equipamento é de "
@@ -291,8 +251,8 @@ public class ReservaService {
             }
             // Retirada e devolução acontecem no balcão, dentro do horário de atendimento.
             if (foraDoExpediente(recurso, p.inicio()) || foraDoExpediente(recurso, p.fim())) {
-                throw ApiException.campoInvalido("dataInicio", "Retirada e devolução devem ocorrer nos dias e no "
-                        + "horário do balcão (" + Horarios.descrever(recurso) + ").");
+                throw ApiException.campoInvalido("dataInicio", "Retirada e devolução devem ocorrer no horário do "
+                        + "balcão (" + Horarios.descrever(recurso) + ").");
             }
             return;
         }
@@ -310,23 +270,11 @@ public class ReservaService {
         }
     }
 
-    /** Impede que um mesmo profissional acumule reservas ativas e bloqueie a agenda dos demais. */
-    private void validarLimiteDoUsuario(Usuario usuario) {
-        if (usuario.isAdmin()) {
-            return;
-        }
-        reservas.travarUsuario(usuario.getId());
-        // Conta pelo status, sem olhar a data: empréstimo em atraso (EM_USO após o fim) continua ocupando o limite.
-        long ativas = reservas.countByUsuarioIdAndStatusIn(usuario.getId(), StatusReserva.ATIVAS);
-        if (ativas >= props.maxReservasAtivasPorUsuario()) {
-            throw ApiException.conflito("Você já tem " + ativas + " reservas ativas, o máximo permitido é "
-                    + props.maxReservasAtivasPorUsuario() + ". Conclua ou cancele alguma antes de solicitar outra.");
-        }
-    }
-
     private boolean foraDoExpediente(Recurso recurso, LocalDateTime momento) {
-        return !recurso.getDiasSemana().contains(momento.getDayOfWeek().getValue())
-                || momento.toLocalTime().isBefore(recurso.getHorarioAbertura())
+        if (!recurso.getDiasSemana().contains(momento.getDayOfWeek().getValue())) {
+            return true;
+        }
+        return momento.toLocalTime().isBefore(recurso.getHorarioAbertura())
                 || momento.toLocalTime().isAfter(recurso.getHorarioFechamento());
     }
 
