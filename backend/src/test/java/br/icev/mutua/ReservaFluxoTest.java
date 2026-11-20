@@ -268,8 +268,13 @@ class ReservaFluxoTest extends IntegracaoBase {
     }
 
     private String corpoEquipamento(String id, LocalDate retirada, boolean termo) {
+        LocalDate devolucao = retirada.plusDays(1);
+        while (devolucao.getDayOfWeek() == DayOfWeek.SATURDAY
+                || devolucao.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            devolucao = devolucao.plusDays(1);
+        }
         return "{\"recursoId\":\"" + id + "\",\"tipo\":\"equipamento\",\"dataInicio\":\"" + retirada
-                + "T08:30:00\",\"dataFim\":\"" + retirada.plusDays(2) + "T17:00:00\","
+                + "T08:30:00\",\"dataFim\":\"" + devolucao + "T17:00:00\"," 
                 + "\"finalidade\":\"Levantamento planialtimétrico.\","
                 + "\"documentoVinculado\":\"ART: PI2026008491 • SISANT: 412850-BR\",\"termoAceito\":" + termo + "}";
     }
