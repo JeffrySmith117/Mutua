@@ -1,8 +1,3 @@
-/* ============================================================
-   Design System — Mútua-PI & Crea Tec HUB
-   Fundação Minimalista conforme DESIGN.md
-   ============================================================ */
-
 /* --- CSS Reset & Base --- */
 *,
 *::before,
@@ -15,7 +10,6 @@
 html {
   font-size: 16px;
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -23,28 +17,37 @@ html {
    TOKENS GLOBAIS — Tema Claro (padrão)
    ============================================================ */
 :root {
+  /* Azul e verde publicados no site institucional da Mútua. */
+  --marca-azul: #184286;
+  --marca-verde: #44ab3e;
+  --marca-marinho: #162743;
+  --marca-texto: #fff;
+  --marca-texto-suave: #d9e7fc;
+  --sombra-flutuante: 0 12px 32px rgb(7 20 40 / .16);
+  --altura-alvo: 44px;
+  --transition-fast: var(--transition-sm);
   /* --- Superfícies (60%) --- */
-  --bg:            #FAFAFA;
-  --bg-alt:        #F4F4F5;
+  --bg:            #f2f5fa;
+  --bg-alt:        #e9eff7;
   --card:          #FFFFFF;
-  --card-subtle:   #F4F4F5;
+  --card-subtle:   #edf3fb;
 
   /* --- Bordas Hairline --- */
-  --line:          rgba(15, 23, 42, 0.08);
-  --line-hover:    rgba(15, 23, 42, 0.14);
-  --line-focus:    rgba(5, 150, 105, 0.4);
+  --line:          #d8e1ed;
+  --line-hover:    #a4b4c8;
+  --line-focus:    #3c6da7;
 
   /* --- Tipografia (30%) --- */
-  --fg:            #09090B;
-  --fg-muted:      #52525B;
-  --fg-subtle:     #62626B;
+  --fg:            #162743;
+  --fg-muted:      #465974;
+  --fg-subtle:     #526681;
   --fg-invert:     #FFFFFF;
 
-  /* --- Destaque Único (10%) — Verde Esmeralda Mútua/CREA --- */
-  --accent:        #08734F;
-  --accent-hover:  #047857;
-  --accent-subtle: #ECFDF5;
-  --accent-text:   #065F46;
+  /* --- Ações institucionais --- */
+  --accent:        var(--marca-azul);
+  --accent-hover:  var(--marca-marinho);
+  --accent-subtle: #e7effb;
+  --accent-text:   var(--marca-azul);
 
   /* --- Feedback (Semânticas) --- */
   --success:       #08734F;
@@ -57,13 +60,13 @@ html {
   --info-bg:       #F0F9FF;
 
   /* --- Raios de Borda --- */
-  --radius-pill:    100px;    /* Botões, tags, chips, inputs de busca  */
-  --radius-card:    20px;     /* Cards, painéis, modais               */
+  --radius-pill:    10px;     /* Botões, tags, chips, inputs de busca  */
+  --radius-card:    16px;     /* Cards, painéis, modais               */
   --radius-element: 12px;     /* Inputs internos, selects              */
   --radius-sm:      6px;      /* Badges, tooltips pequenos             */
 
   /* --- Tipografia --- */
-  --font:       'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font:       system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono:  'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
 
   /* --- Espaçamento (módulo 4/8px) --- */
@@ -85,14 +88,14 @@ html {
   /* --- Aliases de Legado (compatibilidade com CSS existente dos componentes) --- */
   --cor-primaria:              var(--accent);
   --cor-primaria-escura:       var(--accent-hover);
-  --cor-primaria-clara:        #10B981;
+  --cor-primaria-clara:        var(--marca-verde);
   --cor-primaria-suave:        var(--accent-subtle);
   --cor-cta:                   var(--accent);
   --cor-cta-hover:             var(--accent-hover);
   --cor-cta-suave:             var(--accent-subtle);
   --cor-secundaria:            var(--accent);
   --cor-secundaria-escura:     var(--accent-hover);
-  --cor-secundaria-clara:      #10B981;
+  --cor-secundaria-clara:      var(--marca-verde);
   --cor-secundaria-suave:      var(--accent-subtle);
   --cor-acento:                var(--warning);
   --cor-acento-escura:         var(--warning);
@@ -156,24 +159,24 @@ html {
    TEMA ESCURO
    ============================================================ */
 [data-theme="escuro"] {
-  --bg:            #09090B;
-  --bg-alt:        #111113;
-  --card:          #18181B;
-  --card-subtle:   #1F1F23;
+  --bg:            #101a2b;
+  --bg-alt:        #142037;
+  --card:          #192840;
+  --card-subtle:   #213450;
 
-  --line:          rgba(255, 255, 255, 0.08);
-  --line-hover:    rgba(255, 255, 255, 0.14);
-  --line-focus:    rgba(16, 185, 129, 0.4);
+  --line:          #364963;
+  --line-hover:    #607594;
+  --line-focus:    #a8cdff;
 
-  --fg:            #FAFAFA;
-  --fg-muted:      #A1A1AA;
-  --fg-subtle:     #A1A1AA;
-  --fg-invert:     #09090B;
+  --fg:            #f3f7ff;
+  --fg-muted:      #bac9de;
+  --fg-subtle:     #aebfd7;
+  --fg-invert:     #142037;
 
-  --accent:        #10B981;
-  --accent-hover:  #34D399;
-  --accent-subtle: rgba(16, 185, 129, 0.12);
-  --accent-text:   #6EE7B7;
+  --accent:        #a8cdff;
+  --accent-hover:  #cce2ff;
+  --accent-subtle: #263e61;
+  --accent-text:   #b8d7ff;
 
   --success:       #10B981;
   --success-bg:    rgba(16, 185, 129, 0.12);

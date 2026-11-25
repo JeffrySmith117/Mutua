@@ -300,13 +300,8 @@
 }
 
 .status-reserva-em_andamento {
-  background: rgba(59, 130, 246, 0.12);
-  color: #1d4ed8;
-}
-
-.status-reserva-nao_compareceu {
-  background: rgba(245, 158, 11, 0.12);
-  color: #b45309;
+  background: var(--info-bg);
+  color: var(--info);
 }
 
 .reserva-card-titulo {
@@ -904,4 +899,14 @@
 @media print {
   dialog.modal-comprovante-container { position: absolute; inset: 0; max-height: none; width: 100%; overflow: visible; }
   dialog.modal-comprovante-container::backdrop { display: none; }
+}
+/* Filtros e registros compartilham as superfícies do restante do painel. */
+.minhas-reservas-container { min-width: 0; gap: var(--pad-lg); }
+.painel-filtros-reservas { border-color: var(--line); background: var(--card); }
+.aba-status-btn, .pilula-tipo-btn { min-height: var(--altura-alvo); }
+.card-reserva-associado { border-color: var(--line); }
+.reserva-card-titulo, .protocolo-badge { overflow-wrap: anywhere; }
+@media (max-width: 480px) {
+  .abas-status-grupo, .pilulas-tipo-reservas { flex-wrap: wrap; }
+  .grade-cards-reservas { grid-template-columns: minmax(0, 1fr); }
 }

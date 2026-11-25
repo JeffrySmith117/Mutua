@@ -52,8 +52,8 @@
 }
 
 .auth-etapa.ativa .auth-etapa-numero {
-  background: var(--fg);
-  color: var(--fg-invert);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .auth-etapa span {
@@ -138,7 +138,7 @@
   width: 100%;
   height: 48px;
   padding: 0 14px 0 44px;
-  border: 1px solid var(--line-hover);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius-element);
   background: var(--card);
   color: var(--fg);
@@ -153,7 +153,7 @@
 }
 
 .auth-input:hover {
-  border-color: var(--line-hover);
+  border-color: var(--accent);
 }
 
 .auth-input:focus {
@@ -285,8 +285,7 @@
 }
 
 .auth-botao-principal:hover:not(:disabled) {
-  background: var(--fg);
-  opacity: .88;
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
@@ -346,7 +345,7 @@
   width: 22px;
   height: 22px;
   border: 2.5px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border-top-color: var(--on-accent);
   border-radius: 50%;
   animation: girar 0.7s linear infinite;
 }
@@ -423,20 +422,6 @@
 /* ============================================================
    Responsivo
    ============================================================ */
-@media (max-width: 1024px) {
-
-}
-
-@media (max-width: 768px) {
-
-
-
-
-  .auth-titulo-formulario {
-    font-size: 1.5rem;
-  }
-}
-
 @media (max-width: 480px) {
 
   .auth-formulario-wrapper {

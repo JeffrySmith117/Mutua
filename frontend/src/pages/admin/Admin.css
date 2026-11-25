@@ -13,12 +13,14 @@
 .toast-admin-feedback {
   position: fixed;
   top: 85px;
-  right: 2rem;
-  background: #065f46;
-  color: #ffffff;
+  inset-inline: auto max(12px, env(safe-area-inset-right));
+  max-width: calc(100% - 24px);
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid currentColor;
   padding: 0.85rem 1.4rem;
   border-radius: var(--radius-element);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--sombra-flutuante);
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -67,9 +69,8 @@
 .ponto-status-admin {
   width: 7px;
   height: 7px;
-  background: #f59e0b;
+  background: var(--marca-verde);
   border-radius: 50%;
-  box-shadow: 0 0 6px #f59e0b;
 }
 
 .admin-titulo {
@@ -178,6 +179,7 @@
 
 .admin-abas-navegacao {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   border-bottom: 1px solid var(--line);
   padding-bottom: 0.2rem;
@@ -198,7 +200,8 @@
   gap: 0.5rem;
   position: relative;
   transition: all var(--transition-fast);
-  white-space: nowrap;
+  min-height: var(--altura-alvo);
+  text-align: start;
   font-family: var(--font);
 }
 
@@ -228,18 +231,20 @@
    ============================================================ */
 .grid-pendencias-cards {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
 }
 
 .card-pendencia-admin {
+  min-width: 0;
+  overflow-wrap: anywhere;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
-  padding: 1.5rem;
+  padding: clamp(12px, 3vw, 24px);
   display: flex;
   flex-direction: column;
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast);
 }
 
 .card-pendencia-admin:hover {
@@ -335,11 +340,18 @@
 
 .pendencia-acoes-rodape {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem;
   margin-top: auto;
   padding-top: 1rem;
   border-top: 1px solid var(--bg-alt);
+}
+
+.pendencia-acoes-rodape .btn {
+  min-height: var(--altura-alvo);
+  height: auto;
+  white-space: normal;
 }
 
 .btn-recusar-admin {
@@ -361,7 +373,7 @@
 
 .btn-aprovar-admin {
   background: var(--accent);
-  color: var(--fg-invert);
+  color: var(--on-accent);
   border: none;
   padding: 0.55rem 1.2rem;
   border-radius: var(--radius-element);
@@ -724,7 +736,7 @@
   }
 
   .grid-pendencias-cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .inventario-grid-cards {
@@ -1085,27 +1097,27 @@
 }
 
 .badge-auditoria.status-concluida {
-  background: #065f46;
-  color: #a7f3d0;
-  border: 1px solid #047857;
+  background: var(--success-bg);
+  color: var(--success);
+  border: 1px solid currentColor;
 }
 
 .badge-auditoria.status-em-uso {
-  background: #1e40af;
-  color: #bfdbfe;
-  border: 1px solid #3b82f6;
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid currentColor;
 }
 
 .badge-auditoria.status-cancelada {
-  background: #991b1b;
-  color: #fecaca;
-  border: 1px solid #dc2626;
+  background: var(--error-bg);
+  color: var(--error);
+  border: 1px solid currentColor;
 }
 
 .badge-auditoria.status-recusada {
-  background: #9a3412;
-  color: #fed7aa;
-  border: 1px solid #ea580c;
+  background: var(--warning-bg);
+  color: var(--warning);
+  border: 1px solid currentColor;
 }
 
 .modal-auditoria-corpo {
@@ -1488,4 +1500,19 @@
 .inventario-mensagem {
   color: var(--accent-text);
   margin-bottom: 12px;
+}
+/* Superfícies e ações do módulo de gestão */
+.admin-page-container { gap: var(--pad-lg); min-width: 0; }
+.admin-cabecalho { border-inline-start: 4px solid var(--marca-verde); padding: clamp(16px, 3vw, 32px); }
+.admin-titulo { font-size: clamp(1.65rem, 3vw, 2.4rem); line-height: 1.15; }
+.admin-kpi-card { min-width: 0; }
+.admin-kpi-card:hover { transform: none; }
+.admin-abas-navegacao { max-width: 100%; }
+.balcao-tabela-wrapper, .historico-tabela-wrapper { max-width: 100%; overscroll-behavior-inline: contain; }
+@media (max-width: 480px) {
+  .admin-kpis-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-abas-navegacao { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-aba-btn { padding: 8px; }
+  .pendencia-acoes-rodape { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .dado-solicitante-linha { flex-wrap: wrap; gap: 4px 8px; }
 }

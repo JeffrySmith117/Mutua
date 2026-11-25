@@ -5,7 +5,10 @@ export default function AcessoLayout({ children, tituloId }: { children: ReactNo
   return <main className="login-sigra">
     <aside className="login-institucional">
       <Marca />
-      <p>Sistema Integrado de Gestão de Reservas e Ativos</p>
+      <div className="login-apresentacao">
+        <p>Espaços e equipamentos para sua prática profissional.</p>
+        <span>Reserve ambientes e solicite equipamentos disponibilizados pela Mútua-PI.</span>
+      </div>
       <small>Mútua-PI · Teresina</small>
     </aside>
     <section className="login-area" aria-labelledby={tituloId}>{children}</section>

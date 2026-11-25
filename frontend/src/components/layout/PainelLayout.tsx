@@ -10,10 +10,10 @@ import BuscaGlobal from './BuscaGlobal'
 import './PainelLayout.css'
 
 const itens: { rota: string; nome: string; icone: NomeIcone }[] = [
-  { rota: '/', nome: 'Painel Inicial', icone: 'painel' },
-  { rota: '/ambientes', nome: 'Ambientes e Coworking', icone: 'ambiente' },
-  { rota: '/equipamentos', nome: 'Equipamentos HUB', icone: 'equipamento' },
-  { rota: '/minhas-reservas', nome: 'Minhas Reservas', icone: 'calendario' },
+  { rota: '/', nome: 'Visão geral', icone: 'painel' },
+  { rota: '/ambientes', nome: 'Ambientes e coworking', icone: 'ambiente' },
+  { rota: '/equipamentos', nome: 'Equipamentos', icone: 'equipamento' },
+  { rota: '/minhas-reservas', nome: 'Minhas reservas', icone: 'calendario' },
 ]
 
 export default function PainelLayout() {
@@ -45,8 +45,9 @@ export default function PainelLayout() {
   }
 
   return <div className={`estrutura-sigra ${recolhido ? 'estrutura-recolhida' : ''}`}>
+    <a className="pular-navegacao" href="#conteudo-principal">Ir para o conteúdo</a>
     <aside className="navegacao-desktop">
-      <Marca />
+      <Marca compacta={recolhido} />
       {links(false)}
       <button type="button" className="controle-icone recolher-menu" aria-pressed={recolhido}
         aria-label={recolhido ? 'Expandir navegação' : 'Recolher navegação'}
@@ -54,7 +55,7 @@ export default function PainelLayout() {
         onClick={() => setRecolhido(!recolhido)}><Icone nome="recolher" /></button>
     </aside>
     {menuAberto && <Janela fechar={() => setMenuAberto(false)} titulo="Menu do Mútua Tec Hub" className="navegacao-mobile">
-      <div className="janela-topo"><strong>Mútua Tec Hub</strong>
+      <div className="janela-topo"><Marca />
         <button type="button" className="controle-icone" onClick={() => setMenuAberto(false)} aria-label="Fechar navegação"><Icone nome="fechar" /></button>
       </div>
       {links(true)}
@@ -78,7 +79,11 @@ export default function PainelLayout() {
             event.currentTarget.querySelector('summary')?.focus()
           }
         }}>
-          <summary aria-label="Conta de usuário"><span aria-hidden="true">{iniciais}</span><strong>{usuario.nome}</strong></summary>
+          <summary>
+            <span className="sr-only">Conta de usuário</span>
+            <span className="perfil-iniciais" aria-hidden="true">{iniciais}</span>
+            <strong>{usuario.nome}</strong>
+          </summary>
           <div className="perfil-opcoes">
             <strong>{usuario.nome}</strong><small>{usuario.email}</small>
             <button className="btn btn-secundario" type="button" onClick={() => {
@@ -89,7 +94,7 @@ export default function PainelLayout() {
           </div>
         </details>
       </header>
-      <main className="conteudo-sigra"><Outlet /></main>
+      <main className="conteudo-sigra" id="conteudo-principal" tabIndex={-1}><Outlet /></main>
     </div>
   </div>
 }

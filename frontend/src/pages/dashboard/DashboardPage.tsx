@@ -19,6 +19,10 @@ export default function DashboardPage() {
   const equipamentos = useQuery(consultarEquipamentos)
   const [agora] = useState(() => new Date())
   const hora = agora.getHours()
+  const dataHoje = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(agora)
+  const acoesPerfil = usuario?.perfil.toLowerCase() === 'admin'
+    ? [...acoes.slice(0, 3), { titulo: 'Administração', descricao: 'Pendências, balcão e inventário', rota: '/admin', icone: 'admin' as const }]
+    : acoes
   const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite'
   const registros = reservas.data ?? []
   const pendentes = registros.filter(item => item.status === 'pendente').length
@@ -37,18 +41,25 @@ export default function DashboardPage() {
 
   return <div className="painel-operacional">
     <header className="titulo-pagina">
-      <p className="identificacao-pagina">PAINEL INICIAL</p>
-      <h1>{saudacao}, {usuario?.nome}.</h1>
+      <time>{dataHoje}</time>
+      <h1>{saudacao}, {usuario?.nome.trim().split(/\s+/)[0]}.</h1>
       <p>Agende espaços, solicite equipamentos e acompanhe suas reservas.</p>
     </header>
-    <nav aria-label="Ações principais" className="acoes-dashboard">
-      {acoes.map((acao, indice) => <Link className="acao-dashboard" to={acao.rota} key={acao.rota}>
+    <section className="secao-acoes" aria-labelledby="atalhos-painel">
+      <h2 id="atalhos-painel">Ações principais</h2>
+      <nav aria-labelledby="atalhos-painel" className="acoes-dashboard">
+      {acoesPerfil.map((acao) => <Link className="acao-dashboard" to={acao.rota} key={acao.rota}>
         <span className="acao-icone"><Icone nome={acao.icone} /></span>
         <span><strong>{acao.titulo}</strong><small>{acao.descricao}</small></span>
         <Icone nome="seta" />
-        {indice === 0 && <span className="acao-destaque" aria-hidden="true" />}
       </Link>)}
-    </nav>
+      </nav>
+    </section>
+    <dl className="indicadores-dashboard" aria-label="Resumo do HUB">
+      <div><dt>Em análise</dt><dd>{reservas.isSuccess ? pendentes : '—'}</dd></div>
+      <div><dt>Ambientes no catálogo</dt><dd>{ambientes.data?.length ?? '—'}</dd></div>
+      <div><dt>Equipamentos no catálogo</dt><dd>{equipamentos.data?.length ?? '—'}</dd></div>
+    </dl>
     <div className="resumo-dashboard">
       <section className="bloco-sigra" aria-labelledby="proximas-reservas">
         <h2 id="proximas-reservas">Próximas reservas</h2>
@@ -62,7 +73,6 @@ export default function DashboardPage() {
             <span className={`etiqueta-sigra etiqueta-${item.status}`}>{statusReserva[item.status]}</span>
           </Link></li>)}
         </ul>
-        {reservas.isSuccess && pendentes > 0 && <p className="texto-apoio resumo-pendentes">{pendentes} em análise</p>}
       </section>
       <section className="bloco-sigra" aria-labelledby="destaques-reservas">
         <h2 id="destaques-reservas">Recursos em destaque</h2>

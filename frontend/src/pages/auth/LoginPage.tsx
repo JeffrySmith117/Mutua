@@ -32,8 +32,8 @@ export default function LoginPage() {
 
   return <AcessoLayout tituloId="titulo-login">
       <div className="login-formulario">
-        <h1 id="titulo-login">Entrar no Mútua Tec Hub</h1>
-        <p className="texto-apoio">Acesse sua conta para gerenciar reservas e solicitações.</p>
+        <h1 id="titulo-login">Boas-vindas ao HUB</h1>
+        <p className="texto-apoio">Use seu e-mail e sua senha para acessar sua conta.</p>
         <form onSubmit={entrar} aria-busy={carregando}>
           {erro && <p className="erro-sigra" role="alert">{erro}</p>}
           <label>E-mail <input className="controle-campo" id="login-email" name="email" type="email"
@@ -42,7 +42,7 @@ export default function LoginPage() {
             <label>Senha <input className="controle-campo" id="login-senha" name="senha"
               type={senhaVisivel ? 'text' : 'password'} autoComplete="current-password" required /></label>
             <button type="button" className="controle-icone" aria-label={senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'}
-              title={senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'} onClick={() => setSenhaVisivel(!senhaVisivel)}><Icone nome="olho" /></button>
+              title={senhaVisivel ? 'Ocultar senha' : 'Mostrar senha'} onClick={() => setSenhaVisivel(!senhaVisivel)}><Icone nome={senhaVisivel ? "olhoOculto" : "olho"} /></button>
           </div>
           <button id="btn-login" className="btn btn-primario" type="submit" disabled={carregando}>
             {carregando ? 'Entrando…' : 'Entrar'} <Icone nome="seta" />

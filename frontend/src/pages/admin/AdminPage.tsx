@@ -381,7 +381,7 @@ export default function AdminPage() {
           <div className="admin-conteudo-aba">
             {carregando && <p role="status">Carregando movimentações…</p>}
             {!carregando && movimentacoes.length === 0 && <p>Nenhuma movimentação registrada.</p>}
-            {movimentacoes.length > 0 && <div className="balcao-tabela-wrapper">
+            {movimentacoes.length > 0 && <div className="balcao-tabela-wrapper" tabIndex={0} role="region" aria-label="Tabela de movimentações de balcão">
               <table className="balcao-tabela">
                 <thead>
                   <tr>
@@ -587,7 +587,7 @@ export default function AdminPage() {
               </div>
             ) : (
               <>
-                <div className="historico-tabela-wrapper">
+                <div className="historico-tabela-wrapper" tabIndex={0} role="region" aria-label="Tabela do histórico de solicitações">
                   <table className="historico-tabela">
                     <thead>
                       <tr>
