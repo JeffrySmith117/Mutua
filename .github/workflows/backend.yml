@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
       # Os testes usam um PostgreSQL real embutido, sem precisar de Docker.
       - name: Build e testes
