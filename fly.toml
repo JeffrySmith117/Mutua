@@ -1,16 +1,17 @@
-# Configuração do deploy da API no Fly.io (app mutua-hmpsjw).
-# Segredos (DB_URL, DB_USER, DB_PASSWORD, JWT_SECRET, ADMIN_EMAIL, ADMIN_SENHA, CORS_ORIGENS)
-# ficam em "Secrets" no painel do Fly ou via: fly secrets set NOME=valor
+# fly.toml app configuration file generated for mutua-hmpsjw on 2026-11-26T15:21:08Z
+#
+# See https://docs.fly.io/reference/configuration for information about how to use this file.
+#
 
-app = "mutua-hmpsjw"
-primary_region = "gru"
+app = 'mutua-hmpsjw'
+primary_region = 'gru'
 
 [build]
-  dockerfile = "Dockerfile"
+  dockerfile = 'Dockerfile'
 
 [env]
-  SPRING_PROFILES_ACTIVE = "prod"
-  PORT = "8080"
+  PORT = '8080'
+  SPRING_PROFILES_ACTIVE = 'prod'
 
 [http_service]
   internal_port = 8080
@@ -22,13 +23,13 @@ primary_region = "gru"
   min_machines_running = 0
 
   [[http_service.checks]]
-    grace_period = "60s"
-    interval = "30s"
-    timeout = "5s"
-    method = "GET"
-    path = "/api/v1/actuator/health"
+    interval = '30s'
+    timeout = '5s'
+    grace_period = '1m0s'
+    method = 'GET'
+    path = '/api/v1/actuator/health'
 
 [[vm]]
-  memory = "512mb"
-  cpu_kind = "shared"
+  memory = '512mb'
+  cpu_kind = 'shared'
   cpus = 1
