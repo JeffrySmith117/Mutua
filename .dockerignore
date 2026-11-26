@@ -1,0 +1,12 @@
+.git
+.github
+.claude
+frontend
+docs
+*.pdf
+*.md
+.env
+.env.*
+backend/target
+backend/.idea
+**/node_modules
