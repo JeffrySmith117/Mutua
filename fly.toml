@@ -15,8 +15,9 @@ primary_region = "gru"
 [http_service]
   internal_port = 8080
   force_https = true
-  # Desliga a máquina quando não há acesso, para economizar créditos; liga de novo na primeira requisição.
-  auto_stop_machines = "stop"
+  # Suspende a máquina quando não há acesso (economiza créditos) e retoma em menos de 1s na primeira requisição.
+  # Com "stop" ela desligava de vez e o Spring levava ~20s para subir, o que travava o login.
+  auto_stop_machines = "suspend"
   auto_start_machines = true
   min_machines_running = 0
 
