@@ -4,8 +4,9 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api/v1'
 
 const api = axios.create({
   baseURL: BASE_URL,
-  // A API no Fly.io desliga quando fica parada e leva ~20s para ligar de novo: 30s cobre esse primeiro acesso.
-  timeout: 30000,
+  // A API no plano gratuito do Render dorme depois de 15 min sem acesso e leva 1 a 3 min para acordar.
+  // 120s cobre esse primeiro acesso sem estourar o login.
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
