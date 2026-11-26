@@ -35,7 +35,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String cabecalho = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (cabecalho != null && cabecalho.startsWith(PREFIXO)) {
             jwt.validar(cabecalho.substring(PREFIXO.length()))
-                    .flatMap(usuarios::findById)
+                    .flatMap(t -> usuarios.findById(t.usuarioId())
+                            .filter(u -> u.getSessaoVersao() == t.sessaoVersao()))
                     .filter(u -> u.isAtivo())
                     .ifPresent(u -> {
                         var autenticacao = new UsernamePasswordAuthenticationToken(u, null,

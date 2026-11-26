@@ -194,7 +194,11 @@ class ReservaFluxoTest extends IntegracaoBase {
         String token = token(novoProfissional());
         String admin = tokenAdmin();
         String drone = idPorNome(token, "/equipamentos", "Drone DJI Phantom 4 RTK");
+        // Segunda a quarta: a devolução, dois dias depois, também precisa cair em dia útil.
         LocalDate retirada = proximoDiaUtil(20);
+        while (retirada.getDayOfWeek().getValue() > DayOfWeek.WEDNESDAY.getValue()) {
+            retirada = retirada.plusDays(1);
+        }
 
         // Sem o termo aceito, a solicitação é recusada.
         mvc.perform(post("/reservas").header("Authorization", "Bearer " + token)

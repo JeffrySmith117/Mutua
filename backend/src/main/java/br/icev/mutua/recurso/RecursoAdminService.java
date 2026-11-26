@@ -1,5 +1,7 @@
 package br.icev.mutua.recurso;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -8,6 +10,7 @@ import br.icev.mutua.common.ApiException;
 import br.icev.mutua.common.Relogio;
 import br.icev.mutua.recurso.RecursoAdminDtos.RecursoAdminResponse;
 import br.icev.mutua.recurso.RecursoAdminDtos.RecursoRequest;
+import br.icev.mutua.reserva.Reserva;
 import br.icev.mutua.reserva.ReservaRepository;
 import br.icev.mutua.reserva.StatusReserva;
 
@@ -52,16 +55,22 @@ public class RecursoAdminService {
 
     @Transactional
     public RecursoAdminResponse atualizar(UUID id, RecursoRequest req) {
-        Recurso recurso = obter(id);
+        // Trava o recurso: reservas sendo criadas ao mesmo tempo não escapam da conferência abaixo.
+        Recurso recurso = recursos.buscarParaReserva(id)
+                .orElseThrow(() -> ApiException.naoEncontrada("Recurso não encontrado."));
         // O tipo define se o recurso é exclusivo ou de capacidade compartilhada; mudá-lo com reservas
         // existentes deixaria a regra de conflito inconsistente.
         if (req.tipo() != recurso.getTipo()) {
             throw ApiException.campoInvalido("tipo", "O tipo de um recurso não pode ser alterado.");
         }
+        Funcionamento antes = Funcionamento.de(recurso);
         aplicar(recurso, req);
         if (recurso.getPatrimonio() != null
                 && recursos.existsByPatrimonioAndIdNot(recurso.getPatrimonio(), id)) {
             throw patrimonioDuplicado(recurso.getPatrimonio());
+        }
+        if (!antes.equals(Funcionamento.de(recurso))) {
+            verificarReservasAtivas(recurso);
         }
         return RecursoAdminResponse.de(recursos.saveAndFlush(recurso));
     }
@@ -76,6 +85,72 @@ public class RecursoAdminService {
         }
         recurso.setAtivo(ativo);
         return RecursoAdminResponse.de(recursos.saveAndFlush(recurso));
+    }
+
+    /** Horário, dias, capacidade e prazo: o que decide se uma reserva existente ainda cabe no recurso. */
+    private record Funcionamento(LocalTime abertura, LocalTime fechamento, List<Integer> dias, int capacidade,
+                                 int prazoMaxDias) {
+        static Funcionamento de(Recurso r) {
+            return new Funcionamento(r.getHorarioAbertura(), r.getHorarioFechamento(), List.copyOf(r.getDiasSemana()),
+                    r.getCapacidade(), r.getPrazoMaxDias());
+        }
+    }
+
+    /**
+     * Ao mudar horário, dias, capacidade ou prazo, nenhuma reserva pendente ou confirmada pode ficar fora do
+     * novo funcionamento: a edição é recusada (409) com os protocolos afetados, para a gestão cancelar ou
+     * remarcar antes. Reservas já em uso ficam de fora (o uso em andamento não é interrompido).
+     */
+    private void verificarReservasAtivas(Recurso recurso) {
+        List<Reserva> futuras = reservas.findByRecursoIdAndStatusInAndDataFimAfter(recurso.getId(),
+                StatusReserva.ATIVAS, Relogio.agora());
+        List<Reserva> aReavaliar = futuras.stream().filter(r -> r.getStatus() != StatusReserva.EM_USO).toList();
+
+        List<String> foraDoFuncionamento = aReavaliar.stream().filter(r -> !cabe(recurso, r))
+                .map(Reserva::getProtocolo).toList();
+        if (!foraDoFuncionamento.isEmpty()) {
+            throw ApiException.conflito("Não é possível salvar: " + foraDoFuncionamento.size()
+                    + " reserva(s) ativa(s) ficariam fora do novo funcionamento ("
+                    + listar(foraDoFuncionamento) + "). Cancele ou remarque essas reservas antes.");
+        }
+        if (!recurso.isExclusivo() && maximoSimultaneas(aReavaliar) > recurso.getCapacidade()) {
+            throw ApiException.conflito("Não é possível reduzir a capacidade para " + recurso.getCapacidade()
+                    + ": há horários com mais reservas ativas do que isso. Cancele ou remarque algumas antes.");
+        }
+    }
+
+    private boolean cabe(Recurso recurso, Reserva r) {
+        if (recurso.isEquipamento()) {
+            return noExpediente(recurso, r.getDataInicio()) && noExpediente(recurso, r.getDataFim())
+                    && Duration.between(r.getDataInicio(), r.getDataFim())
+                    .compareTo(Duration.ofDays(recurso.getPrazoMaxDias())) <= 0;
+        }
+        return recurso.getDiasSemana().contains(r.getDataInicio().getDayOfWeek().getValue())
+                && !r.getDataInicio().toLocalTime().isBefore(recurso.getHorarioAbertura())
+                && !r.getDataFim().toLocalTime().isAfter(recurso.getHorarioFechamento());
+    }
+
+    private boolean noExpediente(Recurso recurso, LocalDateTime momento) {
+        return recurso.getDiasSemana().contains(momento.getDayOfWeek().getValue())
+                && !momento.toLocalTime().isBefore(recurso.getHorarioAbertura())
+                && !momento.toLocalTime().isAfter(recurso.getHorarioFechamento());
+    }
+
+    /** Maior número de reservas ao mesmo tempo, avaliado no início de cada uma. */
+    private int maximoSimultaneas(List<Reserva> lista) {
+        int maximo = 0;
+        for (Reserva ponto : lista) {
+            LocalDateTime instante = ponto.getDataInicio();
+            int simultaneas = (int) lista.stream()
+                    .filter(r -> !r.getDataInicio().isAfter(instante) && r.getDataFim().isAfter(instante)).count();
+            maximo = Math.max(maximo, simultaneas);
+        }
+        return maximo;
+    }
+
+    private String listar(List<String> protocolos) {
+        String primeiros = String.join(", ", protocolos.subList(0, Math.min(5, protocolos.size())));
+        return protocolos.size() > 5 ? primeiros + " e mais " + (protocolos.size() - 5) : primeiros;
     }
 
     private Recurso obter(UUID id) {
